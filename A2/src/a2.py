@@ -136,6 +136,8 @@ if __name__ == '__main__':
         operation = 'sum'
     elif args.product:
         operation = 'product'
+    elif (args.sum and args.product):
+        print('Invalid input: Multiple arguements. Please use either --sum or --product not both')
     parsed_values = []
     # f = open('sample_input.txt', 'r')
     for o in streaming_iterload(sys.stdin):
