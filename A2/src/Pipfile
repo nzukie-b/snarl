@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 ijson = "*"
+numpy = "*"
 
 [dev-packages]
 
