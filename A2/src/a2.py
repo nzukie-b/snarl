@@ -77,6 +77,8 @@ def streaming_iterload(stream):
         for x in iterload(o):
             yield x
 
+# END OF STACK OVERFLOW CODE BLOCK
+
 class Output_Obj:
     def __init__(self, obj, total):
         self.object = obj
@@ -106,7 +108,6 @@ def create_output_obj_product(x):
         return obj
 
 def serialize_output_sum(parsed_values):
-    # print("PARSED VALUES: {}\n".format(parsed_values))
     res = []
     for x in parsed_values:
         res.append(json.dumps(create_output_obj_sum(x).__dict__))
@@ -125,7 +126,6 @@ def serialize_output(parsed_values, operation):
     elif operation == 'product':
         res = serialize_output_product(parsed_values)
     else:
-        #TODO: Change error message | is this even needed?
         print('Invalid operation')
     print(res)
 
@@ -139,8 +139,6 @@ if __name__ == '__main__':
     elif (args.sum and args.product):
         print('Invalid input: Multiple arguements. Please use either --sum or --product not both')
     parsed_values = []
-    # f = open('sample_input.txt', 'r')
     for o in streaming_iterload(sys.stdin):
         parsed_values.append(o)
-        # print(o)
     serialize_output(parsed_values, operation)
