@@ -127,7 +127,7 @@ def serialize_output(parsed_values, operation):
         res = serialize_output_product(parsed_values)
     else:
         print('Invalid operation')
-    print(res)
+    return res
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -141,4 +141,4 @@ if __name__ == '__main__':
     parsed_values = []
     for o in streaming_iterload(sys.stdin):
         parsed_values.append(o)
-    serialize_output(parsed_values, operation)
+    print(serialize_output(parsed_values, operation))
