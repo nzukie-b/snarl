@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Algorithm to find path from https://www.python.org/doc/essays/graphs/ not necessarily shortest path
+# Algorithm to find path from https://www.python.org/doc/essays/graphs/ with modification to exclude nodes with a character
 def find_path(graph, start, end, path=[]):
     path = path + [start]
     if start == end:
@@ -8,7 +8,7 @@ def find_path(graph, start, end, path=[]):
     if not graph.has_key(start):
         return None
     for node in graph[start]:
-        if node not in path:
+        if node not in path and node.char == None:
             newpath = find_path(graph, node, end, path)
             if newpath:
                 return newpath
