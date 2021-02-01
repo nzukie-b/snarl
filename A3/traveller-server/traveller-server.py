@@ -8,7 +8,7 @@ def find_path(graph, start, end, path=[]):
     if not graph.has_key(start):
         return None
     for node in graph[start]:
-        if node not in path and node.char == None:
+        if node not in path and node.inTown == False:
             newpath = find_path(graph, node, end, path)
             if newpath:
                 return newpath
@@ -28,7 +28,7 @@ class Town_Network:
     def can_move(self, dest_town, char):
         origin = None
         for town in self.towns:
-            if town.char == char:
+            if town.get_character() == char:
                 origin = town
 
         path = find_path(self.towns, origin, dest_town)
@@ -43,6 +43,22 @@ class Town:
 
     def place_char(self, char):
         self.inTown = True
+        self.char = char
+
+    ## Described in Town class, but it 
+    def move_char(self, char, town):
+        return NotImplemented
+        
+    def get_inTown(self):
+        return self.inTown
+
+    def set_inTown(self, bool):
+        self.inTown = bool
+
+    def get_char(self):
+        return self.char
+
+    def set_char(self, char):
         self.char = char
 
 class Character:
