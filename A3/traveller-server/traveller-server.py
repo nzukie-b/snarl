@@ -17,7 +17,7 @@ def find_path(graph, start, end, path=[]):
 
 class Town_Network:
     def __init__(self):
-        self.towns = None
+        self.towns = []
 
     # Asssuming town is a dictionary with key being the name of the town,
     # and the value being a set of nodes that can be accessed from
@@ -45,7 +45,7 @@ class Town:
         self.inTown = True
         self.char = char
 
-    ## Described in Town class, but it 
+    ## Described in Town class, but no example of arguements 
     def move_char(self, char, town):
         return NotImplemented
         
