@@ -1,5 +1,13 @@
 import sys
+import os
 import json
+
+currentdir = os.path.dirname(os.path.realpath(__file__))
+a3_dir = os.path.dirname(currentdir)
+root_dir = os.path.dirname(a3_dir)
+a2_dir = root_dir + '/A2/src'
+sys.path.append(a2_dir)
+from traveller-server import serialize_output, streaming_iterload
 
 
 def take_json_input(json_str):
