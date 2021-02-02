@@ -13,33 +13,35 @@ a2_dir = root_dir + '/A2/src'
 sys.path.append(a2_dir)
 from num_json import serialize_output, streaming_iterload
 
-
-# Create a TCP socket and listen at port 55555
+# Create a TCP socket and listen at port 8081
 socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_addr = ('localhost', 8081)
 socket.bind(server_addr)
 socket.listen(1)
 
-while True:
-    # Wait for a connection
-    connection, client_addr = socket.accept()
-    parsed_values = []
+def main():
     while True:
-        chunk = connection.recv(1024).decode('utf-8').rstrip()
-        if chunk == 'END':
-            res = serialize_output(parsed_values, 'sum')
-            connection.sendall(json.dumps(res).encode('utf-8'))
-            break;
-        else :
-            try:
-                for o in streaming_iterload(chunk):
-                    if o:
-                        parsed_values.append(o)
-            except:
-                err_msg = 'Invalid numJSON input'
-                print(err_msg)
-                connection.sendall(err_msg.encode('utf-8'))
-                break
-    break
+        # Wait for a connection
+        connection, client_addr = socket.accept()
+        parsed_values = []
+        while True:
+            chunk = connection.recv(1024).decode('utf-8').rstrip()
+            if chunk == 'END':
+                res = serialize_output(parsed_values, 'sum')
+                connection.sendall(json.dumps(res).encode('utf-8'))
+                break;
+            else :
+                try:
+                    for o in streaming_iterload(chunk):
+                        if o:
+                            parsed_values.append(o)
+                except:
+                    err_msg = 'Invalid numJSON input'
+                    print(err_msg)
+                    connection.sendall(err_msg.encode('utf-8'))
+                    break
+        break
+    connection.close()
 
-connection.close()
+if __name__ == '__main__':
+    main()

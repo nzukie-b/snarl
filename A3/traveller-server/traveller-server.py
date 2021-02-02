@@ -45,7 +45,7 @@ class Town:
         self.inTown = True
         self.char = char
 
-    ## Described in Town class, but no example of arguements 
+    ## Described in Town class, but may make more sense in TownNetwork 
     def move_char(self, char, town):
         return NotImplemented
         
