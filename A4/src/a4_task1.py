@@ -3,13 +3,28 @@
 import socket
 import argparse
 import json
-from traveller_client import take_json_input
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument('tcp_addr', type=str, nargs='?', help='Server address to connect to.', default='127.0.0.1')
 parser.add_argument('port', type=int, nargs='?', help='Port to connect to', default=8000)
 parser.add_argument('username', type=str, nargs='?', help='How the server will address the user', default='Glorifrir Flintshoulder')
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+def print_to_stdout(*a):
+    # Here a is the array holding the objects
+    # passed as the arguement of the function
+    print(*a, file=sys.stdout)
+
+def take_json_input(json_str):
+    try:
+        json_o = json.loads(json_str)
+    except json.decoder.JSONDecodeError:
+        print_to_stdout("Given invalid JSON")
+        quit()
+
+    # print(json_obj['id'])
+    return json_o
 
 def json_encode(obj):
     return json.dumps(obj).encode('utf-8')
@@ -61,27 +76,43 @@ def handle_road_network(roads):
     return Create_Req(town_names, routes)
 
 
-def handle_place_chars(chars, towns):
-    place_obj = take_json_input(chars)
-    command = place_obj['command']
-    if command == 'place':
-        try:
-            for obj in place_obj["params"]:
-                try:
-                    char = obj['character']
-                    town = obj['town']
-                    if town not in towns:
-                        # TODO: work on invalid place request
-                        return None
-                    return Character(char, town)
-                except TypeError:
-                    print("Invalid road param structure")
-        except KeyError:
-            print("Invalid structure no param key")
-    else:
-        #TODO: Decide how to handle
-        return None
+def handle_place_chars(json_obj, towns):
+    try:
+        for obj in json_obj["params"]:
+            try:
+                char = obj['character']
+                town = obj['town']
+                if town not in towns:
+                    # TODO: work on invalid place request
+                    return None
+                return Character(char, town)
+            except TypeError:
+                print("Invalid road param structure")
+    except KeyError:
+        print("Invalid structure no param key")
 
+def handle_passage_safe(json_obj):
+    try:
+        for obj in json_obj["params"]:
+            try:
+                char = obj['character']
+                dest = obj['destination']
+                return Query(char, dest)
+            except TypeError:
+                print("Invalid road param structure")
+    except KeyError:
+        print("Invalid structure no param key")
+
+def handle_single_req(user_input, towns):
+    json_obj = take_json_input(user_input)
+    command = json_obj['command']
+    if command == 'place':
+        return handle_place_chars(json_obj, towns)
+    elif command == 'passage_safe?':
+        return handle_passage_safe(json_obj)
+    else:
+        #TODO: Something?
+        return None 
 
 
 def main():
@@ -97,20 +128,14 @@ def main():
     s.sendall(json_obj_encode(create_request))
     place_loop = True
     while place_loop:
+        line = sys.stdin.readline()
+        print(line)
+        if line == '': break
         placing = True
         while placing:
             user_input = input()
-            json_obj = take_json_input(user_input)
-            if json_obj['command'] == 'passage_safe?':
-                placing = False
+            handle_single_req(user_input)
 
-            if json_obj['command'] == 'place':
-
-
-
-
-    # while True:
-        
 
 
     print(args)
