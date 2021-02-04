@@ -11,6 +11,27 @@ parser.add_argument('port', type=int, nargs='?', help='Port to connect to', defa
 parser.add_argument('username', type=str, nargs='?', help='How the server will address the user', default='Glorifrir Flintshoulder')
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+<<<<<<< HEAD
+=======
+def take_json_input(json_str):
+    try:
+        json_o = json.loads(json_str)
+    except json.decoder.JSONDecodeError:
+        print("Given invalid JSON")
+        quit()
+
+    # print(json_obj['id'])
+    return json_o
+
+
+def json_encode(obj):
+    return json.dumps(obj).encode('utf-8')
+
+
+def json_obj_encode(obj):
+    return json.dumps(obj.__dict__).encode('utf-8')
+
+>>>>>>> c3fdae94561d745ba9b41ea227f53f4099f2de31
 class Create_Req:
     def __init__(self, towns, roads):
         self.towns = towns
@@ -124,8 +145,7 @@ def main():
     s.connect(server_addr)
     s.sendall(json_encode(args.username))
     res = s.recv(2048)
-    #print(['the server will call me', args.username])
-    print_to_stdout(res.decode("ascii"))
+    print(res.decode("ascii"))
     user_roads = sys.stdin.readline()
     roads_obj = take_json_input(user_roads)
     create_request = handle_road_network(user_roads)
@@ -136,7 +156,7 @@ def main():
         place_loop = False
     while place_loop:
         line = sys.stdin.readline()
-        print(line)
+        #print(line)
         placing = True
         if line == '':
             break
