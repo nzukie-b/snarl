@@ -21,7 +21,7 @@ def main():
     session_id = s.recv(2048)
     ## Username of session_id ?
     print(['the server will call me', args.username])
-    while True:
+    # while True:
         
 
 
