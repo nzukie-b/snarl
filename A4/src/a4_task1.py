@@ -12,6 +12,8 @@ parser.add_argument('port', type=int, nargs='?', help='Port to connect to', defa
 parser.add_argument('username', type=str, nargs='?', help='How the server will address the user', default='Glorifrir Flintshoulder')
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+
+
 class Create_Req:
     def __init__(self, towns, roads):
         self.towns = towns
@@ -55,7 +57,7 @@ def json_encode(obj):
     return json.dumps(obj).encode('utf-8')
 
 def json_obj_encode(obj):
-    return json.dumps(obj.__dict__).encode('utf-8')
+    return json.dumps(obj.__dict__).replace('origin', 'from').encode('utf-8')
 
 def print_to_stdout(*a):
     # Here a is the array holding the objects
