@@ -127,25 +127,28 @@ def main():
     #print(['the server will call me', args.username])
     print_to_stdout(res.decode("ascii"))
     user_roads = sys.stdin.readline()
-    if user_roads == '': exit()
     roads_obj = take_json_input(user_roads)
     create_request = handle_road_network(user_roads)
     towns = create_request.towns
     s.sendall(json_obj_encode(create_request))
     place_loop = True
+    if user_roads == '':
+        place_loop = False
     while place_loop:
         line = sys.stdin.readline()
         print(line)
-        if line == '': break
         placing = True
+        if line == '':
+            break
         while placing:
             user_input = sys.stdin.readline()
-            if user_input == '': break
+            if user_input == '':
+                break
             handle_batch_req(user_input)
 
 
 
-    print(args)
+    #print(args)
     s.close()
 
 if __name__ == '__main__':
