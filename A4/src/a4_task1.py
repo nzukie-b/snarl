@@ -18,7 +18,7 @@ class Create_Req:
 
 class Route:
     def __init__(self, origin, dest):
-        self.from = origin
+        #self.from = origin
         self.to = dest
 
 class Character:
@@ -125,7 +125,9 @@ def main():
     s.sendall(json_encode(args.username))
     session_id = s.recv(2048)
     print(['the server will call me', args.username])
-    user_roads = input()
+    user_roads = sys.stdin.readline()
+    if user_roads == '': exit()
+    roads_obj = take_json_input(user_roads)
     create_request = handle_road_network(user_roads)
     towns = create_request.towns
     s.sendall(json_obj_encode(create_request))
@@ -136,7 +138,8 @@ def main():
         if line == '': break
         placing = True
         while placing:
-            user_input = input()
+            user_input = sys.stdin.readline()
+            if user_input == '': break
             handle_single_req(user_input)
 
 
