@@ -11,27 +11,6 @@ parser.add_argument('port', type=int, nargs='?', help='Port to connect to', defa
 parser.add_argument('username', type=str, nargs='?', help='How the server will address the user', default='Glorifrir Flintshoulder')
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-def print_to_stdout(*a):
-    # Here a is the array holding the objects
-    # passed as the arguement of the function
-    print(*a, file=sys.stdout)
-
-def take_json_input(json_str):
-    try:
-        json_o = json.loads(json_str)
-    except json.decoder.JSONDecodeError:
-        print_to_stdout("Given invalid JSON")
-        quit()
-
-    # print(json_obj['id'])
-    return json_o
-
-def json_encode(obj):
-    return json.dumps(obj).encode('utf-8')
-
-def json_obj_encode(obj):
-    return json.dumps(obj.__dict__).encode('utf-8')
-
 class Create_Req:
     def __init__(self, towns, roads):
         self.towns = towns
@@ -52,6 +31,29 @@ class Query:
         self.character = char
         self.destination = dest
 
+class Batch_Req:
+    def __init__(self, chars, query):
+            self.characters = chars
+            self.query = query
+
+def print_to_stdout(*a):
+    # Here a is the array holding the objects
+    # passed as the arguement of the function
+    print(*a, file=sys.stdout)
+
+def take_json_input(json_str):
+    try:
+        json_o = json.loads(json_str)
+    except json.decoder.JSONDecodeError:
+        print_to_stdout("Given invalid JSON")
+        quit()
+    return json_o
+
+def json_encode(obj):
+    return json.dumps(obj).encode('utf-8')
+
+def json_obj_encode(obj):
+    return json.dumps(obj.__dict__).encode('utf-8')
 
 def handle_road_network(roads):
     roads_obj = take_json_input(roads)
@@ -112,6 +114,7 @@ def handle_single_req(user_input, towns):
         return handle_passage_safe(json_obj)
     else:
         #TODO: Something?
+        print()
         return None 
 
 
