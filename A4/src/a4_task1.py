@@ -14,23 +14,42 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 def json_encode(obj):
     return json.dumps(obj).encode('utf-8')
 
+def json_obj_encode(obj):
+    return json.dumps(obj.__dict__).encode('utf-8')
+
 class Create_Req:
     def __init__(self, towns, roads):
         self.towns = towns
         self.roads = roads
 
+class Route:
+    def __init__(self, origin, dest):
+        self.from = origin
+        self.to = dest
+
+class Character:
+    def __init__(self, name, town):
+        self.name = name
+        self.town = town
+
+class Query:
+    def __init__(self, char, dest):
+        self.character = char
+        self.destination = dest
+
+
 def handle_road_network(roads):
     roads_obj = take_json_input(roads)
     command = roads_obj['command']
     town_names = set()
-    road_paths = []
+    routes = []
     if command == 'roads':
         try:
             for obj in roads_obj["params"]:
-                town_names.add(obj["from"])
-                town_names.add(obj["to"])
                 try:
-                    road_paths.append(obj["from"], [obj["to"]])
+                    town_names.add(obj["from"])
+                    town_names.add(obj["to"])
+                    routes.append(Route(obj['from'], obj['to']))
                 except TypeError:
                     print("Invalid road param structure")
                     quit()
@@ -39,6 +58,31 @@ def handle_road_network(roads):
             quit()
     else:
         print("No valid command given")
+    return Create_Req(town_names, routes)
+
+
+def handle_place_chars(chars, towns):
+    place_obj = take_json_input(chars)
+    command = place_obj['command']
+    if command == 'place':
+        try:
+            for obj in place_obj["params"]:
+                try:
+                    char = obj['character']
+                    town = obj['town']
+                    if town not in towns:
+                        # TODO: work on invalid place request
+                        return None
+                    return Character(char, town)
+                except TypeError:
+                    print("Invalid road param structure")
+        except KeyError:
+            print("Invalid structure no param key")
+    else:
+        #TODO: Decide how to handle
+        return None
+
+
 
 def main():
     args = parser.parse_args()
@@ -48,9 +92,23 @@ def main():
     session_id = s.recv(2048)
     print(['the server will call me', args.username])
     user_roads = input()
-    roads_obj = take_json_input(user_roads)
-    try if 
-    
+    create_request = handle_road_network(user_roads)
+    towns = create_request.towns
+    s.sendall(json_obj_encode(create_request))
+    place_loop = True
+    while place_loop:
+        placing = True
+        while placing:
+            user_input = input()
+            json_obj = take_json_input(user_input)
+            if json_obj['command'] == 'passage_safe?':
+                placing = False
+
+            if json_obj['command'] == 'place':
+
+
+
+
     # while True:
         
 
