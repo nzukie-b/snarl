@@ -3,7 +3,8 @@
 import socket
 import argparse
 import json
-from traveller_client import take_json_input
+# from traveller_client import take_json_input
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument('tcp_addr', type=str, nargs='?', help='Server address to connect to.', default='127.0.0.1')
@@ -49,10 +50,12 @@ def main():
     print(['the server will call me', args.username])
     user_roads = input()
     roads_obj = take_json_input(user_roads)
-    try if 
+    #try if
     
-    # while True:
-        
+    while True:
+        line = sys.stdin.readline()
+        print(line)
+        if line == '': break
 
 
     print(args)
