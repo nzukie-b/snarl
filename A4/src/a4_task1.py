@@ -39,7 +39,7 @@ class Create_Req:
 
 class Route:
     def __init__(self, origin, dest):
-        #self.from = origin
+        self.origin = origin
         self.to = dest
 
 class Character:
@@ -103,7 +103,7 @@ def handle_passage_safe(json_obj):
     except KeyError:
         print("Invalid structure no param key")
 
-def handle_single_req(user_input, towns):
+def handle_batch_req(user_input, towns):
     json_obj = take_json_input(user_input)
     command = json_obj['command']
     if command == 'place':
@@ -120,8 +120,9 @@ def main():
     server_addr = (args.tcp_addr, args.port)
     s.connect(server_addr)
     s.sendall(json_encode(args.username))
-    session_id = s.recv(2048)
-    print(['the server will call me', args.username])
+    res = s.recv(2048)
+    #print(['the server will call me', args.username])
+    print_to_stdout(res.decode("ascii"))
     user_roads = sys.stdin.readline()
     if user_roads == '': exit()
     roads_obj = take_json_input(user_roads)
@@ -137,7 +138,7 @@ def main():
         while placing:
             user_input = sys.stdin.readline()
             if user_input == '': break
-            handle_single_req(user_input)
+            handle_batch_req(user_input)
 
 
 
