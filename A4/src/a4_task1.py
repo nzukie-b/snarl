@@ -56,15 +56,16 @@ def handle_road_network(roads):
         print("No valid command given")
 
 def main():
-    # args = parser.parse_args()
-    # server_addr = (args.tcp_addr, args.port)
-    # s.connect(server_addr)
-    # s.sendall(json_encode(args.username))
-    # session_id = s.recv(2048)
-    # print(['the server will call me', args.username])
-    # user_roads = input()
-    # roads_obj = take_json_input(user_roads)
-    # #try if
+    args = parser.parse_args()
+    server_addr = (args.tcp_addr, args.port)
+    s.connect(server_addr)
+    s.sendall(json_encode(args.username))
+    session_id = s.recv(2048)
+    print(['the server will call me', args.username])
+    #print(session_id)
+    #user_roads = input()
+    roads_obj = take_json_input(user_roads)
+    #try if
 
     while True:
         line = sys.stdin.readline()
