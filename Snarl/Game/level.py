@@ -9,9 +9,8 @@ HEIGTH = 500
 SIZE = 5
 
 
-
-# Assuming that dimension given will not be offset from the origin and will just be sized dimensions in x and y. 
-#   ie. origin = (10, 10) dimensions = (5, 7) The boundaries of the room are (10 - 15, 10, 17)
+# Assuming that dimension given will not be offset from the origin and will just be sized dimensions in x and y.
+#   ie. origin = (10, 10) dimensions = (5, 7) The tile boundaries of the room are (10 - 15, 10, 17)
 class Room:
     def __init__(self, origin, dimensions, tiles, doors, items=None):
         self.origin = origin
@@ -20,38 +19,27 @@ class Room:
         self.doors = doors
         self.items = items if items != None else []
 
+    # Validate doors are on a walkable tiles. Does not guarantee that tiles are inside room boundaries.
     def check_doors(self):
         for door in self.doors:
             if door not in self.tiles:
                 return False
         return True
     
+    # Validate walkable tiles are inside the room boundaries
     def check_tiles(self):
         for tile in self.tiles:
-            if tile.x > self.dimensions.x or tile.y > self.dimensions.y:
+            if tile.x > self.origin.x + self.dimensions.x or tile.y > self.origin.y + self.dimensions.y:
                 return False
         return True
 
+    # Validate items are on a walkable tile?
     def check_items(self):
         for item in self.items:
             if item.x not in self.tiles:
                 # TODO: Are items on non walkable tiles valid?
                 return False
         return True
-
-def check_room(room):
-    valid_doors = room.check_doors()
-    valid_tiles = room.check_tiles()
-    # valid_items = room.check_items()
-    if not valid_tiles:
-        print('Invalid Room: Walkable tile(s) outside of room dimensions')
-        return False
-    if not valid_doors:
-        print('Invalid Room: Door(s) outside of walkable tiles')
-        return False
-    return True
-    
-
 class Hallway:
     def __init__(self, origin, dimensions, rooms, waypoints=None):
         self.origin = origin
@@ -85,12 +73,23 @@ class Hallway:
             raise Exception(self)
 
 def check_hallway(hallway):
-    valid_hallway = False
     try:
         hallway.check_vertical_axis()
         return True
     except Exception as err:
         print(err)
+
+# Since valid_doors is only checked after valid_tiles is True it is not an issue that check_doors does not guarantee that the walkable tiles are inside the room as check_tiles handles guarantees that 
+def check_room(room):
+    valid_tiles = room.check_tiles()
+    valid_doors = room.check_doors()
+    if not valid_tiles:
+        print('Invalid Room: Walkable tile(s) outside of room dimensions')
+        return False
+    if not valid_doors:
+        print('Invalid Room: Door(s) outside of walkable tiles')
+        return False
+    return True
 class Tile:
     def __init__(self, x, y, wall=True, item=None):
         self.x = x
