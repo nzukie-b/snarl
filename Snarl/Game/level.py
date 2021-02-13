@@ -7,12 +7,97 @@ YELLOW = (255, 225, 125)
 WIDTH = 700
 HEIGTH = 500
 SIZE = 5
+
+
+
+# Assuming that dimension given will not be offset from the origin and will just be sized dimensions in x and y. 
+#   ie. origin = (10, 10) dimensions = (5, 7) The boundaries of the room are (10 - 15, 10, 17)
+class Room:
+    def __init__(self, origin, dimensions, tiles, doors, items=None):
+        self.origin = origin
+        self.dimensions = dimensions
+        self.tiles = tiles
+        self.doors = doors
+        self.items = items if items != None else []
+
+    def check_doors(self):
+        for door in self.doors:
+            if door not in self.tiles:
+                return False
+        return True
+    
+    def check_tiles(self):
+        for tile in self.tiles:
+            if tile.x > self.dimensions.x or tile.y > self.dimensions.y:
+                return False
+        return True
+
+    def check_items(self):
+        for item in self.items:
+            if item.x not in self.tiles:
+                # TODO: Are items on non walkable tiles valid?
+                return False
+        return True
+
+def check_room(room):
+    valid_doors = room.check_doors()
+    valid_tiles = room.check_tiles()
+    # valid_items = room.check_items()
+    if not valid_tiles:
+        print('Invalid Room: Walkable tile(s) outside of room dimensions')
+        return False
+    if not valid_doors:
+        print('Invalid Room: Door(s) outside of walkable tiles')
+        return False
+    return True
+    
+
+class Hallway:
+    def __init__(self, origin, dimensions, rooms, waypoints=None):
+        self.origin = origin
+        self.dimensions = dimensions
+        self.rooms = rooms
+        self.waypoints = waypoints if waypoints != None else []
+
+    def check_rooms_vertical(self):
+        for room in self.rooms:
+            for door in room.doors:
+                if door.y != self.origin.y or door.y != self.origin.y + self.dimensions.y:
+                    return False
+        return True
+
+    def check_rooms_horizontal(self):
+        for room in self.rooms:
+            for door in room.doors:
+                if door.x != self.origin.x or door.x != self.origin.x + self.dimensions.x:
+                    return False
+        return True
+
+    # Checks that doors in the hallway are on the same axis. If True they are on the vertical axis. If False horizontal. Otherwise an error message
+    def check_vertical_axis(self):
+        if self.check_rooms_horizontal():
+            return False
+        elif self.check_rooms_vertical():
+            return True
+        else:
+            # TODO: Better Error
+            print('Invalid Hallway: Doors are not on the same axis')
+            raise Exception(self)
+
+def check_hallway(hallway):
+    valid_hallway = False
+    try:
+        hallway.check_vertical_axis()
+        return True
+    except Exception as err:
+        print(err)
 class Tile:
-    def __init__(self, x, y, type=None, items=None):
+    def __init__(self, x, y, wall=True, item=None):
         self.x = x
         self.y = y
-        self.type = type
-        self.items = items if items is not None else []
+        self.wall = wall 
+        self.item = item        
+
 
 def render_tile(tile):
     return pygame.Rect(tile.x*SIZE, tile.y*SIZE, SIZE, SIZE)
@@ -22,14 +107,10 @@ def main():
     pygame.display.set_caption('Snarl')
     screen.fill(WHITE)
     pygame.display.flip()
-    path = Tile(0, 0)
-    wall = Tile(0, 1, type='WALL')
-    item = Tile(0, 2, item='KEY')
-    tiles = [path, wall, item]
     # Need to find out how to display graphical programs on wsl
     while True:
         for tile in tiles:
-            if tile.type == 'WALL':
+            if tile.wall:
                 pygame.draw.rect(screen, BLACK, render_tile(tile))
             else:
                 pygame.draw.rect(screen, WHITE, render_tile(tile))
