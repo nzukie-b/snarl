@@ -136,8 +136,8 @@ class Level:
             return False
         for coord in level_dimensions:
             # Remove the coordinate used for comparison from the set to avoid counting itself.
-            level_dimensions = [level for level in level_dimensions if level == coord]
-            if not check_dimensions(coord[0], coord[1], level_dimensions):
+            updated_lvl_dimensions = [level for level in level_dimensions if level == coord]
+            if not check_dimensions(coord[0], coord[1], updated_lvl_dimensions):
                 print('Invalid Level: Overlapping Room(s) or Hallway(s)')
                 return False
         return True
