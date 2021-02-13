@@ -47,14 +47,14 @@ class Hallway:
         self.rooms = rooms
         self.waypoints = waypoints if waypoints != None else []
 
-    def check_rooms_vertical(self):
+    def check_vertical(self):
         for room in self.rooms:
             for door in room.doors:
                 if door.y != self.origin.y or door.y != self.origin.y + self.dimensions.y:
                     return False
         return True
 
-    def check_rooms_horizontal(self):
+    def check_horizontal(self):
         for room in self.rooms:
             for door in room.doors:
                 if door.x != self.origin.x or door.x != self.origin.x + self.dimensions.x:
@@ -63,9 +63,9 @@ class Hallway:
 
     # Checks that doors in the hallway are on the same axis. If True they are on the vertical axis. If False horizontal. Otherwise an error message
     def check_vertical_axis(self):
-        if self.check_rooms_horizontal():
+        if self.check_horizontal():
             return False
-        elif self.check_rooms_vertical():
+        elif self.check_vertical():
             return True
         else:
             # TODO: Better Error
@@ -90,6 +90,58 @@ def check_room(room):
         print('Invalid Room: Door(s) outside of walkable tiles')
         return False
     return True
+
+def check_dimensions(x, y, level_dimensions):
+    for level in level_dimensions:
+        # level is tuple in format ([x_origin, x_origin+dest], [y_origin, y_origin+dest])
+        x_origin = level[0][0]
+        x_dest = level[0][1]
+        y_origin = level[1][0]
+        y_dest = level[1][1]
+        if x in range(x_origin, x_dest + 1):
+            return False
+        if y in range(y_origin, y_dest + 1):
+            return False
+        return True
+
+class Level:
+    def __init__(self, rooms, hallways):
+        self.rooms = rooms
+        self.hallways = hallways
+
+    def check_rooms(self):
+        room_dimensions = set()
+        hall_dimensions = set()
+        for room in self.rooms:
+            x = [room.origin.x, room.origin.x + room.dimensions.x]
+            y = [room.origin.y, room.origin.y + room.dimensions.y]
+            old_room_size = len(room_dimensions)
+            room_dimensions.add((x, y))
+            # Element not added
+            if old_room_size == len(room_dimensions):
+                print('Invalid Level: Duplicate rooms')
+                return False
+        for hall in self.hallways:
+            x = [hall.origin.x, hall.origin.x + hall.dimensions.x]
+            y = [hall.origin.y, hall.origin.y + hall.dimensions.y]
+            old_hall_size = len(hall_dimensions)
+            hall_dimensions.add((x, y)) 
+            if old_hall_size == len(hall_dimensions):
+                print('Invalid Level: Duplicate hallways')
+                return False
+        old_size = len(room_dimensions) + len(hall_dimensions)
+        level_dimensions = room_dimensions.union(hall_dimensions)
+        if old_size == len(level_dimensions):
+            print('Invalid Level: Hallway overlapping room')
+            return False
+        for coord in level_dimensions:
+            # Remove the coordinate used for comparison from the set to avoid false negatives.
+            level_dimensions.remove(coord)
+            if not check_dimensions(coord[0], coord[1], level_dimensions):
+                print('Invalid Level: Overlapping Room(s) or Hallway(s)')
+                return False
+        return True
+
 class Tile:
     def __init__(self, x, y, wall=True, item=None):
         self.x = x
