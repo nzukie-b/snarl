@@ -129,14 +129,14 @@ class Level:
             if old_hall_size == len(hall_dimensions):
                 print('Invalid Level: Duplicate hallways')
                 return False
-        old_size = len(room_dimensions) + len(hall_dimensions)
+        level_size = len(room_dimensions) + len(hall_dimensions)
         level_dimensions = room_dimensions.union(hall_dimensions)
-        if old_size == len(level_dimensions):
-            print('Invalid Level: Hallway overlapping room')
+        if level_size != len(level_dimensions):
+            print('Invalid Level: Hallway or Room sharing coordinates')
             return False
         for coord in level_dimensions:
-            # Remove the coordinate used for comparison from the set to avoid false negatives.
-            level_dimensions.remove(coord)
+            # Remove the coordinate used for comparison from the set to avoid counting itself.
+            level_dimensions = [level for level in level_dimensions if level == coord]
             if not check_dimensions(coord[0], coord[1], level_dimensions):
                 print('Invalid Level: Overlapping Room(s) or Hallway(s)')
                 return False
