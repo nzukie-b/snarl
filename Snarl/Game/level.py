@@ -10,7 +10,7 @@ SIZE = 5
 
 
 # Assuming that dimension given will not be offset from the origin and will just be sized dimensions in x and y.
-#   ie. origin = (10, 10) dimensions = (5, 7) The tile boundaries of the room are (10 - 15, 10, 17)
+#   ie. origin = (10, 10) dimensions = (5, 7) The tile boundaries of the room are (10 - 15, 10 - 17)
 class Room:
     def __init__(self, origin, dimensions, tiles, doors, items=None):
         self.origin = origin
