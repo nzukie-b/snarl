@@ -6,8 +6,12 @@ BLACK = (0, 0, 0)
 YELLOW = (255, 225, 125)
 WIDTH = 700
 HEIGTH = 500
-SIZE = 5
+SIZE = 25
 
+class Coords:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
 # Assuming that dimension given will not be offset from the origin and will just be sized dimensions in x and y.
 #   ie. origin = (10, 10) dimensions = (5, 7) The tile boundaries of the room are (10 - 15, 10 - 17)
@@ -158,13 +162,16 @@ def main():
     pygame.display.set_caption('Snarl')
     screen.fill(WHITE)
     pygame.display.flip()
+    tiles = [Tile(0, 0), Tile(0,1)]
+    room = Room((0, 0), (10, 10), tiles, [(10, 10)])
+    for i in range(room)
     # Need to find out how to display graphical programs on wsl
     while True:
         for tile in tiles:
-            if tile.wall:
-                pygame.draw.rect(screen, BLACK, render_tile(tile))
-            else:
-                pygame.draw.rect(screen, WHITE, render_tile(tile))
+            # if tile.wall:
+            pygame.draw.rect(screen, BLACK, render_tile(tile))
+            # else:
+                # pygame.draw.rect(screen, WHITE, render_tile(tile))
             
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
