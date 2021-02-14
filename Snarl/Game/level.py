@@ -9,10 +9,12 @@ WIDTH = 700
 HEIGTH = 500
 SIZE = 25
 
-class Coords:
+
+class Coord:
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
+        self.x = x * SIZE
+        self.y = y * SIZE
+
 
 # Assuming that dimension given will not be offset from the origin and will just be sized dimensions in x and y.
 #   ie. origin = (10, 10) dimensions = (5, 7) The tile boundaries of the room are (10 - 15, 10 - 17)
@@ -45,6 +47,8 @@ class Room:
                 # TODO: Are items on non walkable tiles valid?
                 return False
         return True
+
+
 class Hallway:
     def __init__(self, origin, dimensions, rooms, waypoints=None):
         self.origin = origin
@@ -77,12 +81,14 @@ class Hallway:
             print('Invalid Hallway: Doors are not on the same axis')
             raise Exception(self)
 
+
 def check_hallway(hallway):
     try:
         hallway.check_vertical_axis()
         return True
     except Exception as err:
         print(err)
+
 
 # Since valid_doors is only checked after valid_tiles is True it is not an issue that check_doors does not guarantee that the walkable tiles are inside the room as check_tiles handles guarantees that 
 def check_room(room):
@@ -96,6 +102,7 @@ def check_room(room):
         return False
     return True
 
+
 def check_dimensions(x, y, level_dimensions):
     for level in level_dimensions:
         # level is tuple in format ([x_origin, x_origin+dest], [y_origin, y_origin+dest])
@@ -108,6 +115,7 @@ def check_dimensions(x, y, level_dimensions):
         if y in range(y_origin, y_dest + 1):
             return False
         return True
+
 
 class Level:
     def __init__(self, rooms, hallways):
@@ -147,6 +155,7 @@ class Level:
                 return False
         return True
 
+
 class Tile:
     def __init__(self, x, y, wall=True, item=None):
         self.x = x
@@ -158,7 +167,8 @@ class Tile:
 def render_tile(tile):
     return Tile(tile.x*SIZE, tile.y*SIZE, True)
 
-def create_example_room():
+
+def create_example_tiles():
     tiles = []
     for i in range(0, int(WIDTH / SIZE)):
         for j in range(0, (int(HEIGTH / SIZE))):
@@ -172,15 +182,28 @@ def create_example_room():
     return tiles
 
 
+def create_example_items():
+    items = []
+    for i in range(0, int(WIDTH / SIZE)):
+        for j in range(0, (int(HEIGTH / SIZE))):
+            if ((i == 5 and j == 10) or
+                (i == 17 and j == 17) or
+                    (i == 6 and j == 3)):
+                items.append(Coord(i, j))
+
+    return items
+
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGTH), 0, 32)
     pygame.display.set_caption('Snarl')
     screen.fill(WHITE)
     pygame.display.flip()
-    tiles = create_example_room();
+    tiles = create_example_tiles()
+    items = create_example_items()
 
-    room = Room((0, 0), (int(WIDTH / 25), int(HEIGTH / 25)), tiles, (15, 10))
+    room = Room((0, 0), (int(WIDTH / 25), int(HEIGTH / 25)), tiles, (15, 10), items)
     print(str(tiles))
     # Need to find out how to display graphical programs on wsl
     pygame.draw.rect(screen, GREY, (15 * SIZE, 10 * SIZE, 25, 25))
@@ -188,12 +211,12 @@ def main():
         for tile in room.tiles:
             if tile.wall:
                 #print(str((tile.x*SIZE, tile.y*SIZE, SIZE, SIZE)))
-                print(str(tile.x) + ", " + str(tile.y))
+                #print(str(tile.x) + ", " + str(tile.y))
                 pygame.draw.rect(screen, BLACK, (tile.x, tile.y, SIZE, SIZE))
             else:
                 pygame.draw.rect(screen, WHITE, (tile.x, tile.y, SIZE, SIZE))
         for item in room.items:
-                pygame.draw.circle(screen, YELLOW, render_tile(tile))
+            pygame.draw.circle(screen, YELLOW, (item.x, item.y), SIZE/2, SIZE)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
