@@ -3,10 +3,11 @@
 import pygame
 WHITE = (255,255,255)
 BLACK = (0, 0, 0)
+GREY = (125, 125, 125)
 YELLOW = (255, 225, 125)
 WIDTH = 700
 HEIGTH = 500
-SIZE = 5
+SIZE = 25
 
 
 # Assuming that dimension given will not be offset from the origin and will just be sized dimensions in x and y.
@@ -151,20 +152,44 @@ class Tile:
 
 
 def render_tile(tile):
-    return pygame.Rect(tile.x*SIZE, tile.y*SIZE, SIZE, SIZE)
+    return Tile(tile.x*SIZE, tile.y*SIZE, True)
+
+def create_example_room():
+    tiles = []
+    for i in range(0, int(WIDTH / SIZE)):
+        for j in range(0, (int(HEIGTH / SIZE))):
+            if j == 0 or j == int(HEIGTH / SIZE) - 1:
+                #print(str(i) + ", " + str(j) + "  " + str(HEIGTH / SIZE))
+                tiles.append(render_tile(Tile(i, j, True)))
+            if (i == 0 or i == int(WIDTH / SIZE) - 1) and (j > 0 and j < int(HEIGTH / SIZE) - 1):
+                #print(str(i) + ", " + str(j) + "  " + str(HEIGTH / SIZE))
+                tiles.append(render_tile(Tile(i, j, True)))
+
+    return tiles
+
 
 def main():
-    screen = pygame.display.set_mode((WIDTH, HEIGTH))
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGTH), 0, 32)
     pygame.display.set_caption('Snarl')
     screen.fill(WHITE)
     pygame.display.flip()
+    tiles = create_example_room();
+
+    room = Room((0, 0), (int(WIDTH / 25), int(HEIGTH / 25)), tiles, (15, 10))
+    print(str(tiles))
     # Need to find out how to display graphical programs on wsl
+    pygame.draw.rect(screen, GREY, (15 * SIZE, 10 * SIZE, 25, 25))
     while True:
-        for tile in tiles:
+        for tile in room.tiles:
             if tile.wall:
-                pygame.draw.rect(screen, BLACK, render_tile(tile))
+                #print(str((tile.x*SIZE, tile.y*SIZE, SIZE, SIZE)))
+                print(str(tile.x) + ", " + str(tile.y))
+                pygame.draw.rect(screen, BLACK, (tile.x, tile.y, SIZE, SIZE))
             else:
-                pygame.draw.rect(screen, WHITE, render_tile(tile))
+                pygame.draw.rect(screen, WHITE, (tile.x, tile.y, SIZE, SIZE))
+        for item in room.items:
+                pygame.draw.circle(screen, YELLOW, render_tile(tile))
             
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
