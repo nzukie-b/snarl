@@ -9,6 +9,10 @@ WIDTH = 700
 HEIGTH = 500
 SIZE = 25
 
+class Coords:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
 # Assuming that dimension given will not be offset from the origin and will just be sized dimensions in x and y.
 #   ie. origin = (10, 10) dimensions = (5, 7) The tile boundaries of the room are (10 - 15, 10 - 17)
@@ -190,7 +194,7 @@ def main():
                 pygame.draw.rect(screen, WHITE, (tile.x, tile.y, SIZE, SIZE))
         for item in room.items:
                 pygame.draw.circle(screen, YELLOW, render_tile(tile))
-            
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
