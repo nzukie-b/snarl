@@ -64,35 +64,27 @@ class Hallway:
         self.rooms = rooms
         self.waypoints = waypoints if waypoints != None else []
 
-    def check_vertical(self):
+
+# Check the orientation of the Hall. If True it is horizontal if False it is vertical otherwise an error is thrown
+    def check_orientation(self):
+        is_horizontal = None
         for room in self.rooms:
             for door in room.doors:
-                if door.y == self.origin.y or door.y == self.origin.y + self.dimensions.y:
-                    return True
-        return False
-
-    def check_horizontal(self):
-        for room in self.rooms:
-            for door in room.doors:
-                if door.x == self.origin.x or door.x == self.origin.x + self.dimensions.x:
-                    return True
-        return False
-
-    # Checks that doors in the hallway are on the same axis. If True they are on the vertical axis. If False horizontal. Otherwise an error message
-    def check_vertical_axis(self):
-        if self.check_horizontal():
-            return False
-        elif self.check_vertical():
-            return True
-        else:
-            # TODO: Better Error
-            print('Invalid Hallway: Doors are not on the same axis')
-            raise Exception(self)
+                if (door.y == self.origin.y or door.y == self.origin.y + self.dimensions.y) and door.x != self.origin.x and (self.origin.x < door.x < self.origin.x + self.dimensions.x):
+                    if is_horizontal is False:
+                        raise Exception(self)
+                    is_horizontal = True
+                elif (door.x == self.origin.x or door.x == self.origin.x + self.dimensions.x ) and door.y != self.origin.y and (self.origin.y < door.y < self.origin.y + self.dimensions.y):
+                    if is_horizontal is True:
+                        raise Exception(self)
+                    is_horizontal = False                        
+        return is_horizontal
 
 
+# Checks that a hallway is either vertical or horizontal 
 def check_hallway(hallway):
     try:
-        hallway.check_vertical_axis()
+        hallway.check_orientation()
         return True
     except Exception as err:
         print(err)
@@ -111,16 +103,15 @@ def check_room(room):
     return True
 
 
+# Checks that the provided coordinates are not within the provided coordinates
 def check_dimensions(x, y, level_dimensions):
     for level in level_dimensions:
-        # level is tuple in format ([x_origin, x_origin+dest], [y_origin, y_origin+dest])
+        # level is tuple in format ([x_origin, x_origin+dest], [y_origin, y_origin+dest]), Created in check_room
         x_origin = level[0][0]
         x_dest = level[0][1]
         y_origin = level[1][0]
         y_dest = level[1][1]
-        if x in range(x_origin, x_dest + 1):
-            return False
-        if y in range(y_origin, y_dest + 1):
+        if x in range(x_origin, x_dest + 1) and y in range(y_origin, y_dest + 1):
             return False
         return True
 
@@ -130,6 +121,7 @@ class Level:
         self.rooms = rooms
         self.hallways = hallways
 
+#  Checks that there are not rooms/hallways sharing coordinates, or having overlapping dimensions
     def check_rooms(self):
         room_dimensions = set()
         hall_dimensions = set()
@@ -157,7 +149,7 @@ class Level:
             return False
         for coord in level_dimensions:
             # Remove the coordinate used for comparison from the set to avoid counting itself.
-            updated_lvl_dimensions = [level for level in level_dimensions if level == coord]
+            updated_lvl_dimensions = [level for level in level_dimensions if level != coord]
             if not check_dimensions(coord[0], coord[1], updated_lvl_dimensions):
                 print('Invalid Level: Overlapping Room(s) or Hallway(s)')
                 return False
@@ -198,37 +190,49 @@ def create_example_items():
 def render_tile(tile):
     return pygame.Rect(tile.x, tile.y, SIZE, SIZE)
 
-
+# Renders tiles for a room, annd returns a list of the created tiles.
 def render_room(room):
+    tiles = []
     for ii in range(room.origin.x, room.origin.x + room.dimensions.x + 1):
         for jj in range(room.origin.y, room.origin.y + room.dimensions.y + 1):
             coord = Coord(ii, jj)
             tile = Tile(ii, jj)
+            tiles.append(tile)
             if coord in room.doors:
                 pygame.draw.circle(SCREEN, YELLOW, (tile.x + SIZE/2, tile.y + SIZE/2), SIZE/2)
             elif coord in room.tiles:
                 pygame.draw.rect(SCREEN, WHITE, render_tile(tile))
             else:
                 pygame.draw.rect(SCREEN, BLACK, render_tile(tile))
+    return tiles
 
-def render_hallway(hallway):
-    x_boundary = hallway.origin.x + hallway.dimensions.x
-    y_boundary = hallway.origin.y + hallway.dimensions.y
-    for ii in range(hallway.origin.x, x_boundary + 1):
-        for jj in range(hallway.origin.y, y_boundary + 1):
-            tile = Tile(ii, jj)
-            pygame.draw.rect(SCREEN, WHITE, render_tile(tile))
-            # Walls aren't defined from the dimensions we assume the provided dimensions are all walkable
-            if hallway.check_vertical():
-                left_wall = Tile(hallway.origin.x - 1, jj)
-                right_wall = Tile(x_boundary + 1, jj)
-                pygame.draw.rect(SCREEN, BLACK, render_tile(left_wall))
-                pygame.draw.rect(SCREEN, BLACK, render_tile(right_wall))
-            elif hallway.check_horizontal():
-                upper_wall = Tile(ii, hallway.origin.y - 1)
-                lower_wall = Tile(ii, y_boundary + 1)
-                pygame.draw.rect(SCREEN, BLACK, render_tile(upper_wall))
-                pygame.draw.rect(SCREEN, BLACK, render_tile(lower_wall))
+# Renders tiles for a hallway, and returns a list of the created tiles.
+def render_hallway(hallway, orientation):
+    try :
+        x_boundary = hallway.origin.x + hallway.dimensions.x
+        y_boundary = hallway.origin.y + hallway.dimensions.y
+        tiles = []
+        for ii in range(hallway.origin.x, x_boundary + 1):
+            for jj in range(hallway.origin.y, y_boundary + 1):
+                tile = Tile(ii, jj)
+                tiles.append(tile)
+                pygame.draw.rect(SCREEN, WHITE, render_tile(tile))
+                # Walls aren't defined from the dimensions we assume the provided dimensions are all walkable
+                if orientation == True:
+                    # Horizontal path hallway case
+                    left_wall = Tile(hallway.origin.x - 1, jj)
+                    right_wall = Tile(x_boundary + 1, jj)
+                    pygame.draw.rect(SCREEN, BLACK, render_tile(left_wall))
+                    pygame.draw.rect(SCREEN, BLACK, render_tile(right_wall))
+                elif orientation == False:
+                    # Vertical path hallway
+                    upper_wall = Tile(ii, hallway.origin.y - 1)
+                    lower_wall = Tile(ii, y_boundary + 1)
+                    pygame.draw.rect(SCREEN, BLACK, render_tile(upper_wall))
+                    pygame.draw.rect(SCREEN, BLACK, render_tile(lower_wall))
+        return tiles
+    except Exception as err :
+        print('Error: Attempting to render invalid hallway. Object: ', err)
 
 def main():
     pygame.init()
@@ -236,18 +240,17 @@ def main():
     tiles = [Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10)]
     start = Coord(5, 5)
     dimensions = Coord(5, 5)
-    doors = [Coord(8,10), Coord(7, 10), Coord(1, 10)]
+    doors = [Coord(8,10), Coord(7, 10), Coord(6, 10)]
     room = Room(start, dimensions, tiles, doors)
     hall_start = Coord(6, 10)
     hall = Hallway(hall_start, Coord(2, 3), [room])
-    print(hall.check_horizontal())
-    print(hall.check_vertical())
+    print(hall.check_orientation())
     
 
 
     # pygame.draw.rect(screen, GREY, (15 * SIZE, 10 * SIZE, 25, 25))
     while True:
-        render_hallway(hall)
+        render_hallway(hall, hall.check_orientation())
 
         render_room(room)
         # for ii in range(room.origin.x, room.origin.x + room.dimensions.x):
