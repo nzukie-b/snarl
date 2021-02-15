@@ -8,12 +8,20 @@ YELLOW = (255, 225, 125)
 WIDTH = 700
 HEIGTH = 500
 SIZE = 25
+SCREEN = pygame.display.set_mode((WIDTH, HEIGTH), 0, 32)
+SCREEN.fill(WHITE)
+pygame.display.set_caption('Snarl')
 
 
 class Coord:
     def __init__(self, x, y):
-        self.x = x * SIZE
-        self.y = y * SIZE
+        self.x = x
+        self.y = y
+
+    def __eq__(self, other):
+        if isinstance(other, Coord):
+            return self.x == other.x and self.y == other.y
+        return False
 
 
 # Assuming that dimension given will not be offset from the origin and will just be sized dimensions in x and y.
@@ -158,15 +166,10 @@ class Level:
 
 class Tile:
     def __init__(self, x, y, wall=True, item=None):
-        self.x = x
-        self.y = y
+        self.x = x * SIZE
+        self.y = y * SIZE
         self.wall = wall 
         self.item = item        
-
-
-def render_tile(tile):
-    return Tile(tile.x*SIZE, tile.y*SIZE, True)
-
 
 def create_example_tiles():
     tiles = []
@@ -178,7 +181,6 @@ def create_example_tiles():
             if (i == 0 or i == int(WIDTH / SIZE) - 1) and (j > 0 and j < int(HEIGTH / SIZE) - 1):
                 #print(str(i) + ", " + str(j) + "  " + str(HEIGTH / SIZE))
                 tiles.append(render_tile(Tile(i, j, True)))
-
     return tiles
 
 
@@ -190,39 +192,79 @@ def create_example_items():
                 (i == 17 and j == 17) or
                     (i == 6 and j == 3)):
                 items.append(Coord(i, j))
-
     return items
 
 
+
+def render_tile(tile):
+    return pygame.Rect(tile.x, tile.y, SIZE, SIZE)
+
+
+def render_room(room):
+    for ii in range(room.origin.x, room.origin.x + room.dimensions.x + 1):
+        for jj in range(room.origin.y, room.origin.y + room.dimensions.y + 1):
+            coord = Coord(ii, jj)
+            tile = Tile(ii, jj)
+            if coord in room.doors:
+                pygame.draw.circle(SCREEN, YELLOW, (tile.x + SIZE/2, tile.y + SIZE/2), SIZE/2)
+            elif coord in room.tiles:
+                pygame.draw.rect(SCREEN, WHITE, render_tile(tile))
+            else:
+                pygame.draw.rect(SCREEN, BLACK, render_tile(tile))
+
+def render_hallway(hallway):
+    for ii in range(hallway.origin.x, hallway.origin.x + hallway.dimensions.x + 1):
+        for jj in range(hallway.origin.y, hallway.origin.y + hallway.dimensions.y + 1):
+            coord = Coord(ii, jj)
+            tile = Tile(ii, jj)
+            pygame.draw.rect(SCREEN, WHITE, render_tile(tile))
+            # Walls aren't defined from the dimensions we assume the provided dimensions are all walkable
+            if hallway.check_vertical():
+                left_wall = Tile(ii - 1, jj)
+                right_wall = Tile(ii + 1, jj)
+                pygame.draw.rect(SCREEN, BLACK, render_tile(left_wall))
+                pygame.draw.rect(SCREEN, BLACK, render_tile(right_wall))
+            elif hallway.check_horizontal():
+                upper_wall = Tile(ii, jj - 1)
+                lower_wall = Tile(ii, jj + 1)
+                pygame.draw.rect(SCREEN, BLACK, render_tile(upper_wall))
+                pygame.draw.rect(SCREEN, BLACK, render_tile(lower_wall))
+
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGTH), 0, 32)
-    pygame.display.set_caption('Snarl')
-    screen.fill(WHITE)
     pygame.display.flip()
-    tiles = create_example_tiles()
-    items = create_example_items()
+    tiles = [Coord(7, 5),Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10),Coord(7, 5), Coord(6, 5), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10)]
+    start = Coord(5, 5)
+    dimensions = Coord(5, 5)
+    doors = [Coord(8, 5), Coord(7,5), Coord(6, 5), Coord(8,10), Coord(7, 10)]
+    room = Room(start, dimensions, tiles, doors)
 
-    room = Room((0, 0), (int(WIDTH / 25), int(HEIGTH / 25)), tiles, (15, 10), items)
-    print(str(tiles))
-    # Need to find out how to display graphical programs on wsl
-    pygame.draw.rect(screen, GREY, (15 * SIZE, 10 * SIZE, 25, 25))
+    # pygame.draw.rect(screen, GREY, (15 * SIZE, 10 * SIZE, 25, 25))
     while True:
-        for tile in room.tiles:
-            if tile.wall:
-                #print(str((tile.x*SIZE, tile.y*SIZE, SIZE, SIZE)))
-                #print(str(tile.x) + ", " + str(tile.y))
-                pygame.draw.rect(screen, BLACK, (tile.x, tile.y, SIZE, SIZE))
-            else:
-                pygame.draw.rect(screen, WHITE, (tile.x, tile.y, SIZE, SIZE))
-        for item in room.items:
-            pygame.draw.circle(screen, YELLOW, (item.x, item.y), SIZE/2, SIZE)
+        render_room(room)
+        # for ii in range(room.origin.x, room.origin.x + room.dimensions.x):
+        #     for jj in range(room.origin.y, room.origin.y + room.dimensions.y):
+        #         coord = Coord(ii, jj)
+        #         tile = Tile(ii, jj)
+        #         if coord in room.tiles:
+        #             pygame.draw.rect(SCREEN, WHITE, render_tile(tile))
+        #         else:
+        #             pygame.draw.rect(SCREEN, BLACK, (coord.x*SIZE, coord.y*SIZE, SIZE, SIZE))
+        pygame.display.update()
+        # for tile in room.tiles:
+        #     if tile.wall:
+        #         #print(str((tile.x*SIZE, tile.y*SIZE, SIZE, SIZE)))
+        #         #print(str(tile.x) + ", " + str(tile.y))
+        #         pygame.draw.rect(screen, BLACK, (tile.x, tile.y, SIZE, SIZE))
+        #     else:
+        #         pygame.draw.rect(screen, WHITE, (tile.x, tile.y, SIZE, SIZE))
+        # for item in room.items:
+        #     pygame.draw.circle(screen, YELLOW, (item.x, item.y), SIZE/2, SIZE)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-        pygame.display.update()
 
 if __name__ == '__main__':
     main()
