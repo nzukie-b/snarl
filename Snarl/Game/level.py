@@ -67,16 +67,16 @@ class Hallway:
     def check_vertical(self):
         for room in self.rooms:
             for door in room.doors:
-                if door.y != self.origin.y or door.y != self.origin.y + self.dimensions.y:
-                    return False
-        return True
+                if door.y == self.origin.y or door.y == self.origin.y + self.dimensions.y:
+                    return True
+        return False
 
     def check_horizontal(self):
         for room in self.rooms:
             for door in room.doors:
-                if door.x != self.origin.x or door.x != self.origin.x + self.dimensions.x:
-                    return False
-        return True
+                if door.x == self.origin.x or door.x == self.origin.x + self.dimensions.x:
+                    return True
+        return False
 
     # Checks that doors in the hallway are on the same axis. If True they are on the vertical axis. If False horizontal. Otherwise an error message
     def check_vertical_axis(self):
@@ -195,7 +195,6 @@ def create_example_items():
     return items
 
 
-
 def render_tile(tile):
     return pygame.Rect(tile.x, tile.y, SIZE, SIZE)
 
@@ -213,34 +212,43 @@ def render_room(room):
                 pygame.draw.rect(SCREEN, BLACK, render_tile(tile))
 
 def render_hallway(hallway):
-    for ii in range(hallway.origin.x, hallway.origin.x + hallway.dimensions.x + 1):
-        for jj in range(hallway.origin.y, hallway.origin.y + hallway.dimensions.y + 1):
-            coord = Coord(ii, jj)
+    x_boundary = hallway.origin.x + hallway.dimensions.x
+    y_boundary = hallway.origin.y + hallway.dimensions.y
+    for ii in range(hallway.origin.x, x_boundary + 1):
+        for jj in range(hallway.origin.y, y_boundary + 1):
             tile = Tile(ii, jj)
             pygame.draw.rect(SCREEN, WHITE, render_tile(tile))
             # Walls aren't defined from the dimensions we assume the provided dimensions are all walkable
             if hallway.check_vertical():
-                left_wall = Tile(ii - 1, jj)
-                right_wall = Tile(ii + 1, jj)
+                left_wall = Tile(hallway.origin.x - 1, jj)
+                right_wall = Tile(x_boundary + 1, jj)
                 pygame.draw.rect(SCREEN, BLACK, render_tile(left_wall))
                 pygame.draw.rect(SCREEN, BLACK, render_tile(right_wall))
             elif hallway.check_horizontal():
-                upper_wall = Tile(ii, jj - 1)
-                lower_wall = Tile(ii, jj + 1)
+                upper_wall = Tile(ii, hallway.origin.y - 1)
+                lower_wall = Tile(ii, y_boundary + 1)
                 pygame.draw.rect(SCREEN, BLACK, render_tile(upper_wall))
                 pygame.draw.rect(SCREEN, BLACK, render_tile(lower_wall))
 
 def main():
     pygame.init()
     pygame.display.flip()
-    tiles = [Coord(7, 5),Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10),Coord(7, 5), Coord(6, 5), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10)]
+    tiles = [Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10)]
     start = Coord(5, 5)
     dimensions = Coord(5, 5)
-    doors = [Coord(8, 5), Coord(7,5), Coord(6, 5), Coord(8,10), Coord(7, 10)]
+    doors = [Coord(8,10), Coord(7, 10), Coord(1, 10)]
     room = Room(start, dimensions, tiles, doors)
+    hall_start = Coord(6, 10)
+    hall = Hallway(hall_start, Coord(2, 3), [room])
+    print(hall.check_horizontal())
+    print(hall.check_vertical())
+    
+
 
     # pygame.draw.rect(screen, GREY, (15 * SIZE, 10 * SIZE, 25, 25))
     while True:
+        render_hallway(hall)
+
         render_room(room)
         # for ii in range(room.origin.x, room.origin.x + room.dimensions.x):
         #     for jj in range(room.origin.y, room.origin.y + room.dimensions.y):
