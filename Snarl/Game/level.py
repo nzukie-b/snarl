@@ -103,7 +103,7 @@ def check_room(room):
     return True
 
 
-# Checks that the provided coordinates are not within the provided coordinates
+# Checks that the provided coordinates are not within the provided coordinates. True if the provided coordinates do not both fall the level dimensions
 def check_dimensions(x, y, level_dimensions):
     for level in level_dimensions:
         # level is tuple in format ([x_origin, x_origin+dest], [y_origin, y_origin+dest]), Created in check_room
