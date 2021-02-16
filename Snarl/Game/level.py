@@ -44,7 +44,7 @@ class Room:
     # Validate walkable tiles are inside the room boundaries
     def check_tiles(self):
         for tile in self.tiles:
-            if tile.x > self.origin.x + self.dimensions.x or tile.y > self.origin.y + self.dimensions.y:
+            if self.origin.x <= tile.x <= self.origin.x + self.dimensions.x and self.origin.y <= tile.y <= self.origin.y + self.dimensions.y:
                 return False
         return True
 
@@ -211,12 +211,6 @@ def render_room(room):
 
 # Renders tiles for a hallway, and returns a list of the created tiles.
 def render_hallway(hallway, orientation):
-    """
-
-    :param hallway:
-    :param orientation:
-    :return:
-    """
     try :
         x_boundary = hallway.origin.x + hallway.dimensions.x
         y_boundary = hallway.origin.y + hallway.dimensions.y
@@ -246,9 +240,8 @@ def render_hallway(hallway, orientation):
 def main():
     pygame.init()
     pygame.display.flip()
-
     #Room 1 example
-    tiles = [Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10)]
+    tiles = [Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10), Coord(9, 6), Coord(9, 7), Coord(9,8) ]
     start = Coord(5, 5)
     dimensions = Coord(5, 5)
     doors = [Coord(8,10), Coord(7, 10), Coord(6, 10)]
@@ -256,14 +249,12 @@ def main():
     room = Room(start, dimensions, tiles, doors, items)
     hall_start = Coord(6, 10)
     hall = Hallway(hall_start, Coord(2, 3), [room])
-    print(hall.check_orientation())
-
     #Room 2 example
-    tiles1 = [Coord(7, 14), Coord(7, 16), Coord(7, 17), Coord(7, 18), Coord(6, 16), Coord(8, 17), Coord(8, 14),
-             Coord(8, 7), Coord(8, 8), Coord(8, 9), Coord(8, 10), Coord(6, 13), Coord(7, 13), Coord(7, 15)]
+    tiles1 = [Coord(7, 14), Coord(7, 16), Coord(7, 17), Coord(6, 16), Coord(8, 17), Coord(8, 14), 
+                Coord(6, 13), Coord(7, 13), Coord(7, 15), Coord(9, 17), Coord(9, 16), Coord(9, 15), Coord (9, 14), Coord(6, 16)]
     start1 = Coord(5, 13)
     dimensions1 = Coord(5, 5)
-    doors1 = [Coord(8, 18), Coord(7, 18), Coord(6, 18)]
+    doors1 = [Coord(8, 13), Coord(7, 13), Coord(6, 13)]
     items1 = [Coord(8, 14), Coord(7, 17)]
     room1 = Room(start1, dimensions1, tiles1, doors1, items1)
 
