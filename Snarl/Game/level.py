@@ -70,11 +70,11 @@ class Hallway:
         is_horizontal = None
         for room in self.rooms:
             for door in room.doors:
-                if (door.y == self.origin.y or door.y == self.origin.y + self.dimensions.y) and door.x != self.origin.x and (self.origin.x < door.x < self.origin.x + self.dimensions.x):
+                if (door.y == self.origin.y or door.y == self.origin.y + self.dimensions.y) and (self.origin.x < door.x < self.origin.x + self.dimensions.x):
                     if is_horizontal is False:
                         raise Exception(self)
                     is_horizontal = True
-                elif (door.x == self.origin.x or door.x == self.origin.x + self.dimensions.x ) and door.y != self.origin.y and (self.origin.y < door.y < self.origin.y + self.dimensions.y):
+                elif (door.x == self.origin.x or door.x == self.origin.x + self.dimensions.x ) and (self.origin.y < door.y < self.origin.y + self.dimensions.y):
                     if is_horizontal is True:
                         raise Exception(self)
                     is_horizontal = False                        
