@@ -199,15 +199,24 @@ def render_room(room):
             tile = Tile(ii, jj)
             tiles.append(tile)
             if coord in room.doors:
-                pygame.draw.circle(SCREEN, YELLOW, (tile.x + SIZE/2, tile.y + SIZE/2), SIZE/2)
+                pygame.draw.rect(SCREEN, GREY, render_tile(tile))
+            elif coord in room.items:
+                pygame.draw.circle(SCREEN, YELLOW, (tile.x + SIZE / 2, tile.y + SIZE / 2), SIZE / 2)
             elif coord in room.tiles:
                 pygame.draw.rect(SCREEN, WHITE, render_tile(tile))
             else:
                 pygame.draw.rect(SCREEN, BLACK, render_tile(tile))
     return tiles
 
+
 # Renders tiles for a hallway, and returns a list of the created tiles.
 def render_hallway(hallway, orientation):
+    """
+
+    :param hallway:
+    :param orientation:
+    :return:
+    """
     try :
         x_boundary = hallway.origin.x + hallway.dimensions.x
         y_boundary = hallway.origin.y + hallway.dimensions.y
@@ -237,15 +246,26 @@ def render_hallway(hallway, orientation):
 def main():
     pygame.init()
     pygame.display.flip()
+
+    #Room 1 example
     tiles = [Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10)]
     start = Coord(5, 5)
     dimensions = Coord(5, 5)
     doors = [Coord(8,10), Coord(7, 10), Coord(6, 10)]
-    room = Room(start, dimensions, tiles, doors)
+    items = [Coord(6, 6), Coord(7, 8)]
+    room = Room(start, dimensions, tiles, doors, items)
     hall_start = Coord(6, 10)
     hall = Hallway(hall_start, Coord(2, 3), [room])
     print(hall.check_orientation())
-    
+
+    #Room 2 example
+    tiles1 = [Coord(7, 14), Coord(7, 16), Coord(7, 17), Coord(7, 18), Coord(6, 16), Coord(8, 17), Coord(8, 14),
+             Coord(8, 7), Coord(8, 8), Coord(8, 9), Coord(8, 10), Coord(6, 13), Coord(7, 13), Coord(7, 15)]
+    start1 = Coord(5, 13)
+    dimensions1 = Coord(5, 5)
+    doors1 = [Coord(8, 18), Coord(7, 18), Coord(6, 18)]
+    items1 = [Coord(8, 14), Coord(7, 17)]
+    room1 = Room(start1, dimensions1, tiles1, doors1, items1)
 
 
     # pygame.draw.rect(screen, GREY, (15 * SIZE, 10 * SIZE, 25, 25))
@@ -253,6 +273,7 @@ def main():
         render_hallway(hall, hall.check_orientation())
 
         render_room(room)
+        render_room(room1)
         # for ii in range(room.origin.x, room.origin.x + room.dimensions.x):
         #     for jj in range(room.origin.y, room.origin.y + room.dimensions.y):
         #         coord = Coord(ii, jj)
