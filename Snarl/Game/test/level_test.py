@@ -7,46 +7,52 @@ game_dir = os.path.dirname(currentdir)
 sys.path.append(game_dir)
 from level import Coord, Room, Hallway, Level, Tile, check_room, check_hallway
 
+
+#Room 1 example
+tiles = [Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10), Coord(9, 6), Coord(9, 7), Coord(9,8), Coord(6, 10)]
+start = Coord(5, 5)
+dimensions = Coord(5, 5)
+doors = [Coord(8,10), Coord(7, 10), Coord(6, 10)]
+items = [Coord(6, 6), Coord(7, 8)]
+
 @pytest.fixture
 def room1():
     '''Initializes example Room'''
-     #Room 1 example
-    tiles = [Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10), Coord(9, 6), Coord(9, 7), Coord(9,8), Coord(6, 10)]
-    start = Coord(5, 5)
-    dimensions = Coord(5, 5)
-    doors = [Coord(8,10), Coord(7, 10), Coord(6, 10)]
-    items = [Coord(6, 6), Coord(7, 8)]
     room = Room(start, dimensions, tiles, doors, items)
     return room
 
 @pytest.fixture
 def invalid_tiles():
-    '''Initializes example Room'''
-     #Room 1 example
-    tiles = [Coord(11, 10), Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10), Coord(9, 6), Coord(9, 7), Coord(9,8), Coord(6, 10)]
-    start = Coord(5, 5)
-    dimensions = Coord(5, 5)
-    doors = [Coord(8,10), Coord(7, 10), Coord(6, 10)]
-    items = [Coord(6, 6), Coord(7, 8)]
-    room = Room(start, dimensions, tiles, doors, items)
+    '''Initializes example Room with invalid Tiles'''
+    invalid_tiles = [Coord(11, 10), Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10), Coord(9, 6), Coord(9, 7), Coord(9,8), Coord(6, 10)]
+    room = Room(start, dimensions, invalid_tiles, doors, items)
     return room
 
 @pytest.fixture
 def invalid_doors():
-    '''Initializes example Room'''
-     #Room 1 example
-    tiles = [Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10), Coord(9, 6), Coord(9, 7), Coord(9,8), Coord(6, 10)]
-    start = Coord(5, 5)
-    dimensions = Coord(5, 5)
-    doors = [Coord(8,10), Coord(7, 10), Coord(5, 5), Coord(6, 10)]
-    items = [Coord(6, 6), Coord(7, 8)]
-    room = Room(start, dimensions, tiles, doors, items)
+    '''Initializes example Room with invalid Doors'''
+    invalid_doors = [Coord(8,10), Coord(7, 10), Coord(5, 5), Coord(6, 10)]
+    room = Room(start, dimensions, tiles, invalid_doors, items)
     return room
 
 @pytest.fixture
-def setup_hallway(room1):
+def hallway(room1):
+    '''Initializes a Hallway with a vertical orientation'''
     hall_start = Coord(6, 10)
     hall = Hallway(hall_start, Coord(2, 3), [room1])
+    return hall
+
+@pytest.fixture 
+def horizontal_hallway():
+    '''Initializes a Hallway with a horizontal orientation'''
+    hall_start = Coord(0, 0)
+    hall = Hallway(hall_start, Coord(5, 5), [Room(start, dimensions, [Coord(5, 5)], [Coord(5, 3)])])
+    return hall
+
+@pytest.fixture
+def invalid_hallway():
+    hall_start = Coord(0, 0)
+    hall = Hallway(hall_start, Coord(5, 5), [Room(start, dimensions, [Coord(5, 5)], [Coord(3, 3)])])
     return hall
 
 @pytest.fixture
@@ -84,7 +90,18 @@ def test_invalid_check_room(capsys, invalid_tiles, invalid_doors):
     assert capture.out == 'Invalid Room: Door(s) outside of walkable tiles\n'
     assert valid_doors == False
 
+def test_check_hallway(hallway):
+    assert check_hallway(hallway) == True
 
+def test_hallway_orientation(hallway, horizontal_hallway):
+    assert hallway.check_orientation() == False
+    assert horizontal_hallway.check_orientation() == True
+
+def test_invalid_hallway(invalid_hallway):
+    with pytest.raises(Exception) as err:
+        check_hallway(invalid_hallway)
+        assert invalid_hallway in str(err.value)
+    return False
 
 
 # def test_test(setup_hallway):

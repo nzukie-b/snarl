@@ -71,13 +71,13 @@ class Hallway:
         for room in self.rooms:
             for door in room.doors:
                 if (door.y == self.origin.y or door.y == self.origin.y + self.dimensions.y) and (self.origin.x < door.x < self.origin.x + self.dimensions.x):
-                    if is_horizontal is False:
-                        raise Exception(self)
-                    is_horizontal = True
-                elif (door.x == self.origin.x or door.x == self.origin.x + self.dimensions.x ) and (self.origin.y < door.y < self.origin.y + self.dimensions.y):
                     if is_horizontal is True:
                         raise Exception(self)
-                    is_horizontal = False                        
+                    is_horizontal = False
+                elif (door.x == self.origin.x or door.x == self.origin.x + self.dimensions.x ) and (self.origin.y < door.y < self.origin.y + self.dimensions.y):
+                    if is_horizontal is False:
+                        raise Exception(self)
+                    is_horizontal = True                        
         return is_horizontal
 
 
@@ -221,14 +221,14 @@ def render_hallway(hallway, orientation):
                 tiles.append(tile)
                 pygame.draw.rect(SCREEN, WHITE, render_tile(tile))
                 # Walls aren't defined from the dimensions we assume the provided dimensions are all walkable
-                if orientation == True:
-                    # Horizontal path hallway case
+                if orientation == False:
+                    # Vertical path hallway case
                     left_wall = Tile(hallway.origin.x - 1, jj)
                     right_wall = Tile(x_boundary + 1, jj)
                     pygame.draw.rect(SCREEN, BLACK, render_tile(left_wall))
                     pygame.draw.rect(SCREEN, BLACK, render_tile(right_wall))
-                elif orientation == False:
-                    # Vertical path hallway
+                elif orientation == True:
+                    # Horizontal path hallway
                     upper_wall = Tile(ii, hallway.origin.y - 1)
                     lower_wall = Tile(ii, y_boundary + 1)
                     pygame.draw.rect(SCREEN, BLACK, render_tile(upper_wall))
