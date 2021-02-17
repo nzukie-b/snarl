@@ -44,7 +44,7 @@ class Room:
     # Validate walkable tiles are inside the room boundaries
     def check_tiles(self):
         for tile in self.tiles:
-            if self.origin.x <= tile.x <= self.origin.x + self.dimensions.x and self.origin.y <= tile.y <= self.origin.y + self.dimensions.y:
+            if tile.x not in range(self.origin.x , self.origin.x + self.dimensions.x) and tile.y not in range(self.origin.y, self.origin.y + self.dimensions.y):
                 return False
         return True
 
@@ -257,33 +257,11 @@ def main():
     doors1 = [Coord(8, 13), Coord(7, 13), Coord(6, 13)]
     items1 = [Coord(8, 14), Coord(7, 17)]
     room1 = Room(start1, dimensions1, tiles1, doors1, items1)
-
-
-    # pygame.draw.rect(screen, GREY, (15 * SIZE, 10 * SIZE, 25, 25))
     while True:
         render_hallway(hall, hall.check_orientation())
-
         render_room(room)
         render_room(room1)
-        # for ii in range(room.origin.x, room.origin.x + room.dimensions.x):
-        #     for jj in range(room.origin.y, room.origin.y + room.dimensions.y):
-        #         coord = Coord(ii, jj)
-        #         tile = Tile(ii, jj)
-        #         if coord in room.tiles:
-        #             pygame.draw.rect(SCREEN, WHITE, render_tile(tile))
-        #         else:
-        #             pygame.draw.rect(SCREEN, BLACK, (coord.x*SIZE, coord.y*SIZE, SIZE, SIZE))
         pygame.display.update()
-        # for tile in room.tiles:
-        #     if tile.wall:
-        #         #print(str((tile.x*SIZE, tile.y*SIZE, SIZE, SIZE)))
-        #         #print(str(tile.x) + ", " + str(tile.y))
-        #         pygame.draw.rect(screen, BLACK, (tile.x, tile.y, SIZE, SIZE))
-        #     else:
-        #         pygame.draw.rect(screen, WHITE, (tile.x, tile.y, SIZE, SIZE))
-        # for item in room.items:
-        #     pygame.draw.circle(screen, YELLOW, (item.x, item.y), SIZE/2, SIZE)
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
