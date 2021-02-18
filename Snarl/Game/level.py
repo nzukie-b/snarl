@@ -106,7 +106,7 @@ def check_room(room):
 # Checks that the provided coordinates are not within the provided coordinates. True if the provided coordinates do not both fall the level dimensions
 def check_dimensions(x, y, level_dimensions):
     for level in level_dimensions:
-        # level is tuple in format ([x_origin, x_origin+dest], [y_origin, y_origin+dest]), Created in check_room
+        # level is tuple in format ((x_origin, x_origin+dest), (y_origin, y_origin+dest)), Created in check_room
         x_origin = level[0][0]
         x_dest = level[0][1]
         y_origin = level[1][0]
@@ -126,8 +126,8 @@ class Level:
         room_dimensions = set()
         hall_dimensions = set()
         for room in self.rooms:
-            x = [room.origin.x, room.origin.x + room.dimensions.x]
-            y = [room.origin.y, room.origin.y + room.dimensions.y]
+            x = (room.origin.x, room.origin.x + room.dimensions.x)
+            y = (room.origin.y, room.origin.y + room.dimensions.y)
             old_room_size = len(room_dimensions)
             room_dimensions.add((x, y))
             # Element not added
@@ -135,8 +135,8 @@ class Level:
                 print('Invalid Level: Duplicate rooms')
                 return False
         for hall in self.hallways:
-            x = [hall.origin.x, hall.origin.x + hall.dimensions.x]
-            y = [hall.origin.y, hall.origin.y + hall.dimensions.y]
+            x = (hall.origin.x, hall.origin.x + hall.dimensions.x)
+            y = (hall.origin.y, hall.origin.y + hall.dimensions.y)
             old_hall_size = len(hall_dimensions)
             hall_dimensions.add((x, y)) 
             if old_hall_size == len(hall_dimensions):
@@ -154,6 +154,9 @@ class Level:
                 print('Invalid Level: Overlapping Room(s) or Hallway(s)')
                 return False
         return True
+
+def check_level(level):
+    return level.check_rooms()
 
 
 class Tile:

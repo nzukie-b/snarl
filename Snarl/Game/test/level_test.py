@@ -5,7 +5,7 @@ import pytest_check as check
 currentdir = os.path.dirname(os.path.realpath(__file__))
 game_dir = os.path.dirname(currentdir)
 sys.path.append(game_dir)
-from level import Coord, Room, Hallway, Level, Tile, check_room, check_hallway
+from level import Coord, Room, Hallway, Level, Tile, check_room, check_hallway, check_level
 
 
 #Room 1 example
@@ -55,8 +55,9 @@ def invalid_hallway():
     hall = Hallway(hall_start, Coord(5, 5), [Room(start, dimensions, [Coord(5, 5)], [Coord(3, 3)])])
     return hall
 
+
 @pytest.fixture
-def setup_room2():
+def room2():
     #Room 2 example
     tiles1 = [Coord(7, 14), Coord(7, 16), Coord(7, 17), Coord(6, 16), Coord(8, 17), Coord(8, 14), 
                 Coord(6, 13), Coord(7, 13), Coord(7, 15), Coord(9, 17), Coord(9, 16), Coord(9, 15), Coord (9, 14), Coord(6, 16)]
@@ -66,6 +67,12 @@ def setup_room2():
     items1 = [Coord(8, 14), Coord(7, 17)]
     room2 = Room(start1, dimensions1, tiles1, doors1, items1)
     return room2
+
+@pytest.fixture
+def level1(room1, room2, hallway):
+    level = Level([room1, room2], [hallway])
+    return level
+
 
 
 def test_coord(check):
@@ -102,6 +109,9 @@ def test_invalid_hallway(invalid_hallway):
         check_hallway(invalid_hallway)
         assert invalid_hallway in str(err.value)
     return False
+
+def test_valid_level(level1):
+    assert check_level(level1) == True
 
 
 # def test_test(setup_hallway):
