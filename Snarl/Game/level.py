@@ -70,11 +70,11 @@ class Hallway:
         is_horizontal = None
         for room in self.rooms:
             for door in room.doors:
-                if (door.y == self.origin.y or door.y == self.origin.y + self.dimensions.y) and (self.origin.x < door.x < self.origin.x + self.dimensions.x):
+                if (door.y == self.origin.y - 1 or door.y == self.origin.y + self.dimensions.y + 1) and (self.origin.x <= door.x <= self.origin.x + self.dimensions.x):
                     if is_horizontal is True:
                         raise Exception(self)
                     is_horizontal = False
-                elif (door.x == self.origin.x or door.x == self.origin.x + self.dimensions.x ) and (self.origin.y < door.y < self.origin.y + self.dimensions.y):
+                elif (door.x == self.origin.x  - 1 or door.x == self.origin.x + self.dimensions.x + 1) and (self.origin.y <= door.y <= self.origin.y + self.dimensions.y):
                     if is_horizontal is False:
                         raise Exception(self)
                     is_horizontal = True                        
@@ -104,15 +104,21 @@ def check_room(room):
 
 
 # Checks that the provided coordinates are not within the provided coordinates. True if the provided coordinates do not both fall the level dimensions
-def check_dimensions(x, y, level_dimensions):
+def check_dimensions(x_dimensions, y_dimensions, level_dimensions):
+    x_start = x_dimensions[0]
+    x_end = x_dimensions[1]
+    y_start = y_dimensions[0]
+    y_end = y_dimensions[1]
     for level in level_dimensions:
         # level is tuple in format ((x_origin, x_origin+dest), (y_origin, y_origin+dest)), Created in check_room
-        x_origin = level[0][0]
-        x_dest = level[0][1]
-        y_origin = level[1][0]
-        y_dest = level[1][1]
-        if x in range(x_origin, x_dest + 1) and y in range(y_origin, y_dest + 1):
-            return False
+        level_x_origin = level[0][0]
+        level_x_dest = level[0][1]
+        level_y_origin = level[1][0]
+        level_y_dest = level[1][1]
+        for x in range(x_start, x_end + 1):
+            for y in range(y_start, y_end +1):
+                if x in range(level_x_origin, level_x_dest + 1) and y in range(level_y_origin, level_y_dest + 1):
+                    return False
         return True
 
 
