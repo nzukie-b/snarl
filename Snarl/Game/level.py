@@ -5,7 +5,7 @@ from coord import Coord
 from room import Room
 from hallway import Hallway
 from utilities import check_dimensions
-from constants import SIZE, HEIGTH, WIDTH, WHITE, BLACK, YELLOW
+from constants import SIZE, HEIGTH, WIDTH, WHITE, BLACK, YELLOW, GREY
 SCREEN = pygame.display.set_mode((WIDTH, HEIGTH), 0, 32)
 SCREEN.fill(WHITE)
 pygame.display.set_caption('Snarl')
@@ -119,7 +119,8 @@ def main():
     pygame.init()
     pygame.display.flip()
     #Room 1 example
-    tiles = [Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10), Coord(9, 6), Coord(9, 7), Coord(9,8) ]
+    tiles = [Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9),
+                 Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10), Coord(9, 6), Coord(9, 7), Coord(9,8) ]
     start = Coord(5, 5)
     dimensions = Coord(5, 5)
     doors = [Coord(8,10), Coord(7, 10), Coord(6, 10)]
@@ -129,11 +130,11 @@ def main():
     hall = Hallway(hall_start, Coord(2, 3), [room])
     #Room 2 example
     tiles1 = [Coord(7, 14), Coord(7, 17), Coord(7, 18), Coord(6, 17), Coord(8, 18), Coord(8, 15), 
-                Coord(6, 15), Coord(7, 15), Coord(7, 15), Coord(9, 17), Coord(9, 16), Coord(9, 15), Coord (9, 14), Coord(6, 16)]
+                Coord(6, 15), Coord(7, 15), Coord(7, 15), Coord(9, 17), Coord(9, 16), Coord(9, 15), Coord(6, 16)]
     start1 = Coord(5, 14)
     dimensions1 = Coord(5, 5)
-    doors1 = [Coord(8, 14), Coord(7, 14), Coord(6, 14), Coord(9,14)]
-    items1 = [Coord(8, 14), Coord(7, 17)]
+    doors1 = [Coord(8, 14), Coord(7, 14), Coord(6, 14)]
+    items1 = [Coord(8, 15), Coord(7, 17)]
     room1 = Room(start1, dimensions1, tiles1, doors1, items1)
 
     while True:
