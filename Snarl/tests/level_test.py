@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import sys, os
 import pytest
-import pytest_check as check
+# import pytest_check as check
 currentdir = os.path.dirname(os.path.realpath(__file__))
-game_dir = os.path.dirname(currentdir)
+snarl_dir = os.path.dirname(currentdir)
+game_dir = snarl_dir + '/Game'
 sys.path.append(game_dir)
 from level import Coord, Room, Hallway, Level, Tile, check_room, check_hallway, check_level
 
@@ -75,12 +76,12 @@ def level1(room1, room2, hallway):
 
 
 
-def test_coord(check):
+def test_coord():
     c1 = Coord(0, 0)
     c2 = Coord(0, 1)
     c3 = Coord(0, 0)
-    check.is_false(c1 == c2)
-    check.is_false(c2 == c3)
+    assert c1 != c2
+    assert c2 != c3
     assert c1 == c3
 
 
