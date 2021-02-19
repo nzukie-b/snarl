@@ -55,10 +55,10 @@ def horizontal_hallway():
 
 @pytest.fixture
 def invalid_hallway():
+    '''Initializes an invalid Hallway'''
     hall_start = Coord(0, 0)
     hall = Hallway(hall_start, Coord(5, 5), [Room(start, dimensions, [Coord(5, 5)], [Coord(3, 3)])])
     return hall
-
 
 @pytest.fixture
 def room2():
@@ -74,10 +74,11 @@ def room2():
 
 @pytest.fixture
 def level1(room1, room2, hallway):
+    '''Initializes example Level'''
     level = Level([room1, room2], [hallway])
     return level
 
-
+## TESTS START HERE ##
 
 def test_coord():
     c1 = Coord(0, 0)
