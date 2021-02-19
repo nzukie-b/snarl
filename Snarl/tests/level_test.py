@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 import sys, os
 import pytest
-# import pytest_check as check
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/Game'
 sys.path.append(game_dir)
-from level import Coord, Room, Hallway, Level, Tile, check_room, check_hallway, check_level
+from coord import Coord
+from room import Room
+from hallway import Hallway
+from level import Level, Tile
+from utilities import check_room, check_hallway, check_level
 
 
 #Room 1 example
