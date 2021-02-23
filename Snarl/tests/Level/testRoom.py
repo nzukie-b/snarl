@@ -11,7 +11,6 @@ from room import Room
 
 def main(room_input):
     room_json = json.loads(room_input)
-    print(room_json[0]['type'])
     if room_json[0]['type'] != 'room':
         print(room_json['type'])
         print('Invalid Args: Type is not room')
@@ -21,7 +20,7 @@ def main(room_input):
     layout = room_json[0]['layout']
     point = room_json[1]
     origin_coord = Coord(origin[0], origin[1])
-    dimensions = Coord(bounds['columns'], bounds['rows'])
+    dimensions = Coord(bounds['rows'], bounds['columns'])
     tiles = []
     doors = []
     for ii in range(0, bounds['rows']):
@@ -32,15 +31,14 @@ def main(room_input):
             if layout[ii][jj] == 2:
                 doors.append(Coord(origin[0] + ii, origin[1] + jj))
     room_obj = Room(origin_coord, dimensions, tiles, doors)
-
+    if (point[0] not in range(origin_coord.x, origin_coord.x + dimensions.x + 1)) or (point[1] not in range(origin_coord.y, origin_coord.y + dimensions.y + 1)):
+        print(f'[ Failure: Point ", {point} , " is not in room at ", {origin} ]')
+        return False
     reachable_coords = room_obj.get_reachable_tiles(Coord(point[0], point[1]))
     reachable_tiles = []
     for coord in reachable_coords:
         reachable_tiles.append([coord.x, coord.y])
-    if reachable_tiles:
-        print(f'[ Success: Traversable points from, " {point} ," in room at ", {origin}, " are ", {reachable_tiles} ]')
-    else:
-        print(f'[ Failure: Point ", {point} , " is not in room at ", {origin} ]')
+    print(f'[ Success: Traversable points from, " {point} ," in room at ", {origin}, " are ", {reachable_tiles} ]')
     return reachable_tiles
 
 
