@@ -15,5 +15,3 @@ class Room:
         self.origin = origin
         self.bounds = bounds
         self.layout = layout
-
-
