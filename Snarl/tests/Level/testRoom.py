@@ -19,7 +19,6 @@ def main(room_input):
     origin = room_json[0]['origin']
     bounds = room_json[0]['bounds']
     layout = room_json[0]['layout']
-    # TODO: Not sure if this order will be consistent
     point = room_json[1]
     origin_coord = Coord(origin[0], origin[1])
     dimensions = Coord(bounds['columns'], bounds['rows'])
