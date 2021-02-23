@@ -6,6 +6,8 @@ from room import Room
 from hallway import Hallway
 from utilities import check_dimensions
 from constants import SIZE, HEIGTH, WIDTH, WHITE, BLACK, YELLOW, GREY
+from player import Player
+from adversary import Adversary
 SCREEN = pygame.display.set_mode((WIDTH, HEIGTH), 0, 32)
 SCREEN.fill(WHITE)
 pygame.display.set_caption('Snarl')
@@ -57,6 +59,12 @@ class Level:
                 print('Invalid Level: Overlapping Room(s) or Hallway(s)')
                 return False
         return True
+
+
+class GameState:
+    def __init__(self, players, adversaries):
+        self.players = players
+        self.adversaries = adversaries
 
 
 def render_tile(tile):
@@ -115,9 +123,37 @@ def render_level(level):
     for room in level.rooms:
         render_room(room)
 
+def create_initial_game_state(level, num_players, num_adversaries):
+    players = []
+    adversaries = []
+
+    for i in range(num_players):
+        cur_tile = level.rooms[0].tiles[i]
+        cur_adversary_tile = level.rooms[len(level.rooms) - 1].tiles[i]
+        players.append(Player(Coord(cur_tile.x, cur_tile.y), "Bruh " + str(i), 3))
+
+    for i in range(num_adversaries):
+        adversaries.append(Adversary(Coord(cur_adversary_tile.x, cur_adversary_tile.y), "Evil Bruh " + str(i), 3))
+
+    return [players, adversaries]
+
+def update_game_state(new_players_locs, new_adversary_locs, new_players_healths, new_adversary_healths, level_exit_status):
+    players = []
+    adversaries = []
+
+    for i in range(len(new_players_locs)):
+        players.append(Player(new_adversary_locs[i], "Bruh " + str(i), new_players_healths[i]))
+
+    for i in range(len(new_adversary_locs)):
+        adversaries.append(Adversary(new_adversary_locs[i], "Evil Bruh " + str(i), new_adversary_healths[i]))
+
+    return GameState(players, adversaries)
+
+
 def main():
     pygame.init()
     pygame.display.flip()
+
     #Room 1 example
     tiles = [Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9),
                  Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10), Coord(9, 6), Coord(9, 7), Coord(9,8) ]
@@ -137,9 +173,15 @@ def main():
     items1 = [Coord(8, 15), Coord(7, 17)]
     room1 = Room(start1, dimensions1, tiles1, doors1, items1)
 
+    gs_info = create_initial_game_state(Level([room, room1]), 3, 3)
+    gamestate = GameState(gs_info[0], gs_info[1])
+
+
+
     while True:
-        render_level(Level([room, room1], [hall]))
+        render_level(Level([room, room1]), [hall])
         pygame.display.update()
+        gamestate = update_game_state([], [], [], [], False)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
