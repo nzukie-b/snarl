@@ -140,13 +140,23 @@ def render_level(level):
 
 
 def remove_doors_and_items_from_rooms(first):
-    first_rm = copy.copy(first)
+    first_rm = copy.deepcopy(first)
+    first_rm_removed = []
+
+    print("1 " + str(len(first.tiles)))
+    print("2 " + str(len(first_rm.tiles)))
 
     for tile in first_rm.tiles:
-        if Coord(tile.x, tile.y) in first_rm.doors or Coord(tile.x, tile.y) in first_rm.items:
-                first_rm.tiles.remove(tile)
+        print(str(tile.x) + " " + str(tile.y) + " in doors " + str(tile in first.doors))
+        print(str(tile.x) + " " + str(tile.y) + " in items " + str(tile in first.items))
+        if tile not in first.doors and tile not in first.items:
+            print("ADD TO LIST: " + str(tile.x) + " " + str(tile.y))
+            first_rm_removed.append(tile)
 
-    return first_rm
+    print("3 " + str(len(first.tiles)))
+    print("4 " + str(len(first_rm.tiles)))
+
+    return Room(first_rm.origin, first_rm.dimensions, first_rm_removed, first_rm.doors, first_rm.items)
 
 
 
@@ -159,10 +169,12 @@ def create_initial_game_state(level, num_players, num_adversaries):
 
     for i in range(num_players):
         cur_tile = first_room.tiles[i]
+        print("ADDP: " + str(cur_tile.x) + " " + str(cur_tile.y))
         players.append(Player(Coord(cur_tile.x, cur_tile.y), "Bruh " + str(i), 3))
 
     for i in range(num_adversaries):
         cur_adversary_tile = last_room.tiles[i]
+        print("ADDA: " + str(cur_adversary_tile.x) + " " + str(cur_adversary_tile.y))
         adversaries.append(Adversary(Coord(cur_adversary_tile.x, cur_adversary_tile.y), "Evil Bruh " + str(i), 3))
 
     #print(str(adversaries))

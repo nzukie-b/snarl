@@ -95,9 +95,8 @@ def test_coord():
     assert c2 != c3
     assert c1 == c3
 
-
 def test_gamestate(gamestate1):
-    gs1 = gamestate1()
+    gs1 = gamestate1
     assert len(gs1.players) == 3
     assert len(gs1.adversaries) == 3
     for i in range(3):
@@ -107,6 +106,7 @@ def test_gamestate(gamestate1):
 
 def test_valid_check_room(room1):
     assert check_room(room1) == True
+
 
 def test_invalid_check_room(capsys, invalid_tiles, invalid_doors):
     valid_tiles = check_room(invalid_tiles)
@@ -118,12 +118,15 @@ def test_invalid_check_room(capsys, invalid_tiles, invalid_doors):
     assert capture.out == 'Invalid Room: Door(s) outside of walkable tiles\n'
     assert valid_doors == False
 
+
 def test_check_hallway(hallway):
     assert check_hallway(hallway) == True
+
 
 def test_hallway_orientation(hallway, horizontal_hallway):
     assert hallway.check_orientation() == False
     assert horizontal_hallway.check_orientation() == True
+
 
 def test_invalid_hallway(invalid_hallway):
     with pytest.raises(Exception) as err:
@@ -131,8 +134,10 @@ def test_invalid_hallway(invalid_hallway):
         assert invalid_hallway in str(err.value)
     return False
 
+
 def test_valid_level(level1):
     assert check_level(level1) == True
+
 
 def test_invalid_level_rooms(capsys, room1, hallway):
     room2 = Room(start, dimensions, tiles, doors)
@@ -142,6 +147,7 @@ def test_invalid_level_rooms(capsys, room1, hallway):
     assert capture.out == 'Invalid Level: Duplicate rooms\n'
     assert valid_level == False
 
+
 def test_invalid_level_hallway(capsys, room1, hallway):
     hall2 = Hallway(Coord(6, 11), Coord(2, 3), [room1])
     level = Level([room1], [hallway, hall2])
@@ -150,6 +156,7 @@ def test_invalid_level_hallway(capsys, room1, hallway):
     assert capture.out == 'Invalid Level: Duplicate hallways\n'
     assert valid_level == False
 
+
 def test_invalid_level_shared_coords(capsys, room1, level1):
     hall = Hallway(Coord(5, 5), Coord(5,5), [room1])
     level1.hallways.append(hall)
@@ -157,6 +164,7 @@ def test_invalid_level_shared_coords(capsys, room1, level1):
     capture = capsys.readouterr()
     assert capture.out == 'Invalid Level: Hallway or Room sharing coordinates\n'
     assert valid_level == False
+
 
 def test_invalid_level_dimensions(capsys, level1):
     invalid_dimensions = Room(Coord(6, 6), Coord(6, 6), tiles, doors)
