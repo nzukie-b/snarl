@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d1eaaf3-79a0-4fd7-b46b-e20a73e7ae6f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Snarl/tests/Level/testRoom.py" beforeDir="false" afterPath="$PROJECT_DIR$/Snarl/tests/Level/testRoom.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -67,11 +66,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Snarl/tests/Level/testRoom.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="16" column="28" selection-start-line="16" selection-start-column="28" selection-end-line="16" selection-end-column="28" />
-              <folding>
-                <element signature="e#23#34#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="555">
+              <caret line="37" column="38" selection-start-line="37" selection-start-column="38" selection-end-line="37" selection-end-column="38" />
             </state>
           </provider>
         </entry>
@@ -340,12 +336,12 @@
       <workItem from="1612809498589" duration="4621000" />
       <workItem from="1613337306933" duration="4751000" />
       <workItem from="1613491272800" duration="6430000" />
-      <workItem from="1614044503964" duration="614000" />
+      <workItem from="1614044503964" duration="654000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="52284000" />
+    <option name="totallyTimeSpent" value="52324000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1440" y="-1051" width="1440" height="2560" extended-state="0" />
@@ -592,11 +588,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Snarl/tests/Level/testRoom.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="16" column="28" selection-start-line="16" selection-start-column="28" selection-end-line="16" selection-end-column="28" />
-          <folding>
-            <element signature="e#23#34#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="555">
+          <caret line="37" column="38" selection-start-line="37" selection-start-column="38" selection-end-line="37" selection-end-column="38" />
         </state>
       </provider>
     </entry>
