@@ -8,7 +8,7 @@ sys.path.append(game_dir)
 from coord import Coord
 from room import Room
 from hallway import Hallway
-from level import Level, Tile
+from level import Level, Tile, GameState, create_initial_game_state
 from utilities import check_room, check_hallway, check_level
 
 
@@ -78,6 +78,13 @@ def level1(room1, room2, hallway):
     level = Level([room1, room2], [hallway])
     return level
 
+@pytest.fixture
+def gamestate1(level1):
+    '''Initializes example gamestate'''
+    gs_info = create_initial_game_state(level1, 3, 3)
+    gamestate = GameState(gs_info[0], gs_info[1])
+    return gamestate
+
 ## TESTS START HERE ##
 
 def test_coord():
@@ -87,6 +94,15 @@ def test_coord():
     assert c1 != c2
     assert c2 != c3
     assert c1 == c3
+
+
+def test_gamestate(gamestate1):
+    gs1 = gamestate1()
+    assert len(gs1.players) == 3
+    assert len(gs1.adversaries) == 3
+    for i in range(3):
+        assert gs1.adversaries[i].health == 3
+        assert gs1.players[i].health == 3
 
 
 def test_valid_check_room(room1):

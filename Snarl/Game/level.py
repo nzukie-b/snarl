@@ -5,9 +5,10 @@ from coord import Coord
 from room import Room
 from hallway import Hallway
 from utilities import check_dimensions
-from constants import SIZE, HEIGTH, WIDTH, WHITE, BLACK, YELLOW, GREY
+from constants import SIZE, HEIGTH, WIDTH, WHITE, BLACK, YELLOW, GREY, BLUE, RED
 from player import Player
 from adversary import Adversary
+import copy
 SCREEN = pygame.display.set_mode((WIDTH, HEIGTH), 0, 32)
 SCREEN.fill(WHITE)
 pygame.display.set_caption('Snarl')
@@ -71,6 +72,7 @@ def render_tile(tile):
     '''Returns a rectangle for the provided Tile to be rendered on the view'''
     return pygame.Rect(tile.x, tile.y, SIZE, SIZE)
 
+
 def render_room(room):
     '''Renders tiles for the provided Room, and returns the list of the created tiles.'''
     tiles = []
@@ -88,6 +90,18 @@ def render_room(room):
             else:
                 pygame.draw.rect(SCREEN, BLACK, render_tile(tile))
     return tiles
+
+
+def render_players(players):
+    for player in players:
+        pygame.draw.circle(SCREEN, BLUE, (player.pos.x + SIZE / 2, player.pos.y + SIZE / 2), SIZE / 2)
+
+
+def render_adversaries(adversaries):
+    #print(str(adversaries))
+    for adversary in adversaries:
+        pygame.draw.circle(SCREEN, RED, (adversary.pos.x + SIZE / 2, adversary.pos.y + SIZE / 2), SIZE / 2)
+
 
 def render_hallway(hallway, orientation):
     '''Renders tiles for the provided hallway based on the hallway's orientaion, and returns the list of the created tiles.'''
@@ -117,25 +131,44 @@ def render_hallway(hallway, orientation):
     except Exception as err :
         print('Error: Attempting to render invalid hallway. Object: ', err)
 
+
 def render_level(level):
     for hall in level.hallways:
         render_hallway(hall, hall.check_orientation())
     for room in level.rooms:
         render_room(room)
 
+
+def remove_doors_and_items_from_rooms(first):
+    first_rm = copy.copy(first)
+
+    for tile in first_rm.tiles:
+        if Coord(tile.x, tile.y) in first_rm.doors or Coord(tile.x, tile.y) in first_rm.items:
+                first_rm.tiles.remove(tile)
+
+    return first_rm
+
+
+
 def create_initial_game_state(level, num_players, num_adversaries):
     players = []
     adversaries = []
 
+    last_room = remove_doors_and_items_from_rooms(level.rooms[len(level.rooms) - 1])
+    first_room = remove_doors_and_items_from_rooms(level.rooms[0])
+
     for i in range(num_players):
-        cur_tile = level.rooms[0].tiles[i]
-        cur_adversary_tile = level.rooms[len(level.rooms) - 1].tiles[i]
+        cur_tile = first_room.tiles[i]
         players.append(Player(Coord(cur_tile.x, cur_tile.y), "Bruh " + str(i), 3))
 
     for i in range(num_adversaries):
+        cur_adversary_tile = last_room.tiles[i]
         adversaries.append(Adversary(Coord(cur_adversary_tile.x, cur_adversary_tile.y), "Evil Bruh " + str(i), 3))
 
+    #print(str(adversaries))
+
     return [players, adversaries]
+
 
 def update_game_state(new_players_locs, new_adversary_locs, new_players_healths, new_adversary_healths, level_exit_status):
     players = []
@@ -173,15 +206,17 @@ def main():
     items1 = [Coord(8, 15), Coord(7, 17)]
     room1 = Room(start1, dimensions1, tiles1, doors1, items1)
 
-    gs_info = create_initial_game_state(Level([room, room1]), 3, 3)
+    gs_info = create_initial_game_state(Level([room, room1], [hall]), 3, 3)
     gamestate = GameState(gs_info[0], gs_info[1])
 
 
 
     while True:
-        render_level(Level([room, room1]), [hall])
+        render_level(Level([room, room1], [hall]))
+        render_players(gamestate.players)
+        render_adversaries(gamestate.adversaries)
         pygame.display.update()
-        gamestate = update_game_state([], [], [], [], False)
+        #gamestate = update_game_state([], [], [], [], False)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
