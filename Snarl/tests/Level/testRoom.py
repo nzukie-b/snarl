@@ -26,7 +26,7 @@ def main(room_input):
     doors = []
     for ii in range(0, bounds['rows']):
         for jj in range(0, bounds['columns']):
-            # Row = y, Cols = x
+            # ii = x jj = y
             if layout[ii][jj] != 0:
                 tiles.append(Coord(origin[0] + ii, origin[1] + jj))
             if layout[ii][jj] == 2:
@@ -38,9 +38,9 @@ def main(room_input):
     for coord in reachable_coords:
         reachable_tiles.append([coord.x, coord.y])
     if reachable_tiles:
-        print(f'Success: Traversable points from, " {point} ," in room at ", {origin}, " are ", {reachable_tiles}')
+        print(f'[ Success: Traversable points from, " {point} ," in room at ", {origin}, " are ", {reachable_tiles} ]')
     else:
-        print(f'Failure: Point ", {point} , " is not in room at ", {origin}')
+        print(f'[ Failure: Point ", {point} , " is not in room at ", {origin} ]')
     return reachable_tiles
 
 
