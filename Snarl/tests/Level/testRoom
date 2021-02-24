@@ -32,13 +32,13 @@ def main(room_input):
                 doors.append(Coord(origin[0] + ii, origin[1] + jj))
     room_obj = Room(origin_coord, dimensions, tiles, doors)
     if (point[0] not in range(origin_coord.x, origin_coord.x + dimensions.x + 1)) or (point[1] not in range(origin_coord.y, origin_coord.y + dimensions.y + 1)):
-        print(f'[ Failure: Point ", {point} , " is not in room at ", {origin} ]')
+        print('[ Failure: Point ", {} , " is not in room at ", {} ]'.format(point, origin))
         return False
     reachable_coords = room_obj.get_reachable_tiles(Coord(point[0], point[1]))
     reachable_tiles = []
     for coord in reachable_coords:
         reachable_tiles.append([coord.x, coord.y])
-    print(f'[ Success: Traversable points from, " {point} ," in room at ", {origin}, " are ", {reachable_tiles} ]')
+    print('[ Success: Traversable points from, " {} ," in room at ", {}, " are ", {} ]'.format(point, origin, reachable_tiles))
     return reachable_tiles
 
 
