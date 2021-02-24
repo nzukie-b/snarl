@@ -13,6 +13,7 @@ SCREEN = pygame.display.set_mode((WIDTH, HEIGTH), 0, 32)
 SCREEN.fill(WHITE)
 pygame.display.set_caption('Snarl')
 
+
 class Tile:
     def __init__(self, x, y, wall=True, item=None):
         self.x = x * SIZE
@@ -63,9 +64,10 @@ class Level:
 
 
 class GameState:
-    def __init__(self, players, adversaries):
+    def __init__(self, players, adversaries, level_exited=False):
         self.players = players
         self.adversaries = adversaries
+        self.level_exited = level_exited
 
 
 def render_tile(tile):
@@ -183,6 +185,15 @@ def create_initial_game_state(level, num_players, num_adversaries):
 
 
 def update_game_state(new_players_locs, new_adversary_locs, new_players_healths, new_adversary_healths, level_exit_status):
+    """
+    Replaces the current gamestate with a new gamestate made up of the updated values for all of the game attributes.
+    :param new_players_locs: [Coord]
+    :param new_adversary_locs: [Coord]
+    :param new_players_healths: [int]
+    :param new_adversary_healths: [int]
+    :param level_exit_status: boolean
+    :return:
+    """
     players = []
     adversaries = []
 

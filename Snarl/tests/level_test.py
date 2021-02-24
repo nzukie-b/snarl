@@ -102,6 +102,8 @@ def test_gamestate(gamestate1):
     for i in range(3):
         assert gs1.adversaries[i].health == 3
         assert gs1.players[i].health == 3
+        assert gs1.adversaries[i].id == "Evil Bruh " + str(i)
+        assert gs1.players[i].name == "Bruh " + str(i)
 
 
 def test_valid_check_room(room1):
