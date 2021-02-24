@@ -3,7 +3,7 @@ import sys, os
 import pytest
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
-game_dir = snarl_dir + '/Game'
+game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
 from coord import Coord
 from room import Room
