@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-import pygame
 from coord import Coord
-from room import Room
-from hallway import Hallway
 from constants import SIZE, HEIGTH, WIDTH
 
 def check_hallway(hallway):
@@ -31,13 +28,14 @@ def check_room(room):
 
 # Checks that the provided coordinates are not within the provided coordinates. True if the provided coordinates do not both fall the level dimensions
 def check_dimensions(x_dimensions, y_dimensions, level_dimensions):
-    '''Checks that the provided coordinates, are not withing the level dimensions. True if the coordinates are not both within level dimensions'''
+    '''Checks that the provided coordinates, are within the level dimensions. 
+        If so, returns the origin of the room/hallway overlapping the point. If the provided coordinates are not within the level returns None'''
     x_start = x_dimensions[0]
     x_end = x_dimensions[1]
     y_start = y_dimensions[0]
     y_end = y_dimensions[1]
     for level in level_dimensions:
-        # level is tuple in format ((x_origin, x_origin+dest), (y_origin, y_origin+dest)), Created in check_room
+        # level is tuple in format ((x_origin, x_origin+dest), (y_origin, y_origin+dest)), Created in check_level_dimensions
         level_x_origin = level[0][0]
         level_x_dest = level[0][1]
         level_y_origin = level[1][0]
@@ -45,8 +43,8 @@ def check_dimensions(x_dimensions, y_dimensions, level_dimensions):
         for x in range(x_start, x_end + 1):
             for y in range(y_start, y_end +1):
                 if x in range(level_x_origin, level_x_dest + 1) and y in range(level_y_origin, level_y_dest + 1):
-                    return False
-        return True
+                    return Coord(level_x_origin, level_y_origin)
+        return None
 
 def check_level(level):
     '''Checks that the provided level is valid'''

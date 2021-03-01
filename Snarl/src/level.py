@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
-import pygame
 from coord import Coord
 from room import Room
-from hallway import Hallway
 from utilities import check_dimensions
-from constants import SIZE, HEIGTH, WIDTH, WHITE, BLACK, YELLOW, GREY, BLUE, RED
 from player import Player
 from adversary import Adversary
 import copy
@@ -15,11 +12,9 @@ class Level:
         self.rooms = rooms
         self.hallways = hallways
 
-    #  Checks that there are not rooms/hallways sharing coordinates, or having overlapping dimensions
-    def check_level_dimensions(self):
-        '''Checks that this level has no rooms/hallways sharing coodinates or having overlapping dimension'''
+    def get_level_room_dimensions(self):
+        '''Returns a set of ((x_origin, x_dest), (y_origin, y_dest)) representing the dimension boundaries of each room in the level'''
         room_dimensions = set()
-        hall_dimensions = set()
         for room in self.rooms:
             x = (room.origin.x, room.origin.x + room.dimensions.x)
             y = (room.origin.y, room.origin.y + room.dimensions.y)
@@ -29,6 +24,11 @@ class Level:
             if old_room_size == len(room_dimensions):
                 print('Invalid Level: Duplicate rooms')
                 return False
+        return room_dimensions
+
+    def get_level_hallway_dimensions(self):
+        '''Returns a set of ((x_origin, x_dest), (y_origin, y_dest)) representing the dimension boundaries of each hallway in the level'''
+        hall_dimensions = set()
         for hall in self.hallways:
             x = (hall.origin.x, hall.origin.x + hall.dimensions.x)
             y = (hall.origin.y, hall.origin.y + hall.dimensions.y)
@@ -37,6 +37,15 @@ class Level:
             if old_hall_size == len(hall_dimensions):
                 print('Invalid Level: Duplicate hallways')
                 return False
+        return hall_dimensions   
+
+    #  Checks that there are not rooms/hallways sharing coordinates, or having overlapping dimensions
+    def check_level_dimensions(self):
+        '''Checks that this level has no rooms/hallways sharing coodinates or having overlapping dimensions'''
+        room_dimensions = self.get_level_room_dimensions()
+        hall_dimensions = self.get_level_hallway_dimensions()
+        if hall_dimensions == False or room_dimensions == False:
+            return False
         level_size = len(room_dimensions) + len(hall_dimensions)
         level_dimensions = room_dimensions.union(hall_dimensions)
         if level_size != len(level_dimensions):
@@ -45,10 +54,75 @@ class Level:
         for coord in level_dimensions:
             # Remove the coordinate used for comparison from the set to avoid counting itself.
             updated_lvl_dimensions = [level for level in level_dimensions if level != coord]
-            if not check_dimensions(coord[0], coord[1], updated_lvl_dimensions):
+            if check_dimensions(coord[0], coord[1], updated_lvl_dimensions):
                 print('Invalid Level: Overlapping Room(s) or Hallway(s)')
                 return False
         return True
+
+    def info_at_coord(self, coord):
+        '''Checks if the tile at the provided coordinate is within the bounds of the level. If so, it will return and object/dictionary with the following info
+            - whether the tile is traversable
+            - whether the tile it references contains a key or an exit
+            - if it is a hallway, the origins of the rooms it connects
+            - if it is a room, the origins of neighboring rooms, that is, the rooms that are one hallway removed from the current room'''
+        result = {
+            'traversable': None,
+            'object': None,
+            'type': 'void', 
+            'reachable': []
+        }
+        x_dimensions = (coord.x, coord.x)
+        y_dimensions = (coord.y, coord.y)
+        room_dimensions = self.get_level_room_dimensions()
+        hall_dimensions = self.get_level_hallway_dimensions()
+        if not check_dimensions(x_dimensions, y_dimensions, room_dimensions.union(hall_dimensions)):
+            print('Provided coordinate is not within the bounds of the level')
+            return None
+        else:
+            # Point is guaranteed to be within level dimensions
+            origin = None
+            #False if Hallway, True if Room, None otherwise
+            is_room = None
+            room_origin = check_dimensions(x_dimensions, y_dimensions, room_dimensions)
+            hall_origin = check_dimensions(x_dimensions, y_dimensions, hall_dimensions)
+            if room_origin:
+                is_room = True
+                origin = room_origin
+            elif hall_origin:
+                is_room = False
+                origin = hall_origin
+            if is_room == True:
+                for room in self.rooms:
+                    if origin == room.origin:
+                        result['type'] = 'room'
+                        reachable = []
+                        # Go through the doors in room1 and find the connecting hall. Add the origin of all connecting rooms from the found hall to reachable
+                        for door in room.doors:
+                            for hall in self.hallways:
+                                for hall_room in hall.rooms:
+                                    if door in hall_room.doors:
+                                        for connected_room in hall.rooms:
+                                            reachable.append([connected_room.origin.x, connected_room.origin.y])
+                                        for connected_waypoint in hall.waypoints:
+                                            reachable.append([connected_waypoint.origin.x, connected_waypoint.origin.y])
+                        result['reachable'] = reachable
+            elif is_room == False:
+                for hall in self.hallways:
+                    if origin == hall.origin:
+                        result['type'] = 'hallway'
+                        reachable = []
+                        for room in hall.rooms:
+                            reachable.append([room.origin.x, room.origin.y])
+                        for waypoint in hall.waypoints:
+                            reachable.append([waypoint.origin.x, waypoint.origin.y])
+                        result['reachable'] = reachable
+                        
+            
+
+                
+
+            
+
 
 
 class GameState:

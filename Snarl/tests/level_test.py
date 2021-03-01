@@ -8,7 +8,7 @@ sys.path.append(game_dir)
 from coord import Coord
 from room import Room
 from hallway import Hallway
-from level import Level, Tile, GameState, create_initial_game_state
+from level import Level, GameState, create_initial_game_state
 from utilities import check_room, check_hallway, check_level
 
 
