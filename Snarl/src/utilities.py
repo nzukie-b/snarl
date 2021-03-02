@@ -38,7 +38,7 @@ def check_dimensions(x_dimensions, y_dimensions, level_dimensions):
     y_start = y_dimensions[0]
     y_end = y_dimensions[1]
     for level in level_dimensions:
-        # level is tuple in format ((x_origin, x_origin+dest), (y_origin, y_origin+dest)), Created in check_level_dimensions
+        # level_dimensions list of tuples in format ((x_origin, x_origin+dest), (y_origin, y_origin+dest)), Created in check_level_dimensions
         level_x_origin = level[0][0]
         level_x_dest = level[0][1]
         level_y_origin = level[1][0]
@@ -128,10 +128,10 @@ def parse_hall(hall_input, rooms):
     origin = None
     dimensions = None
     if is_horizontal:
-        # From and To a tiles within a room so hall boundaries do not include them
+        # From and To are tiles within a room so hall boundaries do not include them
         hall_boundaries = (min(from_coord.x, to_coord.x) + 1, max(from_coord.x, to_coord.x) - 1)
         origin = Coord(hall_boundaries[0], from_coord.y)
-        # For now halls are stated to only be a single tile wide
+        # For now halls are stated to only be a single tile wide, but width could be co
         dimensions = Coord(hall_boundaries[1] - hall_boundaries[0], 1)
     else:
         hall_boundaries = (min(from_coord.y, to_coord.y) + 1, max(from_coord.y, to_coord.y) - 1)
@@ -142,8 +142,6 @@ def parse_hall(hall_input, rooms):
     waypoints_list = []
     for room in rooms:
         for door in room.doors:
-            to_room = None
-            from_room = None
             if door == to_coord or door == from_coord:
                 rooms_list.append(room)
             # Doors are considered to be inside a room each waypoint coord should correspond to a door in a room.
