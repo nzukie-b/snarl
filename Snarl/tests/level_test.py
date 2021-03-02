@@ -6,9 +6,9 @@ snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
 from coord import Coord
-from room import Room
-from hallway import Hallway
-from level import Level, GameState, create_initial_game_state
+from model.room import Room
+from model.hallway import Hallway
+from model.level import Level, GameState, create_initial_game_state
 from utilities import check_room, check_hallway, check_level
 
 

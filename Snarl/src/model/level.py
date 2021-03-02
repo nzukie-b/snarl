@@ -1,17 +1,18 @@
 #!/usr/bin/env python
-
+import copy
 from coord import Coord
-from room import Room
-from hallway import Hallway
 from utilities import check_dimensions
-from player import Player
-from adversary import Adversary
-import copy, json
+from model.room import Room
+from model.hallway import Hallway
+from model.player import Player
+from model.adversary import Adversary
 
 class Level:
-    def __init__(self, rooms, hallways):
+    def __init__(self, rooms, hallways, keys=[], exits=[]):
         self.rooms = rooms
         self.hallways = hallways
+        self.keys = keys
+        self.exits = exits
     
     def __str__(self):
         rooms_str = [str(room) for room in self.rooms]
@@ -29,7 +30,7 @@ class Level:
             # Element not added
             if old_room_size == len(room_dimensions):
                 print('Invalid Level: Duplicate rooms')
-                return False
+                return None
         return room_dimensions
 
     def get_level_hallway_dimensions(self):
@@ -42,7 +43,7 @@ class Level:
             hall_dimensions.add((x, y)) 
             if old_hall_size == len(hall_dimensions):
                 print('Invalid Level: Duplicate hallways')
-                return False
+                return None
         return hall_dimensions   
 
     #  Checks that there are not rooms/hallways sharing coordinates, or having overlapping dimensions
@@ -50,7 +51,7 @@ class Level:
         '''Checks that this level has no rooms/hallways sharing coodinates or having overlapping dimensions'''
         room_dimensions = self.get_level_room_dimensions()
         hall_dimensions = self.get_level_hallway_dimensions()
-        if hall_dimensions == False or room_dimensions == False:
+        if not hall_dimensions or not room_dimensions:
             return False
         level_size = len(room_dimensions) + len(hall_dimensions)
         level_dimensions = room_dimensions.union(hall_dimensions)

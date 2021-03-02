@@ -1,9 +1,12 @@
+import sys, os, json
 import pygame
-import json
+current_dir = os.path.dirname(os.path.realpath(__file__))
+src_dir = os.path.dirname(current_dir)
+sys.path.append(src_dir)
 from coord import Coord
-from room import Room
-from hallway import Hallway
-from level import Level, GameState, create_initial_game_state
+from model.room import Room
+from model.hallway import Hallway
+from model.level import Level, GameState, create_initial_game_state
 from constants import BLACK, WHITE, YELLOW, GREY, RED, BLUE, HEIGTH, WIDTH, SIZE
 
 

@@ -4,7 +4,7 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
-from room import Room
+from model.room import Room
 from coord import Coord
 
 @pytest.fixture
