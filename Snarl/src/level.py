@@ -2,6 +2,7 @@
 
 from coord import Coord
 from room import Room
+from hallway import Hallway
 from utilities import check_dimensions
 from player import Player
 from adversary import Adversary
@@ -66,10 +67,10 @@ class Level:
 
     def info_at_coord(self, coord):
         '''Checks if the tile at the provided coordinate is within the bounds of the level. If so, it will return and object/dictionary with the following info
-            - whether the tile is traversable
-            - whether the tile it references contains a key or an exit
-            - if it is a hallway, the origins of the rooms it connects
-            - if it is a room, the origins of neighboring rooms, that is, the rooms that are one hallway removed from the current room'''
+            - whether the tile is traversable : ['traversable']
+            - whether the tile it references contains a key or an exit : ['object']
+            - if it is a hallway, or room : ['type']
+            - if a hallway the origins of the connecting rooms | if a room the origins of neighboring rooms, that is, the rooms that are one hallway removed from the current room : ['reachable']'''
         result = {
             'traversable': None,
             'object': None,

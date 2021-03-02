@@ -1,0 +1,4 @@
+{
+    "python.pythonPath": "C:\\Users\\Brandon\\.virtualenvs\\Snarl-6DOWUdZf\\Scripts\\python.exe",
+    "python.analysis.extraPaths": ["Snarl/src", "Snarl/tests"]
+}

@@ -3,6 +3,7 @@ from hallway import Hallway
 import json
 from coord import Coord
 from room import Room
+from hallway import Hallway
 from constants import SIZE, HEIGTH, WIDTH
 
 def check_hallway(hallway):
