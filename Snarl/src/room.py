@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import json
 
 # Assuming that dimension given will not be offset from the origin and will just be sized dimensions in x and y.
 #   ie. origin = (10, 10) dimensions = (5, 7) The tile boundaries of the room are (10 - 15, 10 - 17)
@@ -9,7 +10,16 @@ class Room:
         self.tiles = tiles
         self.doors = doors
         self.items = items if items != None else []
-
+    
+    def __str__(self):
+        origin_str = str(self.origin)
+        dimensions_str = str(self.dimensions)
+        tiles_str = [str(tile) for tile in self.tiles]
+        doors_str = [str(door) for door in self.doors]
+        items_str = [str(item) for item in self.items]
+        return '{{"origin": {}, "dimensions": {}, "tiles": {}, "doors": {}, "items": {}}}'.format(
+            origin_str, dimensions_str, tiles_str, doors_str, items_str)
+    
     def check_doors(self):
         ''' Validate doors are on a walkable tiles. Does not guarantee that tiles are inside room boundaries'''
         for door in self.doors:

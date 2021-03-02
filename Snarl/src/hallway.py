@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import json
 from coord import Coord
 
 class Hallway:
@@ -7,6 +8,13 @@ class Hallway:
         self.dimensions = dimensions
         self.rooms = rooms
         self.waypoints = waypoints if waypoints != None else []
+    
+    def __str__(self):
+        origin_str = str(self.origin)
+        dimensions_str = str(self.dimensions)
+        rooms_str = [str(room) for room in self.rooms]
+        waypoints_str = [str(waypoint) for waypoint in self.waypoints]
+        return '{{"origin": {}, "dimensions": {}, "rooms": {}, "waypoints": {}}}'.format(origin_str, dimensions_str, rooms_str, waypoints_str)
 
 
     def check_orientation(self):

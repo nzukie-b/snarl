@@ -5,12 +5,17 @@ from room import Room
 from utilities import check_dimensions
 from player import Player
 from adversary import Adversary
-import copy
+import copy, json
 
 class Level:
     def __init__(self, rooms, hallways):
         self.rooms = rooms
         self.hallways = hallways
+    
+    def __str__(self):
+        rooms_str = [str(room) for room in self.rooms]
+        halls_str = [str(hall) for hall in self.hallways]
+        return '{{"rooms": {}, "hallways": {}}}'.format(rooms_str, halls_str)
 
     def get_level_room_dimensions(self):
         '''Returns a set of ((x_origin, x_dest), (y_origin, y_dest)) representing the dimension boundaries of each room in the level'''

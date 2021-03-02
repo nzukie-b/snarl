@@ -1,4 +1,5 @@
 import pygame
+import json
 from coord import Coord
 from room import Room
 from hallway import Hallway
@@ -16,7 +17,10 @@ class Tile:
         self.x = x * SIZE
         self.y = y * SIZE
         self.wall = wall 
-        self.item = item        
+        self.item = item
+
+    def __str__(self):
+        return json.dumps(self.__dict__)        
 
 
 def render_hallway(hallway, orientation):
@@ -113,6 +117,7 @@ def main():
 
     gs_info = create_initial_game_state(Level([room, room1], [hall]), 3, 3)
     gamestate = GameState(gs_info[0], gs_info[1])
+
 
 
     while True:
