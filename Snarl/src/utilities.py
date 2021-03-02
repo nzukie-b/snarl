@@ -1,5 +1,7 @@
 #!/usr/bin/env python
+import json
 from coord import Coord
+from room import Room
 from constants import SIZE, HEIGTH, WIDTH
 
 def check_hallway(hallway):
@@ -58,28 +60,34 @@ def check_level(level):
             return False
     return level.check_level_dimensions()
 
-
-
-# def create_example_tiles():
-#     tiles = []
-#     for i in range(0, int(WIDTH / SIZE)):
-#         for j in range(0, (int(HEIGTH / SIZE))):
-#             if j == 0 or j == int(HEIGTH / SIZE) - 1:
-#                 #print(str(i) + ", " + str(j) + "  " + str(HEIGTH / SIZE))
-#                 tiles.append(render_tile(Tile(i, j, True)))
-#             if (i == 0 or i == int(WIDTH / SIZE) - 1) and (j > 0 and j < int(HEIGTH / SIZE) - 1):
-#                 #print(str(i) + ", " + str(j) + "  " + str(HEIGTH / SIZE))
-#                 tiles.append(render_tile(Tile(i, j, True)))
-#     return tiles
-
-
-def create_example_items():
-    items = []
-    for i in range(0, int(WIDTH / SIZE)):
-        for j in range(0, (int(HEIGTH / SIZE))):
-            if ((i == 5 and j == 10) or
-                (i == 17 and j == 17) or
-                    (i == 6 and j == 3)):
-                items.append(Coord(i, j))
-    return items
-
+def parse_room(room_input):
+    room_json = json.loads(room_input)
+    if room_json[0]['type'] != 'room':
+        print(room_json['type'])
+        print('Invalid Args: Type is not room')
+        return False
+    origin = room_json[0]['origin']
+    bounds = room_json[0]['bounds']
+    layout = room_json[0]['layout']
+    point = room_json[1]
+    origin_coord = Coord(origin[0], origin[1])
+    dimensions = Coord(bounds['rows'], bounds['columns'])
+    tiles = []
+    doors = []
+    for ii in range(0, bounds['rows']):
+        for jj in range(0, bounds['columns']):
+            # ii = x jj = y
+            if layout[ii][jj] != 0:
+                tiles.append(Coord(origin[0] + ii, origin[1] + jj))
+            if layout[ii][jj] == 2:
+                doors.append(Coord(origin[0] + ii, origin[1] + jj))
+    room_obj = Room(origin_coord, dimensions, tiles, doors)
+    if (point[0] not in range(origin_coord.x, origin_coord.x + dimensions.x + 1)) or (point[1] not in range(origin_coord.y, origin_coord.y + dimensions.y + 1)):
+        print('[ Failure: Point ", {} , " is not in room at ", {} ]'.format(point, origin))
+        return False
+    reachable_coords = room_obj.get_reachable_tiles(Coord(point[0], point[1]))
+    reachable_tiles = []
+    for coord in reachable_coords:
+        reachable_tiles.append([coord.x, coord.y])
+    print('[ Success: Traversable points from, " {} ," in room at ", {}, " are ", {} ]'.format(point, origin, reachable_tiles))
+    return reachable_tiles

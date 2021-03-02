@@ -8,43 +8,8 @@ game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
 from coord import Coord
 from room import Room
-
-def main(room_input):
-    room_json = json.loads(room_input)
-    if room_json[0]['type'] != 'room':
-        print(room_json['type'])
-        print('Invalid Args: Type is not room')
-        return False
-    origin = room_json[0]['origin']
-    bounds = room_json[0]['bounds']
-    layout = room_json[0]['layout']
-    point = room_json[1]
-    origin_coord = Coord(origin[0], origin[1])
-    dimensions = Coord(bounds['rows'], bounds['columns'])
-    tiles = []
-    doors = []
-    for ii in range(0, bounds['rows']):
-        for jj in range(0, bounds['columns']):
-            # ii = x jj = y
-            if layout[ii][jj] != 0:
-                tiles.append(Coord(origin[0] + ii, origin[1] + jj))
-            if layout[ii][jj] == 2:
-                doors.append(Coord(origin[0] + ii, origin[1] + jj))
-    room_obj = Room(origin_coord, dimensions, tiles, doors)
-    if (point[0] not in range(origin_coord.x, origin_coord.x + dimensions.x + 1)) or (point[1] not in range(origin_coord.y, origin_coord.y + dimensions.y + 1)):
-        print('[ Failure: Point ", {} , " is not in room at ", {} ]'.format(point, origin))
-        return False
-    reachable_coords = room_obj.get_reachable_tiles(Coord(point[0], point[1]))
-    reachable_tiles = []
-    for coord in reachable_coords:
-        reachable_tiles.append([coord.x, coord.y])
-    print('[ Success: Traversable points from, " {} ," in room at ", {}, " are ", {} ]'.format(point, origin, reachable_tiles))
-    return reachable_tiles
-
+from utilities import parse_room
 
 if __name__ == '__main__':
     room_input = sys.stdin.read().strip()
-    main(room_input)
-
-
-
+    parse_room(room_input)
