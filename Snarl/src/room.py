@@ -43,3 +43,6 @@ class Room:
                 tiles.append(tile)
         return tiles
 
+    def is_reachable_tile(self, coord):
+        return coord in self.tiles
+

@@ -95,6 +95,8 @@ class Level:
                 for room in self.rooms:
                     if origin == room.origin:
                         result['type'] = 'room'
+                        #TODO: Change both traversables to use methods. create is_reachable method to return a boolean
+                        result['traversable'] = coord in room.tiles
                         reachable = []
                         # Go through the doors in room1 and find the connecting hall. Add the origin of all connecting rooms from the found hall to reachable
                         for door in room.doors:
@@ -110,13 +112,14 @@ class Level:
                 for hall in self.hallways:
                     if origin == hall.origin:
                         result['type'] = 'hallway'
+                        result['traversable'] = coord in hall.get_reachable_tiles()
                         reachable = []
                         for room in hall.rooms:
                             reachable.append([room.origin.x, room.origin.y])
                         for waypoint in hall.waypoints:
                             reachable.append([waypoint.origin.x, waypoint.origin.y])
                         result['reachable'] = reachable
-                        
+            return result
             
 
                 

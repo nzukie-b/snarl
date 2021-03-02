@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from coord import Coord
 
 class Hallway:
     def __init__(self, origin, dimensions, rooms, waypoints=None):
@@ -22,3 +23,32 @@ class Hallway:
                         raise Exception(self)
                     is_horizontal = True                        
         return is_horizontal
+
+    def get_reachable_tiles(self, coord):
+        try:
+            tiles = []
+            is_horizontal = self.check_orientation()
+            # If halls should be 1 tile wide any traversable coord in a horizontal hall must have the same y value as a door. The range of traversable tiles spans the x boundary while y does not change
+            if is_horizontal == True:
+                y_values = set()
+                for room in self.rooms:
+                    for door in room.doors:
+                        y_values.add(door.y)
+                for ii in range(self.origin.x, self.origin.x + self.dimensions.x + 1):
+                    if coord.y in y_values:
+                        new_coord = Coord(ii, coord.y)
+                        tiles.append(new_coord)
+            elif is_horizontal == False:
+                x_values = set()
+                for room in self.rooms:
+                    for door in room.doors:
+                        x_values.add(door.x)
+                for jj in range(self.origin.y, self.origin.y + self.dimensions.y + 1):
+                    if coord.x in x_values:
+                        new_coord = Coord(coord.x, jj)
+                        tiles.append(new_coord)
+            return tiles
+        except Exception as err:
+            print(err)
+            return None
+                
