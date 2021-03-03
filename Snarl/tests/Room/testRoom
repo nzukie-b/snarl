@@ -7,7 +7,6 @@ snarl_dir = os.path.dirname(tests_dir)
 src_dir = snarl_dir + '/src'
 sys.path.append(src_dir)
 from controller.controller import parse_room
-from coord import Coord
 
 if __name__ == '__main__':
     room_input = sys.stdin.read().strip()

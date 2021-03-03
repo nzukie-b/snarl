@@ -6,10 +6,13 @@ sys.path.append(src_dir)
 from coord import Coord
 from model.room import Room
 from model.hallway import Hallway
-from level import Level
+from model.level import Level
 
 def parse_room_obj(room_input):
-    room_json = json.loads(room_input)
+    try:
+        room_json = json.loads(room_input)
+    except TypeError:
+        room_json = room_input
     origin = None
     bounds = None
     layout = None
@@ -24,7 +27,7 @@ def parse_room_obj(room_input):
         bounds = room_json[0]['bounds']
         layout = room_json[0]['layout']
         point = room_json[1]
-    except IndexError:
+    except (KeyError, IndexError):
         origin = room_json['origin']
         bounds = room_json['bounds']
         layout = room_json['layout']
@@ -40,29 +43,32 @@ def parse_room_obj(room_input):
                 tiles.append(Coord(origin[0] + ii, origin[1] + jj))
             if layout[ii][jj] == 2:
                 doors.append(Coord(origin[0] + ii, origin[1] + jj))
-    return {'point': point, 'room': Room(origin_coord, dimensions, tiles, doors)}
+    return {'coord': Coord(point[0], point[1]) if point else None, 'room': Room(origin_coord, dimensions, tiles, doors)}
 
 
 def parse_room(room_input):
     parsed_input = parse_room_obj(room_input)
-    point = parsed_input['point']
-    if not point:
+    parsed_coord = parsed_input['coord']
+    if not parsed_coord:
         print('Invalid Args: point is missing')
         return None
     room_obj = parsed_input['room']
-    if (point[0] not in range(room_obj.origin.x, room_obj.origin.x + room_obj.dimensions.x + 1)) or (point[1] not in range(room_obj.origin.y, room_obj.origin.y + room_obj.dimensions.y + 1)):
-        print('[ Failure: Point ", {} , " is not in room at ", {} ]'.format(point, [room_obj.origin.x, room_obj.origin.y]))
+    if (parsed_coord.x not in range(room_obj.origin.x, room_obj.origin.x + room_obj.dimensions.x + 1)) or (parsed_coord.y not in range(room_obj.origin.y, room_obj.origin.y + room_obj.dimensions.y + 1)):
+        print('[ Failure: Point ", {} , " is not in room at ", {} ]'.format([parsed_coord.x, parsed_coord.y], [room_obj.origin.x, room_obj.origin.y]))
         return None
-    reachable_coords = room_obj.get_reachable_tiles(Coord(point[0], point[1]))
+    reachable_coords = room_obj.get_reachable_tiles(parsed_coord)
     reachable_tiles = []
     for coord in reachable_coords:
         reachable_tiles.append([coord.x, coord.y])
-    print('[ Success: Traversable points from, " {} ," in room at, " {} ," are, " {} ]'.format(point, [room_obj.origin.x, room_obj.origin.y], reachable_tiles))
+    print('[ Success: Traversable points from, " {} ," in room at, " {} ," are, " {} ]'.format([parsed_coord.x, parsed_coord.y], [room_obj.origin.x, room_obj.origin.y], reachable_tiles))
     return reachable_tiles
     
 
 def parse_hall(hall_input, rooms):
-    hall_json = json.loads(hall_input)
+    try:
+        hall_json = json.loads(hall_input)
+    except TypeError:
+        hall_json = hall_input
     if hall_json['type'] != 'hallway':
         print('Invalid Args: Type is not hallway')
         return None
@@ -102,13 +108,14 @@ def parse_hall(hall_input, rooms):
     return Hallway(origin, dimensions, rooms, waypoints_list)
         
 def parse_level(level_input):
-    level_json = json.loads(level_input)
-    if level_json['type'] != 'level':
+    level_json = json.loads(str(level_input))
+    if level_json[0]['type'] != 'level':
         print('Invalid Args: Type is not level')
         return None
-    rooms = level_json['rooms']
-    hallways = level_json['hallways']
-    objects = level_json['objects']
+    rooms = level_json[0]['rooms']
+    hallways = level_json[0]['hallways']
+    objects = level_json[0]['objects']
+    point = level_json[1]
 
     rooms_list = []
     for room in rooms:
@@ -117,7 +124,7 @@ def parse_level(level_input):
 
     halls_list = []
     for hall in hallways:
-        parsed_hall = parse_hall(hall)
+        parsed_hall = parse_hall(hall, rooms_list)
         halls_list.append(parsed_hall)
 
     key_coord = None
@@ -130,4 +137,4 @@ def parse_level(level_input):
             exit_coord = Coord(posn[0], posn[1])
 
     parsed_level = Level(rooms_list, halls_list, [key_coord], [exit_coord])
-    return parsed_level
+    return {'level': parsed_level, 'coord': Coord(point[0], point[1])}
