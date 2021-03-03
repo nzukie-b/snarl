@@ -16,9 +16,9 @@ pygame.display.set_caption('Snarl')
 
 
 class Tile:
-    def __init__(self, x, y, wall=True, item=None):
-        self.x = x * SIZE
-        self.y = y * SIZE
+    def __init__(self, row, col, wall=True, item=None):
+        self.row = row * SIZE
+        self.col = col * SIZE
         self.wall = wall 
         self.item = item
 
@@ -29,24 +29,24 @@ class Tile:
 def render_hallway(hallway, orientation):
     '''Renders tiles for the provided hallway based on the hallway's orientaion, and returns the list of the created tiles.'''
     try :
-        x_boundary = hallway.origin.x + hallway.dimensions.x
-        y_boundary = hallway.origin.y + hallway.dimensions.y
+        x_boundary = hallway.origin.row + hallway.dimensions.row
+        y_boundary = hallway.origin.col + hallway.dimensions.col
         tiles = []
-        for ii in range(hallway.origin.x, x_boundary + 1):
-            for jj in range(hallway.origin.y, y_boundary + 1):
+        for ii in range(hallway.origin.row, x_boundary + 1):
+            for jj in range(hallway.origin.col, y_boundary + 1):
                 tile = Tile(ii, jj)
                 tiles.append(tile)
                 pygame.draw.rect(SCREEN, WHITE, render_tile(tile))
                 # Walls aren't defined from the dimensions we assume the provided dimensions are all walkable
                 if orientation == False:
                     # Vertical path hallway case
-                    left_wall = Tile(hallway.origin.x - 1, jj)
+                    left_wall = Tile(hallway.origin.row - 1, jj)
                     right_wall = Tile(x_boundary + 1, jj)
                     pygame.draw.rect(SCREEN, BLACK, render_tile(left_wall))
                     pygame.draw.rect(SCREEN, BLACK, render_tile(right_wall))
                 elif orientation == True:
                     # Horizontal path hallway
-                    upper_wall = Tile(ii, hallway.origin.y - 1)
+                    upper_wall = Tile(ii, hallway.origin.col - 1)
                     lower_wall = Tile(ii, y_boundary + 1)
                     pygame.draw.rect(SCREEN, BLACK, render_tile(upper_wall))
                     pygame.draw.rect(SCREEN, BLACK, render_tile(lower_wall))
@@ -63,21 +63,21 @@ def render_level(level):
 
 def render_tile(tile):
     '''Returns a rectangle for the provided Tile to be rendered on the view'''
-    return pygame.Rect(tile.x, tile.y, SIZE, SIZE)
+    return pygame.Rect(tile.row, tile.col, SIZE, SIZE)
 
 
 def render_room(room):
     '''Renders tiles for the provided Room, and returns the list of the created tiles.'''
     tiles = []
-    for ii in range(room.origin.x, room.origin.x + room.dimensions.x + 1):
-        for jj in range(room.origin.y, room.origin.y + room.dimensions.y + 1):
+    for ii in range(room.origin.row, room.origin.row + room.dimensions.row + 1):
+        for jj in range(room.origin.col, room.origin.col + room.dimensions.col + 1):
             coord = Coord(ii, jj)
             tile = Tile(ii, jj)
             tiles.append(tile)
             if coord in room.doors:
                 pygame.draw.rect(SCREEN, GREY, render_tile(tile))
             elif coord in room.items:
-                pygame.draw.circle(SCREEN, YELLOW, (tile.x + SIZE / 2, tile.y + SIZE / 2), SIZE / 2)
+                pygame.draw.circle(SCREEN, YELLOW, (tile.row + SIZE / 2, tile.col + SIZE / 2), SIZE / 2)
             elif coord in room.tiles:
                 pygame.draw.rect(SCREEN, WHITE, render_tile(tile))
             else:
@@ -87,13 +87,13 @@ def render_room(room):
 
 def render_players(players):
     for player in players:
-        pygame.draw.circle(SCREEN, BLUE, (player.pos.x + SIZE / 2, player.pos.y + SIZE / 2), SIZE / 2)
+        pygame.draw.circle(SCREEN, BLUE, (player.pos.row + SIZE / 2, player.pos.col + SIZE / 2), SIZE / 2)
 
 
 def render_adversaries(adversaries):
     #print(str(adversaries))
     for adversary in adversaries:
-        pygame.draw.circle(SCREEN, RED, (adversary.pos.x + SIZE / 2, adversary.pos.y + SIZE / 2), SIZE / 2)
+        pygame.draw.circle(SCREEN, RED, (adversary.pos.row + SIZE / 2, adversary.pos.col + SIZE / 2), SIZE / 2)
 
 
 def main():

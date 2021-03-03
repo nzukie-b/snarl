@@ -53,14 +53,14 @@ def parse_room(room_input):
         print('Invalid Args: point is missing')
         return None
     room_obj = parsed_input['room']
-    if (parsed_coord.x not in range(room_obj.origin.x, room_obj.origin.x + room_obj.dimensions.x + 1)) or (parsed_coord.y not in range(room_obj.origin.y, room_obj.origin.y + room_obj.dimensions.y + 1)):
-        print('[ Failure: Point ", {} , " is not in room at ", {} ]'.format([parsed_coord.x, parsed_coord.y], [room_obj.origin.x, room_obj.origin.y]))
+    if (parsed_coord.row not in range(room_obj.origin.row, room_obj.origin.row + room_obj.dimensions.row + 1)) or (parsed_coord.col not in range(room_obj.origin.col, room_obj.origin.col + room_obj.dimensions.col + 1)):
+        print('[ Failure: Point ", {} , " is not in room at ", {} ]'.format([parsed_coord.row, parsed_coord.col], [room_obj.origin.row, room_obj.origin.col]))
         return None
     reachable_coords = room_obj.get_reachable_tiles(parsed_coord)
     reachable_tiles = []
     for coord in reachable_coords:
-        reachable_tiles.append([coord.x, coord.y])
-    print('[ Success: Traversable points from, " {} ," in room at, " {} ," are, " {} ]'.format([parsed_coord.x, parsed_coord.y], [room_obj.origin.x, room_obj.origin.y], reachable_tiles))
+        reachable_tiles.append([coord.row, coord.col])
+    print('[ Success: Traversable points from, " {} ," in room at, " {} ," are, " {} ]'.format([parsed_coord.row, parsed_coord.col], [room_obj.origin.row, room_obj.origin.col], reachable_tiles))
     return reachable_tiles
     
 
@@ -79,19 +79,22 @@ def parse_hall(hall_input, rooms):
     waypoints = hall_json['waypoints']
     waypoints_coords = [Coord(waypoint[0], waypoint[1]) for waypoint in waypoints]
     
-    is_horizontal = from_coord.y == to_coord.y and from_coord.x != to_coord.x
+    is_horizontal = from_coord.col == to_coord.col and from_coord.row != to_coord.row
+    # is_horizontal = 
     hall_boundaries = None
     origin = None
     dimensions = None
     if is_horizontal:
         # From and To are tiles within a room so hall boundaries do not include them
-        hall_boundaries = (min(from_coord.x, to_coord.x) + 1, max(from_coord.x, to_coord.x) - 1)
-        origin = Coord(hall_boundaries[0], from_coord.y)
+        hall_boundaries = (min(from_coord.row, to_coord.row) + 1, max(from_coord.row, to_coord.row) - 1)
+        origin = Coord(hall_boundaries[0], from_coord.col)
         # For now halls are stated to only be a single tile wide, but width could be co
         dimensions = Coord(hall_boundaries[1] - hall_boundaries[0], 1)
     else:
-        hall_boundaries = (min(from_coord.y, to_coord.y) + 1, max(from_coord.y, to_coord.y) - 1)
-        origin = Coord(from_coord.x, hall_boundaries[0])
+        print('Vertical')
+        print('from ' + str(from_coord), 'to ' + str(to_coord))
+        hall_boundaries = (min(from_coord.col, to_coord.col) + 1, max(from_coord.col, to_coord.col) - 1)
+        origin = Coord(from_coord.row, hall_boundaries[0])
         dimensions = Coord(1, hall_boundaries[1] - hall_boundaries[0])
     
     rooms_list = []

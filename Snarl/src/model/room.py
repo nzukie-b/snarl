@@ -30,7 +30,7 @@ class Room:
     def check_tiles(self):
         '''Validate walkable tiles are inside the room boundaries'''
         for tile in self.tiles:
-            if tile.x not in range(self.origin.x , self.origin.x + self.dimensions.x) and tile.y not in range(self.origin.y, self.origin.y + self.dimensions.y):
+            if tile.row not in range(self.origin.row , self.origin.row + self.dimensions.row) and tile.col not in range(self.origin.col, self.origin.col + self.dimensions.col):
                 return False
         return True
 
@@ -38,7 +38,7 @@ class Room:
     def check_items(self):
         '''Validate items are on a walkable tile'''
         for item in self.items:
-            if item.x not in self.tiles:
+            if item.row not in self.tiles:
                 # TODO: Are items on non walkable tiles valid?
                 return False
         return True
@@ -47,9 +47,9 @@ class Room:
         '''Returns a list of reachable tiles in this room within a 1 space move'''
         tiles = []
         for tile in self.tiles:
-            if (tile.x == coord.x) and (tile.y ==  coord.y + 1 or tile.y == coord.y - 1):
+            if (tile.row == coord.row) and (tile.col ==  coord.col + 1 or tile.col == coord.col - 1):
                 tiles.append(tile)
-            elif (tile.y == coord.y) and (tile.x == coord.x + 1 or tile.x == coord.x - 1):
+            elif (tile.col == coord.col) and (tile.row == coord.row + 1 or tile.row == coord.row - 1):
                 tiles.append(tile)
         return tiles
 

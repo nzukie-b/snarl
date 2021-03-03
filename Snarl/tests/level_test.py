@@ -16,7 +16,7 @@ from utilities import check_room, check_hallway, check_level
 tiles = [Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10), Coord(9, 6), Coord(9, 7), Coord(9,8), Coord(6, 10)]
 start = Coord(5, 5)
 dimensions = Coord(5, 5)
-doors = [Coord(8, 10), Coord(7, 10), Coord(6, 10)]
+doors = [Coord(7, 10)]
 items = [Coord(6, 6), Coord(7, 8)]
 
 @pytest.fixture
@@ -24,6 +24,18 @@ def room1():
     '''Initializes example Room'''
     room = Room(start, dimensions, tiles, doors, items)
     return room
+
+@pytest.fixture
+def room2():
+    #Room 2 example
+    tiles1 = [Coord(7, 15), Coord(7, 17), Coord(7, 18), Coord(6, 17), Coord(8, 17), Coord(8, 15), 
+                Coord(6, 15), Coord(7, 15), Coord(7, 15), Coord(9, 17), Coord(9, 16), Coord(9, 15), Coord (9, 15), Coord(6, 16)]
+    start1 = Coord(5, 15)
+    dimensions1 = Coord(5, 5)
+    doors1 = [Coord(7, 15)]
+    items1 = [Coord(8, 17), Coord(7, 17)]
+    room2 = Room(start1, dimensions1, tiles1, doors1, items1)
+    return room2
 
 @pytest.fixture
 def invalid_tiles():
@@ -40,10 +52,9 @@ def invalid_doors():
     return room
 
 @pytest.fixture
-def hallway(room1):
+def hallway(room1, room2):
     '''Initializes a Hallway with a vertical orientation'''
-    hall_start = Coord(6, 11)
-    hall = Hallway(hall_start, Coord(2, 3), [room1])
+    hall = Hallway([room1.doors[0], room2.doors[0]], [room1, room2])
     return hall
 
 @pytest.fixture 
@@ -59,18 +70,6 @@ def invalid_hallway():
     hall_start = Coord(0, 0)
     hall = Hallway(hall_start, Coord(5, 5), [Room(start, dimensions, [Coord(5, 5)], [Coord(3, 3)])])
     return hall
-
-@pytest.fixture
-def room2():
-    #Room 2 example
-    tiles1 = [Coord(7, 15), Coord(7, 17), Coord(7, 18), Coord(6, 17), Coord(8, 17), Coord(8, 15), 
-                Coord(6, 15), Coord(7, 15), Coord(7, 15), Coord(9, 17), Coord(9, 16), Coord(9, 15), Coord (9, 15), Coord(6, 16)]
-    start1 = Coord(5, 15)
-    dimensions1 = Coord(5, 5)
-    doors1 = [Coord(8, 15), Coord(7, 15), Coord(6, 15)]
-    items1 = [Coord(8, 17), Coord(7, 17)]
-    room2 = Room(start1, dimensions1, tiles1, doors1, items1)
-    return room2
 
 @pytest.fixture
 def level1(room1, room2, hallway):

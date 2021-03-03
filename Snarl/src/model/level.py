@@ -23,10 +23,10 @@ class Level:
         '''Returns a set of ((x_origin, x_dest), (y_origin, y_dest)) representing the dimension boundaries of each room in the level'''
         room_dimensions = set()
         for room in self.rooms:
-            x = (room.origin.x, room.origin.x + room.dimensions.x)
-            y = (room.origin.y, room.origin.y + room.dimensions.y)
+            row = (room.origin.row, room.origin.row + room.dimensions.row)
+            col = (room.origin.col, room.origin.col + room.dimensions.col)
             old_room_size = len(room_dimensions)
-            room_dimensions.add((x, y))
+            room_dimensions.add((row, col))
             # Element not added
             if old_room_size == len(room_dimensions):
                 print('Invalid Level: Duplicate rooms')
@@ -37,10 +37,10 @@ class Level:
         '''Returns a set of ((x_origin, x_dest), (y_origin, y_dest)) representing the dimension boundaries of each hallway in the level'''
         hall_dimensions = set()
         for hall in self.hallways:
-            x = (hall.origin.x, hall.origin.x + hall.dimensions.x)
-            y = (hall.origin.y, hall.origin.y + hall.dimensions.y)
+            row = (hall.origin.row, hall.origin.row + hall.dimensions.row)
+            col = (hall.origin.col, hall.origin.col + hall.dimensions.col)
             old_hall_size = len(hall_dimensions)
-            hall_dimensions.add((x, y)) 
+            hall_dimensions.add((row, col)) 
             if old_hall_size == len(hall_dimensions):
                 print('Invalid Level: Duplicate hallways')
                 return None
@@ -78,12 +78,12 @@ class Level:
             'type': 'void', 
             'reachable': []
         }
-        x_dimensions = (coord.x, coord.x)
-        y_dimensions = (coord.y, coord.y)
+        row_dimensions = (coord.row, coord.row)
+        col_dimensions = (coord.col, coord.col)
         room_dimensions = self.get_level_room_dimensions()
         hall_dimensions = self.get_level_hallway_dimensions()
-        if not check_dimensions(x_dimensions, y_dimensions, room_dimensions.union(hall_dimensions)):
-            print(x_dimensions, y_dimensions)
+        if not check_dimensions(row_dimensions, col_dimensions, room_dimensions.union(hall_dimensions)):
+            print(row_dimensions, col_dimensions)
             print('Provided coordinate is not within the bounds of the level')
             return None
         else:
@@ -91,43 +91,50 @@ class Level:
             origin = None
             #False if Hallway, True if Room, None otherwise
             is_room = None
-            room_origin = check_dimensions(x_dimensions, y_dimensions, room_dimensions)
-            hall_origin = check_dimensions(x_dimensions, y_dimensions, hall_dimensions)
+            room_origin = check_dimensions(row_dimensions, col_dimensions, room_dimensions)
+            hall_origin = check_dimensions(row_dimensions, col_dimensions, hall_dimensions)
             if room_origin:
                 is_room = True
                 origin = room_origin
             elif hall_origin:
                 is_room = False
                 origin = hall_origin
-            if is_room == True:
-                for room in self.rooms:
-                    if origin == room.origin:
-                        result['type'] = 'room'
-                        #TODO: Change both traversables to use methods. create is_reachable method to return a boolean
-                        result['traversable'] = coord in room.tiles
-                        reachable = []
-                        # Go through the doors in room1 and find the connecting hall. Add the origin of all connecting rooms from the found hall to reachable
-                        for hall in self.hallways:
-                            for hall_room in hall.rooms:
-                                for door in room.doors:
-                                    if door in hall_room.doors:
-                                        # for connected_room in [hall for hall in hall.rooms if hall.room.origin != origin]:
-                                        for connected_room in hall.rooms:
-                                            if [connected_room.origin.x, connected_room.origin.y] not in reachable: reachable.append([connected_room.origin.x, connected_room.origin.y])
-                                        for connected_waypoint in hall.waypoints:
-                                            if [connected_waypoint.origin.x, connected_waypoint.origin.y] not in reachable: reachable.append([connected_waypoint.origin.x, connected_waypoint.origin.y])
-                        result['reachable'] = reachable
-            elif is_room == False:
-                for hall in self.hallways:
-                    if origin == hall.origin:
-                        result['type'] = 'hallway'
-                        result['traversable'] = coord in hall.get_reachable_tiles()
-                        reachable = []
-                        for room in hall.rooms:
-                            reachable.append([room.origin.x, room.origin.y])
-                        for waypoint in hall.waypoints:
-                            reachable.append([waypoint.origin.x, waypoint.origin.y])
-                        result['reachable'] = reachable
+            # if is_room == True:
+            #     for room in self.rooms:
+            #         if origin == room.origin:
+            #             print(room.origin, room.dimensions)
+            #             # print(room.doors[0].x, room.doors[0].y)
+            #             result['type'] = 'room'
+            #             #TODO: Change both traversables to use methods. create is_reachable method to return a boolean
+            #             result['traversable'] = coord in room.tiles
+            #             reachable = []
+            #             # Go through the doors in room1 and find the connecting hall. Add the origin of all connecting rooms from the found hall to reachable
+            #             for hall in self.hallways:
+            #                 print(hall.origin, hall.dimensions)
+            #                 for hall_room in hall.rooms:
+            #                     for door in room.doors:
+            #                         if door in hall_room.doors:
+            #                             # print(door)
+            #                             # print(hall_room.origin, hall_room.dimensions)
+                                        
+            #                             # for connected_room in [hall for hall in hall.rooms if hall.room.origin != origin]:
+            #                             for connected_room in hall.rooms:
+
+            #                                 if [connected_room.origin.x, connected_room.origin.y] not in reachable: reachable.append([connected_room.origin.x, connected_room.origin.y])
+            #                             for connected_waypoint in hall.waypoints:
+            #                                 if [connected_waypoint.origin.x, connected_waypoint.origin.y] not in reachable: reachable.append([connected_waypoint.origin.x, connected_waypoint.origin.y])
+            #             result['reachable'] = reachable
+            # elif is_room == False:
+            #     for hall in self.hallways:
+            #         if origin == hall.origin:
+            #             result['type'] = 'hallway'
+            #             result['traversable'] = coord in hall.get_reachable_tiles()
+            #             reachable = []
+            #             for room in hall.rooms:
+            #                 reachable.append([room.origin.x, room.origin.y])
+            #             for waypoint in hall.waypoints:
+            #                 reachable.append([waypoint.origin.x, waypoint.origin.y])
+            #             result['reachable'] = reachable
             if coord in self.exits:
                 result['object'] = 'exit'
             if coord in self.keys:
@@ -150,10 +157,10 @@ def remove_doors_and_items_from_rooms(first):
     print("2 " + str(len(first_rm.tiles)))
 
     for tile in first_rm.tiles:
-        print(str(tile.x) + " " + str(tile.y) + " in doors " + str(tile in first.doors))
-        print(str(tile.x) + " " + str(tile.y) + " in items " + str(tile in first.items))
+        print(str(tile.row) + " " + str(tile.col) + " in doors " + str(tile in first.doors))
+        print(str(tile.row) + " " + str(tile.col) + " in items " + str(tile in first.items))
         if tile not in first.doors and tile not in first.items:
-            print("ADD TO LIST: " + str(tile.x) + " " + str(tile.y))
+            print("ADD TO LIST: " + str(tile.row) + " " + str(tile.col))
             first_rm_removed.append(tile)
 
     print("3 " + str(len(first.tiles)))
@@ -172,13 +179,13 @@ def create_initial_game_state(level, num_players, num_adversaries):
 
     for i in range(num_players):
         cur_tile = first_room.tiles[i]
-        print("ADDP: " + str(cur_tile.x) + " " + str(cur_tile.y))
-        players.append(Player(Coord(cur_tile.x, cur_tile.y), "Bruh " + str(i), 3))
+        print("ADDP: " + str(cur_tile.row) + " " + str(cur_tile.col))
+        players.append(Player(Coord(cur_tile.row, cur_tile.col), "Bruh " + str(i), 3))
 
     for i in range(num_adversaries):
         cur_adversary_tile = last_room.tiles[i]
-        print("ADDA: " + str(cur_adversary_tile.x) + " " + str(cur_adversary_tile.y))
-        adversaries.append(Adversary(Coord(cur_adversary_tile.x, cur_adversary_tile.y), "Evil Bruh " + str(i), 3))
+        print("ADDA: " + str(cur_adversary_tile.row) + " " + str(cur_adversary_tile.col))
+        adversaries.append(Adversary(Coord(cur_adversary_tile.row, cur_adversary_tile.col), "Evil Bruh " + str(i), 3))
 
     #print(str(adversaries))
 
