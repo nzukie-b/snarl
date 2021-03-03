@@ -83,6 +83,7 @@ class Level:
         room_dimensions = self.get_level_room_dimensions()
         hall_dimensions = self.get_level_hallway_dimensions()
         if not check_dimensions(x_dimensions, y_dimensions, room_dimensions.union(hall_dimensions)):
+            print(x_dimensions, y_dimensions)
             print('Provided coordinate is not within the bounds of the level')
             return None
         else:
@@ -106,14 +107,15 @@ class Level:
                         result['traversable'] = coord in room.tiles
                         reachable = []
                         # Go through the doors in room1 and find the connecting hall. Add the origin of all connecting rooms from the found hall to reachable
-                        for door in room.doors:
-                            for hall in self.hallways:
-                                for hall_room in hall.rooms:
+                        for hall in self.hallways:
+                            for hall_room in hall.rooms:
+                                for door in room.doors:
                                     if door in hall_room.doors:
+                                        # for connected_room in [hall for hall in hall.rooms if hall.room.origin != origin]:
                                         for connected_room in hall.rooms:
-                                            reachable.append([connected_room.origin.x, connected_room.origin.y])
+                                            if [connected_room.origin.x, connected_room.origin.y] not in reachable: reachable.append([connected_room.origin.x, connected_room.origin.y])
                                         for connected_waypoint in hall.waypoints:
-                                            reachable.append([connected_waypoint.origin.x, connected_waypoint.origin.y])
+                                            if [connected_waypoint.origin.x, connected_waypoint.origin.y] not in reachable: reachable.append([connected_waypoint.origin.x, connected_waypoint.origin.y])
                         result['reachable'] = reachable
             elif is_room == False:
                 for hall in self.hallways:
@@ -126,13 +128,11 @@ class Level:
                         for waypoint in hall.waypoints:
                             reachable.append([waypoint.origin.x, waypoint.origin.y])
                         result['reachable'] = reachable
+            if coord in self.exits:
+                result['object'] = 'exit'
+            if coord in self.keys:
+                result['object'] = 'key'
             return result
-            
-
-                
-
-            
-
 
 
 class GameState:

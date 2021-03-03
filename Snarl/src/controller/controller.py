@@ -121,11 +121,13 @@ def parse_level(level_input):
     for room in rooms:
         parsed_room = parse_room_obj(room)
         rooms_list.append(parsed_room['room'])
+        print(parsed_room['room'].origin, parsed_room['room'].dimensions)
 
     halls_list = []
     for hall in hallways:
         parsed_hall = parse_hall(hall, rooms_list)
         halls_list.append(parsed_hall)
+        print(parsed_hall.origin, parsed_hall.dimensions)
 
     key_coord = None
     exit_coord = None
@@ -133,7 +135,7 @@ def parse_level(level_input):
         posn = item['position']
         if item['type'] == 'key':
             key_coord = Coord(posn[0], posn[1])
-        elif item['type'] == 'door':
+        elif item['type'] == 'exit':
             exit_coord = Coord(posn[0], posn[1])
 
     parsed_level = Level(rooms_list, halls_list, [key_coord], [exit_coord])

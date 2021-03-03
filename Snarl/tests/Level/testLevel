@@ -13,9 +13,6 @@ if __name__ == '__main__':
     level_input = sys.stdin.read().strip()
     parsed_input = parse_level(level_input)
     level = parsed_input['level']
-    for hall in level.hallways:
-        print(hall)
-    
     coord = parsed_input['coord']
     info_at_coord = level.info_at_coord(coord)
-    # print(info_at_coord)
+    print(info_at_coord)

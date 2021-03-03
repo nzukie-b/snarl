@@ -39,11 +39,14 @@ def check_dimensions(x_dimensions, y_dimensions, level_dimensions):
         level_x_dest = level[0][1]
         level_y_origin = level[1][0]
         level_y_dest = level[1][1]
+        print(level)
+
         for x in range(x_start, x_end + 1):
             for y in range(y_start, y_end +1):
+                # print(x,y)
                 if x in range(level_x_origin, level_x_dest + 1) and y in range(level_y_origin, level_y_dest + 1):
                     return Coord(level_x_origin, level_y_origin)
-        return None
+    return None
 
 def check_level(level):
     '''Checks that the provided level is valid'''
