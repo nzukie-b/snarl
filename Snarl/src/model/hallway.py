@@ -4,13 +4,14 @@ from coord import Coord
 
 class Hallway:
     def __init__(self, doors, rooms, waypoints=None):
+        # Doors are coordinates of door in connected room
         self.doors = doors
         self.rooms = rooms
-        self.doors = doors
+        #Waypoints are alternate entrance point
         self.waypoints = waypoints if waypoints != None else []
         row_dimensions = (min(doors[0].row, doors[1].row), max(doors[0].row, doors[1].row))
         col_dimensions = (min(doors[0].col, doors[1].col), max(doors[0].col, doors[1].col))
-        self.origin = Coord(row_dimensions[0], col_dimensions[0])
+        self.origin = doors[0]
         self.dimensions = Coord(row_dimensions[1] - row_dimensions[0], col_dimensions[1] - col_dimensions[0]) 
     
     def __str__(self):
@@ -21,9 +22,43 @@ class Hallway:
         return '{{"doors": {}, "dimensions": {}, "rooms": {}, "waypoints": {}}}'.format(doors_str, dimensions_str, rooms_str, waypoints_str)
 
 
+    def check_orientation(self):
+        '''Check the orientation of the Hall. If True it is horizontal if False it is vertical otherwise an error is thrown'''
+        is_horizontal = None
+        door_1 = self.doors[0]
+        door_2 = self.doors[1]
+        # row_range = self.dimensions.row + self.origin.row
+        # col_range = self.dimensions.col + self.origin.col
+        if not self.waypoints:
+            #Straight hallway no waypoints
+            #TODO: See if this be changed to check if the door - self.dimensions == other door
+            horizontal = door_1.row == door_2.row
+            vertical = door_1.col == door_2.col
+            if horizontal is not vertical:
+                # horizontal xor vertical
+                is_horizontal = True if horizontal else False
+                return is_horizontal
+            else:
+            #Not straight and no waypoint
+                raise Exception(self)
+        else:
+            for ii in range(len(self.waypoints)):
+                waypoint = self.waypoints[ii]
+                if self.doors[ii].row == waypoint.row:
+                    # Horizontal hallway
+                    if is_horizontal == False:
+                            # Waypoints should not be the same as doors.
+                            raise Exception(self)
+                    is_horizontal = True
+                elif self.doors[ii].col == waypoint.col:
+                    #Vertical Hallway
+                    if is_horizontal == True:
+                        raise Exception(self)
+                is_horizontal = False
+        return is_horizontal
+
     # def check_orientation(self):
     #     #TODO: ADD SUPPORT FOR WAYPOINTS
-    #     '''Check the orientation of the Hall. If True it is horizontal if False it is vertical otherwise an error is thrown'''
     #     is_horizontal = None
     #     #From Milestone 2 spec hallways have 2 rooms to connect. So only two doors
     #     if waypo
