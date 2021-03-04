@@ -79,36 +79,36 @@ def parse_hall(hall_input, rooms):
     waypoints = hall_json['waypoints']
     waypoints_coords = [Coord(waypoint[0], waypoint[1]) for waypoint in waypoints]
     
-    is_horizontal = from_coord.col == to_coord.col and from_coord.row != to_coord.row
-    # is_horizontal = 
-    hall_boundaries = None
-    origin = None
-    dimensions = None
-    if is_horizontal:
-        # From and To are tiles within a room so hall boundaries do not include them
-        hall_boundaries = (min(from_coord.row, to_coord.row) + 1, max(from_coord.row, to_coord.row) - 1)
-        origin = Coord(hall_boundaries[0], from_coord.col)
-        # For now halls are stated to only be a single tile wide, but width could be co
-        dimensions = Coord(hall_boundaries[1] - hall_boundaries[0], 1)
-    else:
-        print('Vertical')
-        print('from ' + str(from_coord), 'to ' + str(to_coord))
-        hall_boundaries = (min(from_coord.col, to_coord.col) + 1, max(from_coord.col, to_coord.col) - 1)
-        origin = Coord(from_coord.row, hall_boundaries[0])
-        dimensions = Coord(1, hall_boundaries[1] - hall_boundaries[0])
+    # is_horizontal = from_coord.col == to_coord.col and from_coord.row != to_coord.row
+    # # is_horizontal = 
+    # hall_boundaries = None
+    # origin = None
+    # dimensions = None
+    # if is_horizontal:
+    #     # From and To are tiles within a room so hall boundaries do not include them
+    #     hall_boundaries = (min(from_coord.row, to_coord.row) + 1, max(from_coord.row, to_coord.row) - 1)
+    #     origin = Coord(hall_boundaries[0], from_coord.col)
+    #     # For now halls are stated to only be a single tile wide, but width could be co
+    #     dimensions = Coord(hall_boundaries[1] - hall_boundaries[0], 1)
+    # else:
+    #     print('Vertical')
+    #     print('from ' + str(from_coord), 'to ' + str(to_coord))
+    #     hall_boundaries = (min(from_coord.col, to_coord.col) + 1, max(from_coord.col, to_coord.col) - 1)
+    #     origin = Coord(from_coord.row, hall_boundaries[0])
+    #     dimensions = Coord(1, hall_boundaries[1] - hall_boundaries[0])
     
     rooms_list = []
     waypoints_list = []
     for room in rooms:
         for door in room.doors:
-            if door == to_coord or door == from_coord:
+            if door == from_coord or door == to_coord:
                 rooms_list.append(room)
             # Doors are considered to be inside a room each waypoint coord should correspond to a door in a room.
             for waypoint in waypoints_coords:
                 if door == waypoint:
                     waypoints_list.append(room)
                     
-    return Hallway(origin, dimensions, rooms, waypoints_list)
+    return Hallway([from_coord, to_coord], rooms, waypoints_list)
         
 def parse_level(level_input):
     level_json = json.loads(str(level_input))
