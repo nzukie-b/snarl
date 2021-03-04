@@ -134,12 +134,13 @@ class Level:
                 for hall in self.hallways:
                     if origin == hall.origin:
                         result['type'] = 'hallway'
-                        result['traversable'] = coord in hall.get_reachable_tiles()
+                        traversable = coord.row in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1) and coord.col in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1)
+                        result['traversable'] = traversable
                         reachable = []
                         for room in hall.rooms:
-                            reachable.append([room.origin.x, room.origin.y])
+                            reachable.append([room.origin.row, room.origin.col])
                         for waypoint in hall.waypoints:
-                            reachable.append([waypoint.origin.x, waypoint.origin.y])
+                            reachable.append([waypoint.row, waypoint.col])
                         result['reachable'] = reachable
             if coord in self.exits:
                 result['object'] = 'exit'

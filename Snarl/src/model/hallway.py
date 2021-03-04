@@ -77,6 +77,7 @@ class Hallway:
     #     return is_horizontal
 
     def get_reachable_tiles(self, coord):
+        #TODO Refactor to not use coord but return list of coords that are traversable in the hallway
         try:
             tiles = []
             is_horizontal = self.check_orientation()
