@@ -151,21 +151,22 @@ def test_invalid_level_rooms(capsys, room1, hallway):
 
 
 def test_invalid_level_hallway(capsys, room1, hallway):
-    hall2 = Hallway([Coord(6, 11), Coord(2, 3)], [room1])
+    hall2 = Hallway(hallway.doors, [room1])
     level = Level([room1], [hallway, hall2])
     valid_level = check_level(level)
     capture = capsys.readouterr()
-    print(capture.out)
+    # print(capture.out)
     assert capture.out == 'Invalid Level: Duplicate hallways\n'
     assert valid_level == False
 
 
 def test_invalid_level_shared_coords(capsys, room1, level1):
-    hall = Hallway([Coord(5, 5), Coord(5,5)], [room1])
+    hall = Hallway([Coord(6, 1), Coord(10, 5)], [room1, room2])
+    hall.origin = room1.origin
+    hall.dimensions = room1.dimensions
     level1.hallways.append(hall)
     valid_level = check_level(level1)
-    capture = capsys.readouterr()
-    #print(capture.out)
+    capture = capsys.readouterr() 
     assert capture.out == 'Invalid Level: Hallway or Room sharing coordinates\n'
     assert valid_level == False
 

@@ -9,10 +9,8 @@ class Hallway:
         self.rooms = rooms
         #Waypoints are alternate entrance point
         self.waypoints = waypoints if waypoints != None else []
-        row_dimensions = (min(doors[0].row, doors[1].row), max(doors[0].row, doors[1].row))
-        col_dimensions = (min(doors[0].col, doors[1].col), max(doors[0].col, doors[1].col))
         self.origin = doors[0]
-        self.dimensions = Coord(row_dimensions[1] - row_dimensions[0], col_dimensions[1] - col_dimensions[0]) 
+        self.dimensions = Coord(abs(doors[1].row - doors[0].row), abs(doors[1].col - doors[0].col)) 
     
     def __str__(self):
         doors_str = [str(door) for door in self.doors]

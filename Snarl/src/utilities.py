@@ -7,7 +7,7 @@ def check_hallway(hallway):
         hallway.check_orientation()
         return True
     except Exception as err:
-        print(err)
+        # print(err)
         return False
 
 
