@@ -7,7 +7,6 @@ def check_hallway(hallway):
         hallway.check_orientation()
         return True
     except Exception as err:
-        # print(err)
         return False
 
 
@@ -58,10 +57,5 @@ def check_level(level):
         except Exception as err:
             #print("HALLWAY CHECK FAILED")
             return False
-
     #print("dimension check: " + str(level.check_level_dimensions()))
     return level.check_level_dimensions()
-
-# def check_horizontal(coord1, coord2):
-#     '''Checks to determine whether two point are able to be connected by a horizontal path'''
-#     i

@@ -25,15 +25,12 @@ class Hallway:
         is_horizontal = None
         door_1 = self.doors[0]
         door_2 = self.doors[1]
-        # row_range = self.dimensions.row + self.origin.row
-        # col_range = self.dimensions.col + self.origin.col
 
         if not self.waypoints:
             #Straight hallway no waypoints
             #TODO: See if this be changed to check if the door - self.dimensions == other door
             horizontal = door_1.row == door_2.row
             vertical = door_1.col == door_2.col
-            #print("HORI: " + str(horizontal) + " VERTI: " + str(vertical))
             if horizontal is not vertical:
                 # horizontal xor vertical
                 if horizontal:
@@ -61,33 +58,8 @@ class Hallway:
                     if is_horizontal == True:
                         raise Exception(self)
                 is_horizontal = False
-
         #print("DRS: " + str(door_1.row) + str(door_2.row) + ":" + str(door_1.col) + str(door_2.col))
-        # if door_1.row == door_2.row:
-        #     is_horizontal = True
-        # elif door_1.col == door_1.col:
-        #     is_horizontal = False
-        #
         return is_horizontal
-
-    # def check_orientation(self):
-    #     #TODO: ADD SUPPORT FOR WAYPOINTS
-    #     is_horizontal = None
-    #     #From Milestone 2 spec hallways have 2 rooms to connect. So only two doors
-    #     if waypo
-    #     for door in self.doors:
-    #         if (door.x)
-    #     for room in self.rooms:
-    #         for door in room.doors:
-    #             if (door.y == self.origin.y - 1 or door.y == self.origin.y + self.dimensions.y + 1) and (self.origin.x <= door.x <= self.origin.x + self.dimensions.x):
-    #                 if is_horizontal is True:
-    #                     raise Exception(self)
-    #                 is_horizontal = False
-    #             elif (door.x == self.origin.x  - 1 or door.x == self.origin.x + self.dimensions.x + 1) and (self.origin.y <= door.y <= self.origin.y + self.dimensions.y):
-    #                 if is_horizontal is False:
-    #                     raise Exception(self)
-    #                 is_horizontal = True                        
-    #     return is_horizontal
 
     def get_reachable_tiles(self, coord):
         #TODO Refactor to not use coord but return list of coords that are traversable in the hallway

@@ -29,11 +29,11 @@ class Tile:
 def render_hallway(hallway, orientation):
     '''Renders tiles for the provided hallway based on the hallway's orientaion, and returns the list of the created tiles.'''
     try :
-        x_boundary = hallway.origin.row + hallway.dimensions.row
-        y_boundary = hallway.origin.col + hallway.dimensions.col
+        row_boundary = hallway.origin.row + hallway.dimensions.row
+        col_boundary = hallway.origin.col + hallway.dimensions.col
         tiles = []
-        for ii in range(hallway.origin.row, x_boundary + 1):
-            for jj in range(hallway.origin.col, y_boundary + 1):
+        for ii in range(hallway.origin.row, row_boundary + 1):
+            for jj in range(hallway.origin.col, col_boundary + 1):
                 tile = Tile(ii, jj)
                 tiles.append(tile)
                 pygame.draw.rect(SCREEN, WHITE, render_tile(tile))
@@ -41,13 +41,13 @@ def render_hallway(hallway, orientation):
                 if orientation == False:
                     # Vertical path hallway case
                     left_wall = Tile(hallway.origin.row - 1, jj)
-                    right_wall = Tile(x_boundary + 1, jj)
+                    right_wall = Tile(row_boundary + 1, jj)
                     pygame.draw.rect(SCREEN, BLACK, render_tile(left_wall))
                     pygame.draw.rect(SCREEN, BLACK, render_tile(right_wall))
                 elif orientation == True:
                     # Horizontal path hallway
                     upper_wall = Tile(ii, hallway.origin.col - 1)
-                    lower_wall = Tile(ii, y_boundary + 1)
+                    lower_wall = Tile(ii, col_boundary + 1)
                     pygame.draw.rect(SCREEN, BLACK, render_tile(upper_wall))
                     pygame.draw.rect(SCREEN, BLACK, render_tile(lower_wall))
         return tiles
