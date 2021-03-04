@@ -29,14 +29,22 @@ class Hallway:
         door_2 = self.doors[1]
         # row_range = self.dimensions.row + self.origin.row
         # col_range = self.dimensions.col + self.origin.col
+
         if not self.waypoints:
             #Straight hallway no waypoints
             #TODO: See if this be changed to check if the door - self.dimensions == other door
             horizontal = door_1.row == door_2.row
             vertical = door_1.col == door_2.col
+            #print("HORI: " + str(horizontal) + " VERTI: " + str(vertical))
             if horizontal is not vertical:
                 # horizontal xor vertical
-                is_horizontal = True if horizontal else False
+                if horizontal:
+                    is_horizontal = True
+                else:
+                    is_horizontal = False
+                #is_horizontal = True if horizontal else False
+                #print("HORTI: " + str(is_horizontal) + str(horizontal) + " DOORS " + "(" + str(door_1.row) + ", " + str(door_1.col) + ") " +
+                #      "(" + str(door_2.row) + ", " + str(door_2.col) + ")")
                 return is_horizontal
             else:
             #Not straight and no waypoint
@@ -55,6 +63,13 @@ class Hallway:
                     if is_horizontal == True:
                         raise Exception(self)
                 is_horizontal = False
+
+        #print("DRS: " + str(door_1.row) + str(door_2.row) + ":" + str(door_1.col) + str(door_2.col))
+        # if door_1.row == door_2.row:
+        #     is_horizontal = True
+        # elif door_1.col == door_1.col:
+        #     is_horizontal = False
+        #
         return is_horizontal
 
     # def check_orientation(self):

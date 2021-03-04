@@ -14,7 +14,7 @@ from utilities import check_room, check_hallway, check_level
 
 #Room 1 example
 tiles = [Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10), Coord(9, 6), Coord(9, 7), Coord(9,8), Coord(6, 10)]
-start = Coord(5, 5)
+start = Coord(5, 0)
 dimensions = Coord(5, 5)
 doors = [Coord(7, 10)]
 items = [Coord(6, 6), Coord(7, 8)]
@@ -54,21 +54,22 @@ def invalid_doors():
 @pytest.fixture
 def hallway(room1, room2):
     '''Initializes a Hallway with a vertical orientation'''
-    hall = Hallway([room1.doors[0], room2.doors[0]], [room1, room2])
+    hall = Hallway([Coord(1, 10), Coord(5, 10)], [room1, room2])
     return hall
 
 @pytest.fixture 
 def horizontal_hallway():
     '''Initializes a Hallway with a horizontal orientation'''
-    hall_start = Coord(0, 0)
-    hall = Hallway(hall_start, Coord(4, 5), [Room(start, dimensions, [Coord(5, 3)], [Coord(5, 3)])])
+    #hall_start = Coord(0, 0)
+    hall_start = Coord(4, 3)
+    hall = Hallway([hall_start, Coord(4, 5)], [Room(start, dimensions, [Coord(5, 3)], [Coord(5, 3)])])
     return hall
 
 @pytest.fixture
 def invalid_hallway():
     '''Initializes an invalid Hallway'''
     hall_start = Coord(0, 0)
-    hall = Hallway(hall_start, Coord(5, 5), [Room(start, dimensions, [Coord(5, 5)], [Coord(3, 3)])])
+    hall = Hallway([hall_start, Coord(5, 5)], [Room(start, dimensions, [Coord(5, 5)], [Coord(3, 3)])])
     return hall
 
 @pytest.fixture
@@ -150,25 +151,27 @@ def test_invalid_level_rooms(capsys, room1, hallway):
 
 
 def test_invalid_level_hallway(capsys, room1, hallway):
-    hall2 = Hallway(Coord(6, 11), Coord(2, 3), [room1])
+    hall2 = Hallway([Coord(6, 11), Coord(2, 3)], [room1])
     level = Level([room1], [hallway, hall2])
     valid_level = check_level(level)
     capture = capsys.readouterr()
+    print(capture.out)
     assert capture.out == 'Invalid Level: Duplicate hallways\n'
     assert valid_level == False
 
 
 def test_invalid_level_shared_coords(capsys, room1, level1):
-    hall = Hallway(Coord(5, 5), Coord(5,5), [room1])
+    hall = Hallway([Coord(5, 5), Coord(5,5)], [room1])
     level1.hallways.append(hall)
     valid_level = check_level(level1)
     capture = capsys.readouterr()
+    #print(capture.out)
     assert capture.out == 'Invalid Level: Hallway or Room sharing coordinates\n'
     assert valid_level == False
 
 
 def test_invalid_level_dimensions(capsys, level1):
-    invalid_dimensions = Room(Coord(6, 6), Coord(6, 6), tiles, doors)
+    invalid_dimensions = Room(Coord(6, 1), Coord(6, 6), tiles, doors)
     level1.rooms.append(invalid_dimensions)
     valid_level = check_level(level1)
     capture = capsys.readouterr()
