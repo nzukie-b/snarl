@@ -136,11 +136,9 @@ class Level:
                         result['type'] = 'hallway'
                         traversable = coord.row in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1) and coord.col in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1)
                         result['traversable'] = traversable
-                        reachable = []
-                        for room in hall.rooms:
-                            reachable.append([room.origin.row, room.origin.col])
-                        for waypoint in hall.waypoints:
-                            reachable.append([waypoint.row, waypoint.col])
+                        reachable = [[room.origin.row, room.origin.col] for room in hall.rooms]
+                        # for room in hall.rooms:
+                        #     reachable.append([room.origin.row, room.origin.col])
                         result['reachable'] = reachable
             if coord in self.exits:
                 result['object'] = 'exit'

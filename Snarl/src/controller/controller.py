@@ -57,9 +57,9 @@ def parse_room(room_input):
         print('[ Failure: Point ", {} , " is not in room at ", {} ]'.format([parsed_coord.row, parsed_coord.col], [room_obj.origin.row, room_obj.origin.col]))
         return None
     reachable_coords = room_obj.get_reachable_tiles(parsed_coord)
-    reachable_tiles = []
-    for coord in reachable_coords:
-        reachable_tiles.append([coord.row, coord.col])
+    reachable_tiles = [[coord.row, coord.col] for coord in reachable_coords]
+    # for coord in reachable_coords:
+    #     reachable_tiles.append([coord.row, coord.col])
     print('[ Success: Traversable points from, " {} ," in room at, " {} ," are, " {} ]'.format([parsed_coord.row, parsed_coord.col], [room_obj.origin.row, room_obj.origin.col], reachable_tiles))
     return reachable_tiles
     
@@ -97,11 +97,11 @@ def parse_hall(hall_input, rooms):
     #     origin = Coord(from_coord.row, hall_boundaries[0])
     #     dimensions = Coord(1, hall_boundaries[1] - hall_boundaries[0])
     
-    rooms_list = []
-    for room in rooms:
-        for door in room.doors:
-            if door == from_coord or door == to_coord:
-                rooms_list.append(room)
+    rooms_list = [room for room in rooms if from_coord in room.doors or to_coord in room.doors]
+    # for room in rooms:
+    #     for door in room.doors:
+    #         if door == from_coord or door == to_coord:
+    #             rooms_list.append(room)
     print('rooms in hallway ', len(rooms_list))
     print('waypoints in hallway', len(waypoints_list))
     return Hallway([from_coord, to_coord], rooms_list, waypoints_list)
@@ -116,25 +116,25 @@ def parse_level(level_input):
     objects = level_json[0]['objects']
     point = level_json[1]
 
-    rooms_list = []
-    for room in rooms:
-        parsed_room = parse_room_obj(room)
-        rooms_list.append(parsed_room['room'])
-        print(parsed_room['room'].origin)
+    rooms_list = [parse_room_obj(room)['room'] for room in rooms]
+    # for room in rooms:
+    #     parsed_room = parse_room_obj(room)
+    #     rooms_list.append(parsed_room['room'])
+    #     print(parsed_room['room'].origin)
         # print(parsed_room['room'].origin, parsed_room['room'].dimensions)
     print('rooms')
 
 
-    halls_list = []
-    for hall in hallways:
-        parsed_hall = parse_hall(hall, rooms_list)
-        # for room in parsed_hall.rooms:
-        #     print(room.origin)
-        halls_list.append(parsed_hall)
-        print('XXXX')
-        for room in parsed_hall.rooms:
-            print(room.origin)
-        print('XXXX')
+    halls_list = [parse_hall(hall, rooms_list) for hall in hallways]
+    # for hall in hallways:
+    #     parsed_hall = parse_hall(hall, rooms_list)
+    #     # for room in parsed_hall.rooms:
+    #     #     print(room.origin)
+    #     halls_list.append(parsed_hall)
+    #     print('XXXX')
+    #     for room in parsed_hall.rooms:
+    #         print(room.origin)
+    #     print('XXXX')
         # print(parsed_hall.origin, parsed_hall.dimensions)
 
     key_coord = None

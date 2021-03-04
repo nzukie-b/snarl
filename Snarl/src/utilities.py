@@ -40,7 +40,7 @@ def check_dimensions(x_dimensions, y_dimensions, level_dimensions):
         level_col_origin = level[1][0]
         level_col_dest = level[1][1]
         for row in range(row_start, row_end + 1):
-            for col in range(col_start, col_end +1):
+            for col in range(col_start, col_end + 1):
                 # print(x,y)
                 if row in range(level_row_origin, level_row_dest + 1) and col in range(level_col_origin, level_col_dest + 1):
                     return Coord(level_row_origin, level_col_origin)

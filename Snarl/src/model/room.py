@@ -47,6 +47,7 @@ class Room:
         '''Returns a list of reachable tiles in this room within a 1 space move'''
         tiles = []
         for tile in self.tiles:
+            #TODO: Separate this into some coord comparison function?
             if (tile.row == coord.row) and (tile.col ==  coord.col + 1 or tile.col == coord.col - 1):
                 tiles.append(tile)
             elif (tile.col == coord.col) and (tile.row == coord.row + 1 or tile.row == coord.row - 1):
