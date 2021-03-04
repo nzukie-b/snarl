@@ -99,42 +99,48 @@ class Level:
             elif hall_origin:
                 is_room = False
                 origin = hall_origin
-            # if is_room == True:
-            #     for room in self.rooms:
-            #         if origin == room.origin:
-            #             print(room.origin, room.dimensions)
-            #             # print(room.doors[0].x, room.doors[0].y)
-            #             result['type'] = 'room'
-            #             #TODO: Change both traversables to use methods. create is_reachable method to return a boolean
-            #             result['traversable'] = coord in room.tiles
-            #             reachable = []
-            #             # Go through the doors in room1 and find the connecting hall. Add the origin of all connecting rooms from the found hall to reachable
-            #             for hall in self.hallways:
-            #                 print(hall.origin, hall.dimensions)
-            #                 for hall_room in hall.rooms:
-            #                     for door in room.doors:
-            #                         if door in hall_room.doors:
-            #                             # print(door)
-            #                             # print(hall_room.origin, hall_room.dimensions)
+            if is_room == True:
+                for room in self.rooms:
+                    if origin == room.origin:
+                        print(room.origin, room.dimensions)
+                        # print(room.doors[0].x, room.doors[0].y)
+                        result['type'] = 'room'
+                        #TODO: Change both traversables to use methods. create is_reachable method to return a boolean
+                        result['traversable'] = coord in room.tiles
+                        reachable = []
+                        for door in room.doors:
+                            # print(len(room.doors))
+                            for hall in self.hallways:
+                                if door in hall.doors:
+                                    print('hall_room_origins')
+                                    for hall_room in hall.rooms:
+                                        print(hall_room.origin)
+                                    reachable += [[room.origin.row, room.origin.col] for room in hall.rooms if door not in room.doors]
+                        # # Go through the doors in room1 and find the connecting hall. Add the origin of all connecting rooms from the found hall to reachable
+                        #     for hall_room in hall.rooms:
+                        #         for door in room.doors:
+                        #             if door in hall_room.doors:
+                        #                 # print(door)
+                        #                 # print(hall_room.origin, hall_room.dimensions)
                                         
-            #                             # for connected_room in [hall for hall in hall.rooms if hall.room.origin != origin]:
-            #                             for connected_room in hall.rooms:
+                        #                 # for connected_room in [hall for hall in hall.rooms if hall.room.origin != origin]:
+                        #                 for connected_room in hall.rooms:
 
-            #                                 if [connected_room.origin.x, connected_room.origin.y] not in reachable: reachable.append([connected_room.origin.x, connected_room.origin.y])
-            #                             for connected_waypoint in hall.waypoints:
-            #                                 if [connected_waypoint.origin.x, connected_waypoint.origin.y] not in reachable: reachable.append([connected_waypoint.origin.x, connected_waypoint.origin.y])
-            #             result['reachable'] = reachable
-            # elif is_room == False:
-            #     for hall in self.hallways:
-            #         if origin == hall.origin:
-            #             result['type'] = 'hallway'
-            #             result['traversable'] = coord in hall.get_reachable_tiles()
-            #             reachable = []
-            #             for room in hall.rooms:
-            #                 reachable.append([room.origin.x, room.origin.y])
-            #             for waypoint in hall.waypoints:
-            #                 reachable.append([waypoint.origin.x, waypoint.origin.y])
-            #             result['reachable'] = reachable
+                        #                     if [connected_room.origin.x, connected_room.origin.y] not in reachable: reachable.append([connected_room.origin.x, connected_room.origin.y])
+                        #                 for connected_waypoint in hall.waypoints:
+                        #                     if [connected_waypoint.origin.x, connected_waypoint.origin.y] not in reachable: reachable.append([connected_waypoint.origin.x, connected_waypoint.origin.y])
+                        result['reachable'] = reachable
+            elif is_room == False:
+                for hall in self.hallways:
+                    if origin == hall.origin:
+                        result['type'] = 'hallway'
+                        result['traversable'] = coord in hall.get_reachable_tiles()
+                        reachable = []
+                        for room in hall.rooms:
+                            reachable.append([room.origin.x, room.origin.y])
+                        for waypoint in hall.waypoints:
+                            reachable.append([waypoint.origin.x, waypoint.origin.y])
+                        result['reachable'] = reachable
             if coord in self.exits:
                 result['object'] = 'exit'
             if coord in self.keys:

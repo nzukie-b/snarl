@@ -77,7 +77,7 @@ def parse_hall(hall_input, rooms):
     from_coord = Coord(from_[0], from_[1])
     to_coord = Coord(to[0], to[1])
     waypoints = hall_json['waypoints']
-    waypoints_coords = [Coord(waypoint[0], waypoint[1]) for waypoint in waypoints]
+    waypoints_list = [Coord(waypoint[0], waypoint[1]) for waypoint in waypoints]
     
     # is_horizontal = from_coord.col == to_coord.col and from_coord.row != to_coord.row
     # # is_horizontal = 
@@ -98,17 +98,13 @@ def parse_hall(hall_input, rooms):
     #     dimensions = Coord(1, hall_boundaries[1] - hall_boundaries[0])
     
     rooms_list = []
-    waypoints_list = []
     for room in rooms:
         for door in room.doors:
             if door == from_coord or door == to_coord:
                 rooms_list.append(room)
-            # Doors are considered to be inside a room each waypoint coord should correspond to a door in a room.
-            for waypoint in waypoints_coords:
-                if door == waypoint:
-                    waypoints_list.append(room)
-                    
-    return Hallway([from_coord, to_coord], rooms, waypoints_list)
+    print('rooms in hallway ', len(rooms_list))
+    print('waypoints in hallway', len(waypoints_list))
+    return Hallway([from_coord, to_coord], rooms_list, waypoints_list)
         
 def parse_level(level_input):
     level_json = json.loads(str(level_input))
@@ -124,13 +120,22 @@ def parse_level(level_input):
     for room in rooms:
         parsed_room = parse_room_obj(room)
         rooms_list.append(parsed_room['room'])
-        print(parsed_room['room'].origin, parsed_room['room'].dimensions)
+        print(parsed_room['room'].origin)
+        # print(parsed_room['room'].origin, parsed_room['room'].dimensions)
+    print('rooms')
+
 
     halls_list = []
     for hall in hallways:
         parsed_hall = parse_hall(hall, rooms_list)
+        # for room in parsed_hall.rooms:
+        #     print(room.origin)
         halls_list.append(parsed_hall)
-        print(parsed_hall.origin, parsed_hall.dimensions)
+        print('XXXX')
+        for room in parsed_hall.rooms:
+            print(room.origin)
+        print('XXXX')
+        # print(parsed_hall.origin, parsed_hall.dimensions)
 
     key_coord = None
     exit_coord = None
