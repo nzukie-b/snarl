@@ -74,7 +74,7 @@ class Level:
             - if a hallway the origins of the connecting rooms | if a room the origins of neighboring rooms, that is, the rooms that are one hallway removed from the current room : ['reachable']'''
         result = {
             'traversable': None,
-            'object': None,
+            'object': 'null',
             'type': 'void', 
             'reachable': []
         }
@@ -83,9 +83,9 @@ class Level:
         room_dimensions = self.get_level_room_dimensions()
         hall_dimensions = self.get_level_hallway_dimensions()
         if not check_dimensions(row_dimensions, col_dimensions, room_dimensions.union(hall_dimensions)):
-            print(row_dimensions, col_dimensions)
-            print('Provided coordinate is not within the bounds of the level')
-            return None
+            # Provided coordinate is not within the bounds of the level
+            result['traversable'] = False
+            result['object'] == 'null'
         else:
             # Point is guaranteed to be within level dimensions
             origin = None
@@ -144,7 +144,7 @@ class Level:
                 result['object'] = 'exit'
             if coord in self.keys:
                 result['object'] = 'key'
-            return result
+        return result
 
 
 class GameState:
