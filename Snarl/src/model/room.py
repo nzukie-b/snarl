@@ -33,7 +33,7 @@ class Room:
     def check_tiles(self):
         '''Validate walkable tiles are inside the room boundaries'''
         for tile in self.tiles:
-            if tile.row not in range(self.origin.row , self.origin.row + self.dimensions.row) and tile.col not in range(self.origin.col, self.origin.col + self.dimensions.col):
+            if tile.row not in range(self.origin.row , self.origin.row + self.dimensions.row + 1) and tile.col not in range(self.origin.col, self.origin.col + self.dimensions.col + 1):
                 return False
         return True
 
