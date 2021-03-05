@@ -19,7 +19,10 @@ class Room:
         items_str = [str(item) for item in self.items]
         return '{{"origin": {}, "dimensions": {}, "tiles": {}, "doors": {}, "items": {}}}'.format(
             origin_str, dimensions_str, tiles_str, doors_str, items_str)
-    
+
+    def __repr__(self):
+        return str(self)
+
     def check_doors(self):
         ''' Validate doors are on a walkable tiles. Does not guarantee that tiles are inside room boundaries'''
         for door in self.doors:
@@ -38,7 +41,7 @@ class Room:
     def check_items(self):
         '''Validate items are on a walkable tile'''
         for item in self.items:
-            if item.row not in self.tiles:
+            if item not in self.tiles:
                 # TODO: Are items on non walkable tiles valid?
                 return False
         return True

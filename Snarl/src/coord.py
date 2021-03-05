@@ -11,3 +11,6 @@ class Coord:
         return False
     def __str__(self):
         return '{{"row": {}, "col":{}}}'.format(self.row, self.col)
+
+    def __repr__(self):
+        return str(self)

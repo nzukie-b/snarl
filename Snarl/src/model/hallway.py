@@ -19,6 +19,8 @@ class Hallway:
         waypoints_str = [str(waypoint) for waypoint in self.waypoints]
         return '{{"doors": {}, "dimensions": {}, "rooms": {}, "waypoints": {}}}'.format(doors_str, dimensions_str, rooms_str, waypoints_str)
 
+    def __repr__(self):
+        return str(self)
 
     def check_orientation(self):
         '''Check the orientation of the Hall. If True it is horizontal if False it is vertical otherwise an error is thrown'''

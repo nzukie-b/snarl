@@ -38,6 +38,17 @@ def room2():
     return room2
 
 @pytest.fixture
+def room3():
+    tiles1 = [Coord(7, 1), Coord(7, 2), Coord(7, 3), Coord(6, 5), Coord(6, 4), Coord(6, 1), Coord(6, 3), Coord(7, 5), 
+                Coord(8, 4), Coord(8, 2), Coord(8, 3), Coord(8, 4), Coord(8, 5), Coord(9, 2), Coord (9, 3), Coord(9, 4)]
+    start1 = Coord(5, 0)
+    dimensions1 = Coord(5, 5)
+    doors1 = [Coord(7, 5)]
+    items1 = [Coord(6, 1), Coord(7, 3)]
+    room3 = Room(start1, dimensions1, tiles1, doors1, items1)
+    return room3
+
+@pytest.fixture
 def invalid_tiles():
     '''Initializes example Room with invalid Tiles'''
     invalid_tiles = [Coord(11, 10), Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10), Coord(9, 6), Coord(9, 7), Coord(9,8), Coord(6, 10)]
@@ -75,7 +86,12 @@ def invalid_hallway():
 @pytest.fixture
 def level1(room1, room2, hallway):
     '''Initializes example Level'''
-    level = Level([room1, room2], [hallway])
+    level = Level([room1, room2], [hallway], [Coord(8, 9)], [Coord(9, 15)])
+    return level
+
+@pytest.fixture
+def level2(room3, room2, hallway):
+    level = Level([room3, room2], [hallway], [Coord(7, 1)], [Coord(9, 17)])
     return level
 
 @pytest.fixture
@@ -120,26 +136,8 @@ def test_invalid_check_room(capsys, invalid_tiles, invalid_doors):
     assert capture.out == 'Invalid Room: Door(s) outside of walkable tiles\n'
     assert valid_doors == False
 
-
-def test_check_hallway(hallway):
-    assert check_hallway(hallway) == True
-
-
-def test_hallway_orientation(hallway, horizontal_hallway):
-    assert hallway.check_orientation() == False
-    assert horizontal_hallway.check_orientation() == True
-
-
-def test_invalid_hallway(invalid_hallway):
-    with pytest.raises(Exception) as err:
-        check_hallway(invalid_hallway)
-        assert invalid_hallway in str(err.value)
-    return False
-
-
 def test_valid_level(level1):
     assert check_level(level1) == True
-
 
 def test_invalid_level_rooms(capsys, room1, hallway):
     room2 = Room(start, dimensions, tiles, doors)
@@ -176,3 +174,23 @@ def test_invalid_level_dimensions(capsys, level1):
     assert capture.out == 'Invalid Level: Overlapping Room(s) or Hallway(s)\n'
     assert valid_level == False
     
+
+def test_info_at_coord(level2):
+    coord = Coord(7, 1)
+    coord_info = level2.info_at_coord(coord)
+    assert coord_info.traversable == True
+    assert coord_info.object == 'key'
+    assert coord_info.type == 'room'
+    assert len(coord_info.reachable) == 0
+    coord2 = Coord(9, 17)
+    coord_info = level2.info_at_coord(coord2)
+    assert coord_info.traversable == True
+    assert coord_info.object == 'exit'
+    assert coord_info.type == 'room'
+    assert len(coord_info.reachable) == 0
+    coord3 = Coord(0, 0)
+    coord_info = level2.info_at_coord(coord3)
+    assert coord_info.traversable == False
+    assert coord_info.object == 'null'
+    assert coord_info.type == 'void'
+    assert len(coord_info.reachable) == 0

@@ -14,3 +14,6 @@ class Player:
 
     def __str__(self):
         return json.dumps(self.__dict__)
+
+    def __repr__(self):
+        return str(self)
