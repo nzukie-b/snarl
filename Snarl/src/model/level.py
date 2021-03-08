@@ -29,7 +29,7 @@ class Level:
         return str(self)
 
     def get_level_room_dimensions(self):
-        '''Returns a set of ((x_origin, x_dest), (y_origin, y_dest)) representing the dimension boundaries of each room in the level'''
+        '''Returns a set of ((row_origin, row_dest), (col_origin, col_dest)) representing the dimension boundaries of each room in the level'''
         room_dimensions = set()
         for room in self.rooms:
             row = (room.origin.row, room.origin.row + room.dimensions.row)
@@ -43,7 +43,7 @@ class Level:
         return room_dimensions
 
     def get_level_hallway_dimensions(self):
-        '''Returns a set of ((x_origin, x_dest), (y_origin, y_dest)) representing the dimension boundaries of each hallway in the level'''
+        '''Returns a set of ((row_origin, row_dest), (col_origin, col_dest)) representing the dimension boundaries of each hallway in the level'''
         hall_dimensions = set()
         for hall in self.hallways:
             row = (hall.origin.row, hall.origin.row + hall.dimensions.row)
@@ -132,7 +132,3 @@ class Level:
             if coord in self.keys:
                 result.object = 'key'
         return result
-
-
-
-

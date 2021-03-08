@@ -9,7 +9,7 @@ from coord import Coord
 from model.room import Room
 from model.hallway import Hallway
 from model.level import Level
-from utilities import check_dimensions
+from utilities import check_dimensions, to_coord, to_point
 
 
 
@@ -74,5 +74,15 @@ def test_check_dimensions_no_match(level2, room3, room2, hallway):
     cd4_cols = (0, 0)
     res = check_dimensions(cd4_rows, cd4_cols, level_dimensions)
     assert res == None
-    
+
+def test_to_coord():
+    c1 = Coord(0, 0)
+    c2 = to_coord([0, 0])
+    assert c1 == c2
+
+def test_to_point():
+    p1 = [0, 0]
+    p2 = to_point(Coord(0, 0))
+    assert p1[0] == p2[0]
+    assert p1[1] == p2[1]
 

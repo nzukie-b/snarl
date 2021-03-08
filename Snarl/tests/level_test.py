@@ -99,7 +99,6 @@ def test_coord():
     assert c2 != c3
     assert c1 == c3
 
-
 def test_valid_level(level1):
     assert check_level(level1) == True
 

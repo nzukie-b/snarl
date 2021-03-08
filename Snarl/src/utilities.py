@@ -59,3 +59,16 @@ def check_level(level):
             return False
     #print("dimension check: " + str(level.check_level_dimensions()))
     return level.check_level_dimensions()
+
+
+def to_coord(point):
+    '''Converts the point coordinate system i.e. [0, 0] to a Coord object {row: 0, col:0}'''
+    if isinstance(point, Coord):
+        # if point is already a Coord object return it.
+        return point
+    else:
+        return Coord(point[0], point[1])
+
+def to_point(coord):
+    '''Converts a Coord object to the points coordinate system'''
+    return [coord.row, coord.col]

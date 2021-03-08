@@ -4,7 +4,7 @@ from coord import Coord
 
 
 class Player:
-    def __init__(self, pos, name, health, inventory=[], non_walkable_tiles=["Wall"], movement_speed=2):
+    def __init__(self, pos, name, health=100, inventory=[], non_walkable_tiles=["Wall"], movement_speed=2):
         self.pos = Coord(pos.row * SIZE, pos.col * SIZE)
         self.name = name
         self.inventory = inventory

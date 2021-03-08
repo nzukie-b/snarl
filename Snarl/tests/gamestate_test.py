@@ -10,7 +10,7 @@ from model.room import Room
 from model.hallway import Hallway
 from model.level import Level
 from model.gamestate import GameState, create_initial_game_state
-from utilities import check_room, check_level
+from utilities import to_coord, to_point
 
 
 @pytest.fixture

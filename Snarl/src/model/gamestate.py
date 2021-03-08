@@ -1,5 +1,6 @@
 import copy
 from coord import Coord
+from utilities import to_point, to_coord
 from model.room import Room
 from model.adversary import Adversary
 from model.player import Player
@@ -11,6 +12,14 @@ class GameState:
         self.players = players
         self.adversaries = adversaries
         self.exit_locked = exit_locked
+
+        
+    def register_actor(self, actor_type, name, coord):
+        if actor_type == 'player':
+            self.players.append(Player(coord, name))
+        else:
+            self.adversaries.append(Adversary(coord, name))
+    
 
 
 def remove_doors_and_items_from_rooms(first):
@@ -51,19 +60,17 @@ def create_initial_game_state(level, num_players, num_adversaries):
         print("ADDA: " + str(cur_adversary_tile.row) + " " + str(cur_adversary_tile.col))
         adversaries.append(Adversary(Coord(cur_adversary_tile.row, cur_adversary_tile.col), "Evil Bruh " + str(i), 3))
 
-    #print(str(adversaries))
-
     return [players, adversaries]
 
 
-def update_game_state(new_players_locs, new_adversary_locs, new_players_healths, new_adversary_healths, level_exit_status):
+def update_game_state(new_players_locs, new_adversary_locs, new_players_healths, new_adversary_healths, exit_locked):
     """
     Replaces the current gamestate with a new gamestate made up of the updated values for all of the game attributes.
     :param new_players_locs: [Coord]
     :param new_adversary_locs: [Coord]
     :param new_players_healths: [int]
     :param new_adversary_healths: [int]
-    :param level_exit_status: boolean
+    :param exit_locked: boolean
     :return:
     """
     players = []
