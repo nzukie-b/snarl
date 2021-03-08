@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys, os, json
+
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
@@ -8,6 +9,10 @@ from utilities import to_coord, to_point
 from model.room import Room
 from model.hallway import Hallway
 from model.level import Level
+from model.player import Player
+from model.adversary import Adversary
+from model.gamestate import GameState
+
 
 def parse_room_obj(room_input):
     try:
@@ -23,14 +28,13 @@ def parse_room_obj(room_input):
         if room_json[0]['type'] != 'room':
             print('Invalid Args: Type is not room')
             return None
-        origin = room_json[0]['origin']
-        bounds = room_json[0]['bounds']
-        layout = room_json[0]['layout']
+        input_json = room_json[0]
         point = room_json[1]
     except (KeyError, IndexError):
-        origin = room_json['origin']
-        bounds = room_json['bounds']
-        layout = room_json['layout']
+        input_json = room_json
+    origin = input_json['origin']
+    bounds = input_json['bounds']
+    layout = input_json['layout']
 
     origin_coord = to_coord(origin)
     dimensions = Coord(bounds['rows'], bounds['columns'])
@@ -91,14 +95,13 @@ def parse_level(level_input):
         if level_json[0]['type'] != 'level':
             print('Invalid Args: Type is not level')
             return None
-        rooms = level_json[0]['rooms']
-        hallways = level_json[0]['hallways']
-        objects = level_json[0]['objects']
+        input_json = level_json[0]
         point = level_json[1]
     except (KeyError, IndexError):
-        rooms = level_json['rooms']
-        hallways = level_json['hallways']
-        objects = level_json['objects']
+        input_json = level_json
+    rooms = input_json['rooms']
+    hallways = input_json['hallways']
+    objects = input_json['objects']
 
     rooms_list = [parse_room_obj(room)['room'] for room in rooms]
     halls_list = [parse_hall(hall, rooms_list) for hall in hallways]
@@ -115,6 +118,42 @@ def parse_level(level_input):
     parsed_level = Level(rooms_list, halls_list, [key_coord], [exit_coord])
     return {'level': parsed_level, 'coord': to_coord(point)}   
 
-# def parse_state(state_input):
-#     state_json = json.loads(str(state_input))
-#     if state_json[]
+def parse_actor(actor_input):
+    actor_type = actor_input['type']
+    name = actor_input['name']
+    coord = to_coord(actor_input['position'])
+    if actor_type == 'player':
+        return Player(coord, name)
+    else:
+        return Adversary(coord, name)
+def parse_state(state_input):
+    try:
+        state_json = json.loads(str(state_input))
+    except TypeError:
+        state_json = state_input
+    level = None
+    players = []
+    adversaries = []
+    exit_locked = None
+
+    try:
+        if state_json[0]['type'] != 'state':
+            print('Invalid Args: Type is not state')
+            return None
+        input_json = state_json[0]
+        name = state_json[1]
+        coord = to_coord(state_json[2])
+    except (KeyError, IndexError):
+        input_json = state_json
+
+    level_input = input_json['level']
+    players_input = input_json['players']
+    adversaries_input = input_json['adversaries']
+    exit_locked = input_json['exit_locked']
+
+    level = parse_level(level_input)['level']
+    players = [parse_actor(actor_input) for actor_input in players_input]
+    adversaries = [parse_actor(actor_input) for actor_input in adversaries_input]
+    state = GameState(level, players, adversaries, exit_locked)
+    return {'state': state, 'name': name if name else None, 'coord': coord if coord else None}
+    

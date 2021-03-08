@@ -13,12 +13,6 @@ class GameState:
         self.adversaries = adversaries
         self.exit_locked = exit_locked
 
-        
-    def register_actor(self, actor_type, name, coord):
-        if actor_type == 'player':
-            self.players.append(Player(coord, name))
-        else:
-            self.adversaries.append(Adversary(coord, name))
     
 
 
@@ -42,6 +36,7 @@ def remove_doors_and_items_from_rooms(first):
     return Room(first_rm.origin, first_rm.dimensions, first_rm_removed, first_rm.doors, first_rm.items)
 
 
+# def initialize_state(level, players, ad)
 
 def create_initial_game_state(level, num_players, num_adversaries):
     players = []
