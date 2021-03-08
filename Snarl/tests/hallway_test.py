@@ -8,8 +8,7 @@ sys.path.append(game_dir)
 from coord import Coord
 from model.room import Room
 from model.hallway import Hallway
-from model.level import Level, GameState, create_initial_game_state
-from utilities import check_room, check_hallway, check_level
+from utilities import check_hallway
 
 
 #Room 1 example

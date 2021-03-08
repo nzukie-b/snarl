@@ -8,8 +8,9 @@ sys.path.append(game_dir)
 from coord import Coord
 from model.room import Room
 from model.hallway import Hallway
-from model.level import Level, GameState, create_initial_game_state
-from utilities import check_room, check_hallway, check_level
+from model.level import Level
+from model.gamestate import GameState, create_initial_game_state
+from utilities import check_level
 
 
 #Room 1 example
@@ -48,19 +49,6 @@ def room3():
     room3 = Room(start1, dimensions1, tiles1, doors1, items1)
     return room3
 
-@pytest.fixture
-def invalid_tiles():
-    '''Initializes example Room with invalid Tiles'''
-    invalid_tiles = [Coord(11, 10), Coord(7, 6),Coord(7, 8),Coord(7, 9),Coord(7, 10), Coord(6, 6), Coord(6, 8), Coord(8, 9), Coord(8,6), Coord(8, 7), Coord(8,8), Coord(8, 9), Coord(8, 10), Coord(9, 6), Coord(9, 7), Coord(9,8), Coord(6, 10)]
-    room = Room(start, dimensions, invalid_tiles, doors, items)
-    return room
-
-@pytest.fixture
-def invalid_doors():
-    '''Initializes example Room with invalid Doors'''
-    invalid_doors = [Coord(8,10), Coord(7, 10), Coord(5, 5), Coord(6, 10)]
-    room = Room(start, dimensions, tiles, invalid_doors, items)
-    return room
 
 @pytest.fixture
 def hallway(room1, room2):
@@ -111,30 +99,6 @@ def test_coord():
     assert c2 != c3
     assert c1 == c3
 
-def test_gamestate(gamestate1):
-    gs1 = gamestate1
-    assert len(gs1.players) == 3
-    assert len(gs1.adversaries) == 3
-    for i in range(3):
-        assert gs1.adversaries[i].health == 3
-        assert gs1.players[i].health == 3
-        assert gs1.adversaries[i].id == "Evil Bruh " + str(i)
-        assert gs1.players[i].name == "Bruh " + str(i)
-
-
-def test_valid_check_room(room1):
-    assert check_room(room1) == True
-
-
-def test_invalid_check_room(capsys, invalid_tiles, invalid_doors):
-    valid_tiles = check_room(invalid_tiles)
-    capture = capsys.readouterr()
-    assert capture.out == 'Invalid Room: Walkable tile(s) outside of room dimensions\n'
-    assert valid_tiles == False
-    valid_doors = check_room(invalid_doors)
-    capture = capsys.readouterr()
-    assert capture.out == 'Invalid Room: Door(s) outside of walkable tiles\n'
-    assert valid_doors == False
 
 def test_valid_level(level1):
     assert check_level(level1) == True
