@@ -64,7 +64,6 @@ def gamestate1(level2):
         a = Adversary('Evil Bruh ' + str(i))
         a.health = 3
         adversaries.append(a)
-    print(len(adversaries))
 
     gs_info = create_initial_game_state(level2, players, adversaries)
     gamestate = GameState(level2, gs_info[0], gs_info[1])

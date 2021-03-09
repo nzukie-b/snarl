@@ -24,6 +24,7 @@ class GameState:
     
 
 def remove_doors_and_items_from_rooms(first):
+    '''Remove doors and items from walkable tiles. Used to determine initial placement of entities'''
     first_rm = copy.deepcopy(first)
     first_rm_removed = []
 
@@ -86,4 +87,4 @@ def update_game_state(new_players_locs, new_adversary_locs, new_players_healths,
     for i in range(len(new_adversary_locs)):
         adversaries.append(Adversary(new_adversary_locs[i], "Evil Bruh " + str(i), new_adversary_healths[i]))
 
-    return GameState(players, adversaries)
+    return GameState(players, adversaries, exit_locked=exit_locked)
