@@ -12,9 +12,16 @@ class GameState:
         self.players = players
         self.adversaries = adversaries
         self.exit_locked = exit_locked
-
     
+    def __str__(self):
+        level_str = str(self.level)
+        players_str = [str(player) for player in self.players]
+        adversaries_str = [str(adversary) for adversary in self.adversaries]
+        return '{{"level": {}, "players": {}, "adversaries": {}, "exit_locked": {}}}'.format(level_str, players_str, adversaries_str, self.exit_locked)
 
+    def __repr__(self):
+        return str(self)
+    
 
 def remove_doors_and_items_from_rooms(first):
     first_rm = copy.deepcopy(first)

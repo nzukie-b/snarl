@@ -15,3 +15,6 @@ if __name__ == '__main__':
     state = parsed_input['state']
     name = parsed_input['name']
     coord = parsed_input['coord']
+    print(state)
+    print(name)
+    print(coord)

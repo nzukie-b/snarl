@@ -116,7 +116,7 @@ def parse_level(level_input):
             exit_coord = to_coord(posn)
 
     parsed_level = Level(rooms_list, halls_list, [key_coord], [exit_coord])
-    return {'level': parsed_level, 'coord': to_coord(point)}   
+    return {'level': parsed_level, 'coord': to_coord(point) if point else None}   
 
 def parse_actor(actor_input):
     actor_type = actor_input['type']
@@ -149,11 +149,10 @@ def parse_state(state_input):
     level_input = input_json['level']
     players_input = input_json['players']
     adversaries_input = input_json['adversaries']
-    exit_locked = input_json['exit_locked']
+    exit_locked = input_json['exit-locked']
 
     level = parse_level(level_input)['level']
     players = [parse_actor(actor_input) for actor_input in players_input]
     adversaries = [parse_actor(actor_input) for actor_input in adversaries_input]
     state = GameState(level, players, adversaries, exit_locked)
     return {'state': state, 'name': name if name else None, 'coord': coord if coord else None}
-    
