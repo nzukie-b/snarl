@@ -52,11 +52,8 @@ def check_level(level):
             #print("ROOM CHECK FAILED")
             return False
     for hall in level.hallways:
-        try:
-            check_hallway(hall)
-        except Exception as err:
-            #print("HALLWAY CHECK FAILED")
-            return False
+            if check_hallway(hall) == False:
+                return False
     #print("dimension check: " + str(level.check_level_dimensions()))
     return level.check_level_dimensions()
 
