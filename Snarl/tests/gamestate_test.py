@@ -6,11 +6,13 @@ snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
 from coord import Coord
+from utilities import to_coord, to_point
 from model.room import Room
 from model.hallway import Hallway
 from model.level import Level
 from model.gamestate import GameState, create_initial_game_state
-from utilities import to_coord, to_point
+from model.adversary import Adversary
+from model.player import Player
 
 
 @pytest.fixture
@@ -53,7 +55,18 @@ def level2(room3, room2, hallway):
 @pytest.fixture
 def gamestate1(level2):
     '''Initializes example gamestate'''
-    gs_info = create_initial_game_state(level2, 3, 3)
+    players = []
+    adversaries = []
+    for i in range(3):
+        p = Player('Bruh ' + str(i))
+        p.health = 3
+        players.append(p)
+        a = Adversary('Evil Bruh ' + str(i))
+        a.health = 3
+        adversaries.append(a)
+    print(len(adversaries))
+
+    gs_info = create_initial_game_state(level2, players, adversaries)
     gamestate = GameState(level2, gs_info[0], gs_info[1])
     return gamestate
 
@@ -66,5 +79,5 @@ def test_gamestate(gamestate1):
     for i in range(3):
         assert gs1.adversaries[i].health == 3
         assert gs1.players[i].health == 3
-        assert gs1.adversaries[i].id == "Evil Bruh " + str(i)
+        assert gs1.adversaries[i].name == "Evil Bruh " + str(i)
         assert gs1.players[i].name == "Bruh " + str(i)

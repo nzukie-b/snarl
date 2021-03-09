@@ -27,42 +27,44 @@ def remove_doors_and_items_from_rooms(first):
     first_rm = copy.deepcopy(first)
     first_rm_removed = []
 
-    print("1 " + str(len(first.tiles)))
-    print("2 " + str(len(first_rm.tiles)))
+    # print("1 " + str(len(first.tiles)))
+    # print("2 " + str(len(first_rm.tiles)))
 
     for tile in first_rm.tiles:
-        print(str(tile.row) + " " + str(tile.col) + " in doors " + str(tile in first.doors))
-        print(str(tile.row) + " " + str(tile.col) + " in items " + str(tile in first.items))
+        # print(str(tile.row) + " " + str(tile.col) + " in doors " + str(tile in first.doors))
+        # print(str(tile.row) + " " + str(tile.col) + " in items " + str(tile in first.items))
         if tile not in first.doors and tile not in first.items:
-            print("ADD TO LIST: " + str(tile.row) + " " + str(tile.col))
+            # print("ADD TO LIST: " + str(tile.row) + " " + str(tile.col))
             first_rm_removed.append(tile)
 
-    print("3 " + str(len(first.tiles)))
-    print("4 " + str(len(first_rm.tiles)))
+    # print("3 " + str(len(first.tiles)))
+    # print("4 " + str(len(first_rm.tiles)))
 
     return Room(first_rm.origin, first_rm.dimensions, first_rm_removed, first_rm.doors, first_rm.items)
 
 
 # def initialize_state(level, players, ad)
 
-def create_initial_game_state(level, num_players, num_adversaries):
-    players = []
-    adversaries = []
+def create_initial_game_state(level, players, adversaries):
+    player_placements = []
+    adversary_placements = []
 
-    last_room = remove_doors_and_items_from_rooms(level.rooms[len(level.rooms) - 1])
+    last_room = remove_doors_and_items_from_rooms(level.rooms[-1])
     first_room = remove_doors_and_items_from_rooms(level.rooms[0])
 
-    for i in range(num_players):
+    for i in range(len(players)):
         cur_tile = first_room.tiles[i]
-        print("ADDP: " + str(cur_tile.row) + " " + str(cur_tile.col))
-        players.append(Player(Coord(cur_tile.row, cur_tile.col), "Bruh " + str(i), 3))
+        player = players[i]    
+        player.posn = Coord(cur_tile.row, cur_tile.col)
+        player_placements.append(player)
 
-    for i in range(num_adversaries):
+    for i in range(len(adversaries)):
         cur_adversary_tile = last_room.tiles[i]
-        print("ADDA: " + str(cur_adversary_tile.row) + " " + str(cur_adversary_tile.col))
-        adversaries.append(Adversary(Coord(cur_adversary_tile.row, cur_adversary_tile.col), "Evil Bruh " + str(i), 3))
+        adversary = adversaries[i]
+        adversary.posn = Coord(cur_adversary_tile.row, cur_adversary_tile.col)
+        adversary_placements.append(adversary)
 
-    return [players, adversaries]
+    return [player_placements, adversary_placements]
 
 
 def update_game_state(new_players_locs, new_adversary_locs, new_players_healths, new_adversary_healths, exit_locked):
