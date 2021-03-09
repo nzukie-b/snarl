@@ -5,6 +5,20 @@ from model.room import Room
 from model.adversary import Adversary
 from model.player import Player
 
+class State_Obj:
+    def __init__(self, level, players, adversaries, exit_locked):
+        self.type = 'state'
+        self.level = level
+        self.players = players
+        self.adversaries = adversaries
+        self.exit_locked = exit_locked
+
+    def __str__(self):
+        return '{{"type": {}, "level": {}, "players": {}, "adversaries": {}, "exit-locked": {}'.format(self.type, self.level, self.players, self.adversaries, self.exit_locked)
+    
+    def __repr__(self):
+        return str(self)
+
 
 class GameState:
     def __init__(self, level, players, adversaries, exit_locked=False):
