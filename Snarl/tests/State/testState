@@ -32,7 +32,7 @@ def main():
             return state_obj
     info = level.info_at_coord(coord)
     if info.traversable:
-        if info.object == 'exit' and state.exit_unlocked:
+        if info.object == 'exit' and not state.exit_locked:
             state.players.remove(player)
             state_obj = State_Obj(state.level, state.players, state.adversaries, state.exit_locked)
             print('[ "Success", "Player ", {}, " exited.", {} ]'.format(name, state_obj))
