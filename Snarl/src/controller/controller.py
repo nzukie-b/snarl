@@ -123,9 +123,10 @@ def parse_actor(actor_input):
     name = actor_input['name']
     coord = to_coord(actor_input['position'])
     if actor_type == 'player':
-        return Player(coord, name)
+        return Player(name, coord)
     else:
-        return Adversary(coord, name)
+        return Adversary(name, coord)
+
 def parse_state(state_input):
     try:
         state_json = json.loads(str(state_input))

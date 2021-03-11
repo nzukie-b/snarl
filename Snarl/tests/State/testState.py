@@ -2,12 +2,12 @@
 
 import sys, os
 
-from utilities import to_point
 currentdir = os.path.dirname(os.path.realpath(__file__))
 tests_dir = os.path.dirname(currentdir)
 snarl_dir = os.path.dirname(tests_dir)
 src_dir = snarl_dir + '/src'
 sys.path.append(src_dir)
+from utilities import to_point
 from controller.controller import parse_state
 from model.gamestate import GameState, State_Obj
 
@@ -23,25 +23,25 @@ def main():
     if name not in player_names:
         print('[ "Failure", "Player ", {}, " is not a part of the game." ]'.format(name))
         return None
-    player = next([player for player in state.players if player.name == name])
+    player = next(player for player in state.players if player.name == name)
     for adv in state.adversaries:
-        if adv.coord == coord:
+        if adv.pos == coord:
             state.players.remove(player)
-            state_obj = State_Obj(state.level, state.players, state.adversaires, state.exit_locked)
+            state_obj = State_Obj(state.level, state.players, state.adversaries, state.exit_locked)
             print('[ "Success", "Player ", {}, " was ejected.", {} ]'.format(player.name, state_obj))
             return state_obj
     info = level.info_at_coord(coord)
     if info.traversable:
         if info.object == 'exit' and state.exit_unlocked:
             state.players.remove(player)
-            state_obj = State_Obj(state.level, state.players, state.adversaires, state.exit_locked)
+            state_obj = State_Obj(state.level, state.players, state.adversaries, state.exit_locked)
             print('[ "Success", "Player ", {}, " exited.", {} ]'.format(name, state_obj))
             return state_obj
         else:
             state.players.remove(player)
-            player.coord == coord
-            state.players.add(player)
-            state_obj = State_Obj(state.level, state.players, state.adversaires, state.exit_locked)
+            player.pos == coord
+            state.players.append(player)
+            state_obj = State_Obj(state.level, state.players, state.adversaries, state.exit_locked)
             print('[ "Success", {} ]'.format(state_obj))
             return state_obj
     else:
