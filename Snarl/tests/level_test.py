@@ -126,7 +126,7 @@ def test_invalid_level_shared_coords(capsys, room1, level1):
     valid_level = check_level(level1)
     capture = capsys.readouterr() 
     # assert capture.out == 'Invalid Level: Hallway or Room sharing coordinates\n'
-    # Not sure why ((5, 10), (15, 20)) union ((5, 10), (15, 20)), ((5, 10), (0, 5)) isn't triggering the above condition, but check_dimensions in check_level_dimensions also handles this issue
+    # TODO: Fix hallway to be valid
     assert valid_level == False
 
 
