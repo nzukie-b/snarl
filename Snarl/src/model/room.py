@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import json
+from utilities import get_reachable_tiles
 
 # Assuming that dimension given will not be offset from the origin and will just be sized dimensions in x and y.
 #   ie. origin = (10, 10) dimensions = (5, 7) The tile boundaries of the room are (10 - 15, 10 - 17)
@@ -46,17 +47,11 @@ class Room:
                 return False
         return True
 
-    def get_reachable_tiles(self, coord):
-        '''Returns a list of reachable tiles in this room within a 1 space move'''
-        tiles = []
-        for tile in self.tiles:
-            #TODO: Separate this into some coord comparison function?
-            if (tile.row == coord.row) and (tile.col ==  coord.col + 1 or tile.col == coord.col - 1):
-                tiles.append(tile)
-            elif (tile.col == coord.col) and (tile.row == coord.row + 1 or tile.row == coord.row - 1):
-                tiles.append(tile)
-        return tiles
-
+    def get_reachable_tiles(self, coord, walkable_tiles=None):
+        '''Takes in a list of walkable tiles, and returns a list of tiles reachable within a 1 space move'''
+        if walkable_tiles == None: walkable_tiles = self.tiles
+        return get_reachable_tiles(coord, walkable_tiles)
+        
     def is_reachable_tile(self, coord):
         return coord in self.tiles
 

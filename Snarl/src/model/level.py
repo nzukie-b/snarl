@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from utilities import check_dimensions
+from utilities import check_dimensions, get_adjacent_halls, get_adjacent_rooms, to_point
 
 class CoordInfo:
     def __init__(self, traversable=None, obj='null', type_='void', reachable=[]):
@@ -60,7 +60,7 @@ class Level:
         '''Checks that this level has no rooms/hallways sharing coodinates or having overlapping dimensions'''
         room_dimensions = self.get_level_room_dimensions()
         hall_dimensions = self.get_level_hallway_dimensions()
-        if not hall_dimensions or not room_dimensions:
+        if not (hall_dimensions and room_dimensions):
             return False
         level_size = len(room_dimensions) + len(hall_dimensions)
         level_dimensions = room_dimensions.union(hall_dimensions)
@@ -91,7 +91,6 @@ class Level:
         if not check_dimensions(row_dimensions, col_dimensions, room_dimensions.union(hall_dimensions)):
             # Provided coordinate is not within the bounds of the level
             result.traversable = False
-            # result['object'] == 'null'
         else:
             # Point is guaranteed to be within level dimensions
             origin = None
@@ -111,12 +110,9 @@ class Level:
                     if origin == room.origin:
                         result.type = 'room'
                         result.traversable = coord in room.tiles
-                        reachable = []
-                        for door in room.doors:
-                            for hall in self.hallways:
-                                if door in hall.doors:
-                                    reachable += [[room.origin.row, room.origin.col] for room in hall.rooms if door not in room.doors]
-                        result.reachable = reachable
+                    reachable = get_adjacent_rooms(origin, self)
+                    reachable = [] if reachable is None else reachable
+                    result.reachable = [to_point(coord) for coord in reachable]
 
             elif is_room == False:
                 for hall in self.hallways:
@@ -124,8 +120,9 @@ class Level:
                         result.type = 'hallway'
                         traversable = coord.row in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1) and coord.col in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1)
                         result.traversable = traversable
-                        reachable = [[room.origin.row, room.origin.col] for room in hall.rooms]
-                        result.reachable = reachable
+                    reachable = get_adjacent_halls(origin, self)
+                    reachable = [] if reachable is None else reachable
+                    result.reachable = [to_point(coord) for coord in reachable]
                         
             if coord in self.exits:
                 result.object = 'exit'

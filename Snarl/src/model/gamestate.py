@@ -61,6 +61,7 @@ def remove_doors_and_items_from_rooms(first):
 # def initialize_state(level, players, ad)
 
 def create_initial_game_state(level, players, adversaries):
+    '''Creates the initial gamestate. Places players on walkable tiles in the first room. Places adversaries on walkables tiles in the last room.'''
     player_placements = []
     adversary_placements = []
 
@@ -82,7 +83,7 @@ def create_initial_game_state(level, players, adversaries):
     return [player_placements, adversary_placements]
 
 
-def update_game_state(new_players_locs, new_adversary_locs, new_players_healths, new_adversary_healths, exit_locked):
+def update_game_state(new_players, new_adversaries, exit_locked):
     """
     Replaces the current gamestate with a new gamestate made up of the updated values for all of the game attributes.
     :param new_players_locs: [Coord]
@@ -95,10 +96,10 @@ def update_game_state(new_players_locs, new_adversary_locs, new_players_healths,
     players = []
     adversaries = []
 
-    for i in range(len(new_players_locs)):
-        players.append(Player(new_adversary_locs[i], "Bruh " + str(i), new_players_healths[i]))
+    for i in range(len(new_players)):
+        players.append(Player(new_players[i].pos, new_players[i].name, new_players[i].health, new_players[i].inventory, new_players[i].non_walkable_tiles, new_players[i].movement_speed))
 
-    for i in range(len(new_adversary_locs)):
-        adversaries.append(Adversary(new_adversary_locs[i], "Evil Bruh " + str(i), new_adversary_healths[i]))
+    for i in range(len(new_adversaries)):
+        adversaries.append(Adversary(new_adversaries[i].pos, new_adversaries[i].name, new_adversaries[i].health, new_adversaries[i].inventory, new_adversaries[i].non_walkable_tiles, new_adversaries[i].movement_speed))
 
     return GameState(players, adversaries, exit_locked=exit_locked)
