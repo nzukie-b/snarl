@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from utilities import check_dimensions, get_adjacent_halls, get_adjacent_rooms, to_point
+from utilities import check_dimensions, get_reachable_halls, get_reachable_rooms, to_point
 
 class CoordInfo:
     def __init__(self, traversable=None, obj='null', type_='void', reachable=[]):
@@ -110,7 +110,7 @@ class Level:
                     if origin == room.origin:
                         result.type = 'room'
                         result.traversable = coord in room.tiles
-                    reachable = get_adjacent_rooms(origin, self)
+                    reachable = get_reachable_rooms(origin, self)
                     reachable = [] if reachable is None else reachable
                     result.reachable = [to_point(coord) for coord in reachable]
 
@@ -120,7 +120,7 @@ class Level:
                         result.type = 'hallway'
                         traversable = coord.row in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1) and coord.col in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1)
                         result.traversable = traversable
-                    reachable = get_adjacent_halls(origin, self)
+                    reachable = get_reachable_halls(origin, self)
                     reachable = [] if reachable is None else reachable
                     result.reachable = [to_point(coord) for coord in reachable]
                         
