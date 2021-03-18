@@ -6,7 +6,8 @@ sys.path.append(src_dir)
 from coord import Coord
 from model.room import Room
 from model.hallway import Hallway
-from model.level import Level, GameState, create_initial_game_state
+from model.level import Level
+from model.gamestate import GameState, create_initial_game_state
 from constants import BLACK, WHITE, YELLOW, GREY, RED, BLUE, HEIGTH, WIDTH, SIZE
 
 
@@ -107,7 +108,7 @@ def main():
     doors = [Coord(8,10), Coord(7, 10), Coord(6, 10)]
     items = [Coord(6, 6), Coord(7, 8)]
     room = Room(start, dimensions, tiles, doors, items)
-    hall_start = Coord(6, 11)
+    hall_start = [Coord(6, 11), Coord(8, 11)]
     hall = Hallway(hall_start, Coord(2, 3), [room])
     #Room 2 example
     tiles1 = [Coord(7, 14), Coord(7, 17), Coord(7, 18), Coord(6, 17), Coord(8, 18), Coord(8, 15), 
@@ -119,7 +120,7 @@ def main():
     room1 = Room(start1, dimensions1, tiles1, doors1, items1)
 
     gs_info = create_initial_game_state(Level([room, room1], [hall]), 3, 3)
-    gamestate = GameState(gs_info[0], gs_info[1])
+    gamestate = GameState(Level([room, room1]), gs_info[0], gs_info[1])
 
 
 

@@ -12,7 +12,7 @@ class Player:
         self.movement_speed = movement_speed
 
     def __str__(self):
-        return '{{"pos": {}, "id": {}, "health": {}, "walkable_tiles": {}, "movement_speed": {}}}'.format(self.pos, self.name, self.health, self.non_walkable_tiles, self.movement_speed)
+        return '{{"pos": {}, "name": {}, "health": {}, "walkable_tiles": {}, "movement_speed": {}, "inventory": {}}}'.format(self.pos, self.name, self.health, self.non_walkable_tiles, self.movement_speed, self.inventory)
 
     def __repr__(self):
         return str(self)
