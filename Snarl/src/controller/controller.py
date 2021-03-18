@@ -57,11 +57,11 @@ def parse_room(room_input):
         return None
     room_obj = parsed_input['room']
     if (parsed_coord.row not in range(room_obj.origin.row, room_obj.origin.row + room_obj.dimensions.row + 1)) or (parsed_coord.col not in range(room_obj.origin.col, room_obj.origin.col + room_obj.dimensions.col + 1)):
-        print('[ Failure: Point ", {} , " is not in room at ", {} ]'.format([parsed_coord.row, parsed_coord.col], [room_obj.origin.row, room_obj.origin.col]))
+        print('[ Failure: Point ", {} , " is not in room at ", {} ]'.format(to_point(parsed_coord), to_point(room_obj.origin)))
         return None
     reachable_coords = room_obj.get_reachable_tiles(parsed_coord)
     reachable_tiles = [to_point(coord) for coord in reachable_coords]
-    print('[ Success: Traversable points from, " {} ," in room at, " {} ," are, " {} ]'.format([parsed_coord.row, parsed_coord.col], [room_obj.origin.row, room_obj.origin.col], reachable_tiles))
+    print('[ Success: Traversable points from, " {} ," in room at, " {} ," are, " {} ]'.format(to_point(parsed_coord), to_point(room_obj.origin), reachable_tiles))
     return reachable_tiles
 
 def parse_hall(hall_input, rooms):
