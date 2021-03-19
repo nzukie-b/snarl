@@ -3,6 +3,7 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
+from constants import MAX_PLAYERS
 from model.player import Player
 from model.adversary import Adversary
 from model.gamestate import GameState, create_initial_game_state, update_game_state
@@ -17,7 +18,7 @@ class GameManager:
 
     def register_players(self, player_names):
         """Create list of player objects using list of player names."""
-        if 1 < len(player_names) < 4:
+        if 1 < len(player_names) < MAX_PLAYERS:
             for name in player_names:
                 self.players.append(Player(name))
         else:
@@ -26,8 +27,8 @@ class GameManager:
 
     def register_adversaries(self, adversary_ids):
         """Create list of adversary objects using list of adversary ids."""
-        for id in adversary_ids:
-            self.adversaries.append(Adversary(id))
+        for id_ in adversary_ids:
+            self.adversaries.append(Adversary(id_))
 
     def start_game(self, level):
         if self.players:
@@ -49,10 +50,10 @@ class GameManager:
         """
 
         for i in range(len(new_players_locs)):
-            self.players[i].loc = new_players_locs[i]
+            self.players[i].pos = new_players_locs[i]
 
-        if self.rc.validate_player_movement(self.players[i].pos, new_players_locs[i], self.gamestate.level):
-            self.gamestate = GameState(self.gamestate.level, self.players, self.adversaries, self.gamestate.exit_locked)
+            if self.rc.validate_player_movement(self.players[i].pos, new_players_locs[i], self.gamestate.level):
+                self.gamestate = GameState(self.gamestate.level, self.players, self.adversaries, self.gamestate.exit_locked)
         else:
             self.players = self.gamestate.players
 
@@ -77,6 +78,6 @@ class GameManager:
 
         if self.rc.validate_item_interaction(player, item, new_level):
             self.gamestate = GameState(new_level, self.players,
-                                       self.gamestate.adversaries, self.gamestate.exit_locked)
+                                       self.adversaries, self.gamestate.exit_locked)
         else:
             self.players = self.gamestate.players
