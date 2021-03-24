@@ -221,6 +221,7 @@ def parse_manager(game_input):
                         # return False
         if len(gm.player_turns) == 0:
             continue
+    
             
 
 
