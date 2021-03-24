@@ -80,7 +80,7 @@ def test_gamemanager(level2):
     player_names = []
     for i in range(3):
         player_names.append("bruh " + str(i))
-    gm.register_players(player_names)
+    gm.register_player_names(player_names)
     assert len(gm.players) == 3
     assert gm.players[0].name == "bruh 0"
     assert gm.players[1].name == "bruh 1"

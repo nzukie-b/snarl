@@ -61,7 +61,7 @@ def remove_doors_and_items_from_rooms(first):
 # def initialize_state(level, players, ad)
 
 def create_initial_game_state(level, players, adversaries):
-    '''Creates the initial gamestate. Places players on walkable tiles in the first room. Places adversaries on walkables tiles in the last room.'''
+    '''Creates the initial gamestate. Places entities on their provided position. If not provided then, places players on walkable tiles in the first room. Places adversaries on walkables tiles in the last room.'''
     player_placements = []
     adversary_placements = []
 
@@ -69,18 +69,22 @@ def create_initial_game_state(level, players, adversaries):
     first_room = remove_doors_and_items_from_rooms(level.rooms[0])
 
     for i in range(len(players)):
-        cur_tile = first_room.tiles[i]
-        player = players[i]    
-        player.pos = Coord(cur_tile.row, cur_tile.col)
+        player = players[i]
+        if player.pos is None:
+            cur_tile = first_room.tiles[i]
+            player.pos = Coord(cur_tile.row, cur_tile.col)
         player_placements.append(player)
 
     for i in range(len(adversaries)):
-        cur_adversary_tile = last_room.tiles[i]
         adversary = adversaries[i]
-        adversary.pos = Coord(cur_adversary_tile.row, cur_adversary_tile.col)
+        if adversary.pos is None:
+            cur_adversary_tile = last_room.tiles[i]
+            adversary.pos = Coord(cur_adversary_tile.row, cur_adversary_tile.col)
         adversary_placements.append(adversary)
 
     return [player_placements, adversary_placements]
+
+
 
 
 def update_game_state(new_players, new_adversaries, exit_locked):

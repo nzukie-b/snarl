@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import sys, os, json
 
+from game.gameManager import GameManager
+
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
@@ -157,3 +159,69 @@ def parse_state(state_input):
     adversaries = [parse_actor(actor_input) for actor_input in adversaries_input]
     state = GameState(level, players, adversaries, exit_locked)
     return {'state': state, 'name': name if name else None, 'coord': coord if coord else None}
+
+def parse_manager(game_input):
+    try:
+        game_json = json.loads(str(game_input))
+    except TypeError:
+        game_json = game_input
+    names = []
+    level = None
+    max_turns = None
+    initial_coords = []
+    move_list = []
+    
+    try:
+        names = game_json[0]
+        level = parse_level(game_json[1])
+        max_turns = game_json[2]
+        initial_coords = [to_coord(point) for point in game_json[3]]
+        moves_list = game_json[4]
+    except (KeyError, IndexError):
+        print('Invalid Args:')
+        return None
+    
+    players = []
+    adversaries = [] 
+    
+    for ii in range(len(initial_coords)):
+        if ii > len(names):
+            adversaries.append(Adversary('adv: ' + str(ii), initial_coords[ii]))
+        players.append(Player(names[ii], initial_coords[ii]))
+
+    gm = GameManager()
+    gm.register_players(players)
+    gm.register_adversaries(adversaries)
+    gm.start_game()
+    #Initialize dictionary with key = player names to use as a hashmap of moves
+    moves_map = dict.fromkeys(names)
+
+    for ii in range(len(players)):
+        try:
+            moves_map[players[ii].name] = moves_list[ii]
+        except IndexError:
+        # ???
+            return None
+        
+    turn = 0
+    for ii in range(1, max_turns+1):
+        for name in names:
+            err = 0
+            player = [player for player in gm.players if player.name == name]
+            player_moves = moves_map[player.name]
+            
+            while err in range(len(player_moves)):
+                active_move = to_coord(player_moves[ii + err]['to'])
+                if gm.request_player_move(player.name, active_move):
+                    break
+                else:
+                    err += 1
+                    # if err not in range(len(player_moves)):
+                        #TODO: Stop and return the result?
+                        # return False
+        if len(gm.player_turns) == 0:
+            continue
+            
+
+
+

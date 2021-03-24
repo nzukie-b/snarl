@@ -79,7 +79,7 @@ def test_gamemanager(level2):
     player_names = []
     for i in range(3):
         player_names.append("bruh " + str(i))
-    gm.register_players(player_names)
+    gm.register_player_names(player_names)
     assert len(gm.players) == 3
     assert gm.players[0].name == "bruh 0"
     assert gm.players[1].name == "bruh 1"
@@ -92,8 +92,8 @@ def test_gamemanager(level2):
     assert gm.players[1].name == "bruh 1"
     assert gm.players[2].name == "bruh 2"
     new_player_locs = [gm.players[0].pos, gm.players[1].pos, gm.players[2].pos]
-    new_player_locs[2].pos = Coord(7, 18)
-    gm.request_player_move(new_player_locs)
+    new_player_locs[2] = Coord(7, 18)
+    gm.request_player_move(gm.players[2].name, Coord(7,18))
     assert gm.gamestate.players[2].pos == Coord(7, 18)
     gm.apply_player_item_interaction(gm.gamestate.players[2], Coord(8, 17))
     print(str(gm.gamestate.players[2]))

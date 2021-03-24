@@ -15,7 +15,7 @@ class RuleChecker:
 
         info = level.info_at_coord(new_player_loc)
 
-        return True and self.__vaildate_movement_distance(cur_player_loc, new_player_loc, True) and info.traversable
+        return self.__vaildate_movement_distance(cur_player_loc, new_player_loc, True) and info.traversable
 
 
     def validate_adversary_movement(self, gamestate, level, new_adversary):
@@ -56,8 +56,10 @@ class RuleChecker:
             if item in room.items:
                 return False
 
-        for pi in player.inventory:
-            if item == Coord(pi.row, pi.col):
-                return False
+        if item in player.inventory:
+            return False
+        # for pi in player.inventory:
+        #     if item == Coord(pi.row, pi.col):
+        #         return False
 
         return True
