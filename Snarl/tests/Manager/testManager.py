@@ -16,12 +16,14 @@ def main():
     max_turns = parsed_input['max_turns']
     moves_map = parsed_input['moves']
     level = parsed_input['level']
-    names = [player.name for player in gm.players]
+    names = [player_name for player_name in gm.players_turns]
     player_updates = []
     move_update = []
+    manager_updates = []
     gm.start_game(level)
 
-    for name in gm.player_turns:
+    ## Initial player  updates ##
+    for name in names:
         player = next(player for player in gm.players if player.name == name)
         update = {
             "type": 'player-update',
@@ -32,47 +34,81 @@ def main():
         }
         #processing here 
 
-        player_updates.append([name, update])
+        data = [name, update]
+        player_updates.append(data)
+        manager_updates.append(data)
 
-
-    for ii in range(max_turns):
-        for name in gm.player_turns:
+    ## Move Updates ##
+    #NOTE Turn starts at 0
+    for turn in range(max_turns):
+        for name in names:
             err = 0
             player = next(player for player in gm.players if player.name == name)
+            # Copy the moves map, and use this copy for iteration
             player_moves = copy.deepcopy(moves_map[player.name])
             
-            while ii + err in range(len(player_moves)):
+            while err in range(len(player_moves)):
                 try:
-                    active_move = player_moves[ii + err]
-                except (IndexError, KeyError):
-                    #exhausted moves list
-                    
-                move = moves_map[player.name].remove(active_move)
-                if move['to'] == 'null':
-                    move_update.append([name, active_move['to'], 'OK'])
+                    active_move = player_moves[turn + err]
+                    # Cases where player_moves[turn] is an invalid index, such as turn 2 (3rd turn when incl. 0) when only 2 moves, are handled below
+                except (IndexError):
+                    #Move list exhausted / More turns than moves
+                    state_obj = State_Obj(gm.gamestate.level, gm.gamestate.players, gm.gamestate.adversaries, gm.exit_locked)
+                    print('[{}, {}]'.format(state_obj, manager_updates))
+                    return manager_updates
+
+                if active_move['to'] == 'null':
+                    gm.request_player_move(player.name, player.pos)
+                    data = [name, active_move, 'OK']
+                    move_update.append(data)
+                    manager_updates.append(data)
                     break
                 else:
-                    move_coord = to_coord(move['to'])
+                    move_coord = to_coord(active_move['to'])
 
                 move_info = gm.request_player_move(player.name, move_coord)
+                valid_move = move_info['valid_move']
+                info = move_info['info']
                 adv_coords = [adv.pos for adv in gm.adversaries]
+
                 if move_info is not None:
+                    #Valid player turn
                     res = 'OK'
-                    if move_info.object == 'exit' and gm.gamestate.exit_unlocked:
+                    if info.traversable == False or valid_move == False:
+                        # Remove invalid moves from the original moves_map so that the next time moves_map is copied, previous invalid moves will not be included.
+                        #   This should help preserve turn order as all next moves should start at the same index since any invalid before that will have been removed
+                        move = moves_map[player.name].remove(active_move)
+                        err += 1
+                        res = 'Invalid'
+                        data = [name, move, res]
+                        move_update.append(data)
+                        manager_updates.append(data)
+                        #Continue while loop until a valid move is reached or the move list is exhausted
+                        continue
+                    
+                    elif move_info.object == 'exit' and gm.gamestate.exit_unlocked:
                         res = 'Exit'
+                        move_update.append(data)
+                        manager_updates.append(data)
+                        state_obj = State_Obj(gm.gamestate.level, gm.gamestate.players, gm.gamestate.adversaries, gm.exit_locked)
+                        print('[{}, {}]'.format(state_obj, manager_updates))
+                        return manager_updates
                     elif move_info.object == 'key':
                         res = 'Key'
                     elif move_coord in adv_coords:
                         res = 'Eject'
-                    elif move_info.traversable == False:
-                        res = 'Invalid'
-                    move_update.append([name, move['to'], res])
+                    data = [name, active_move, res]
+                    move_update.append(data)
+                    manager_updates.append(data)
                     break
                 else:
-                    err += 1
-                    # if err not in range(len(player_moves)):
+                    print('Invalid Turn ??')
                         #TODO: Stop and return the result?
-                        # return False
+
+    state_obj = State_Obj(gm.gamestate.level, gm.gamestate.players, gm.gamestate.adversaries, gm.exit_locked)
+    print('[{}, {}]'.format(state_obj, manager_updates))
+    return manager_updates
+
 
 if __name__ == '__main__':
     main()

@@ -93,7 +93,7 @@ class GameManager:
                 self.players.append(player)
                 self.gamestate = GameState(self.gamestate.level, self.players, self.adversaries, self.gamestate.exit_locked)
                 self.player_turns.remove(player.name)
-                return player_move['info']
+                return player_move
         return None
 
 
