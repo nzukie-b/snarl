@@ -205,7 +205,7 @@ def parse_manager(game_input):
     
     try:
         names = game_json[0]
-        level = parse_level(game_json[1])
+        level = parse_level(game_json[1])['level']
         max_turns = game_json[2]
         initial_coords = [to_coord(point) for point in game_json[3]]
         moves_list = game_json[4]
@@ -217,9 +217,10 @@ def parse_manager(game_input):
     adversaries = [] 
     
     for ii in range(len(initial_coords)):
-        if ii > len(names):
+        if ii < len(names):
+            players.append(Player(names[ii], initial_coords[ii]))
+        else:
             adversaries.append(Adversary('adv: ' + str(ii), initial_coords[ii]))
-        players.append(Player(names[ii], initial_coords[ii]))
 
     gm = GameManager()
     gm.register_players(players)
