@@ -88,27 +88,30 @@ class Level:
         pos_info = check_position(coord, self)
         is_room = pos_info['type'] == ROOM
         origin = pos_info['origin']
-        if is_room == True:
-            for room in self.rooms:
-                if origin == room.origin:
-                    result.type = 'room'
-                    result.traversable = coord in room.tiles
-                reachable = get_reachable_rooms(origin, self)
-                reachable = [] if reachable is None else reachable
-                result.reachable = [to_point(coord) for coord in reachable]
+        if not origin:
+            result.traversable = False
+        else: 
+            if is_room == True:
+                for room in self.rooms:
+                    if origin == room.origin:
+                        result.type = 'room'
+                        result.traversable = coord in room.tiles
+                    reachable = get_reachable_rooms(origin, self)
+                    reachable = [] if reachable is None else reachable
+                    result.reachable = [to_point(coord) for coord in reachable]
 
-        elif is_room == False:
-            for hall in self.hallways:
-                if origin == hall.origin:
-                    result.type = 'hallway'
-                    traversable = coord.row in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1) and coord.col in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1)
-                    result.traversable = traversable
-                reachable = get_reachable_halls(origin, self)
-                reachable = [] if reachable is None else reachable
-                result.reachable = [to_point(coord) for coord in reachable]
-                    
-        if coord in self.exits:
-            result.object = 'exit'
-        if coord in self.keys:
-            result.object = 'key'
+            elif is_room == False:
+                for hall in self.hallways:
+                    if origin == hall.origin:
+                        result.type = 'hallway'
+                        traversable = coord.row in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1) and coord.col in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1)
+                        result.traversable = traversable
+                    reachable = get_reachable_halls(origin, self)
+                    reachable = [] if reachable is None else reachable
+                    result.reachable = [to_point(coord) for coord in reachable]
+                        
+            if coord in self.exits:
+                result.object = 'exit'
+            if coord in self.keys:
+                result.object = 'key'
         return result
