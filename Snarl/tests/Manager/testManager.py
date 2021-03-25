@@ -5,7 +5,9 @@ tests_dir = os.path.dirname(currentdir)
 snarl_dir = os.path.dirname(tests_dir)
 src_dir = snarl_dir + '/src'
 sys.path.append(src_dir)
-from utilities import to_point
+from coord import Coord
+from constants import ROOM, HALL
+from utilities import check_position, to_point, to_coord, coord_radius
 from controller.controller import parse_manager, to_layout
 from model.gamestate import State_Obj
 
@@ -33,7 +35,33 @@ def main():
             "actors": None 
         }
         #processing here 
-
+        view_radius = Coord(5, 5)
+        coords = coord_radius(player.pos, view_radius)
+        objects = []
+        actors = []
+        other_players = [p for p in gm.players if p.name is not name]
+        for player in other_players:
+            if player.pos in coord:
+                actors.append({"type": 'player', "name": player.name, "position": to_point(player.pos)})
+        for adv in gm.adversaries:
+            if adv.pos in coord:
+                actors.append({"type": 'zombie', "name": adv.name, "posision": to_point(adv.pos)})
+        level = gm.gamestate.level
+        pos_info = check_position(player.pos, level)
+        is_room = pos_info['type'] == ROOM
+        origin = pos_info['origin']
+        if is_room:
+            for room in level.rooms:
+                for item in room.items:
+                    if item in coords:
+                        objects.append({"type": 'key', "position": to_point(item)})
+        for exit_ in level.exits:
+            if exit_ in coords:
+                objects.append({"type": 'exit', "position": to_point(exit_)})
+        layout = to_layout(player.pos, level, view_radius)
+        update['layout'] = layout
+        update['objects'] = objects
+        update['actors'] = actors
         data = [name, update]
         player_updates.append(data)
         manager_updates.append(data)

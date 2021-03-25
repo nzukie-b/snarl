@@ -103,23 +103,24 @@ def get_reachable_halls(origin, level):
     return reachable
 
 
-def check_position(origin, level):
-    row_dimensions = (origin.row, origin.row)
-    col_dimensions = (origin.col, origin.col)
+def check_position(pos, level):
+    '''Checks if the provide point is inside the level. If so returns whether it is a hallway or a room, and its respective origin.'''
+    row_dimensions = (pos.row, pos.row)
+    col_dimensions = (pos.col, pos.col)
     room_dimensions = level.get_level_room_dimensions()
     hall_dimensions = level.get_level_hallway_dimensions()
-    origin = None
+    pos = None
     # Room or Hallway
     origin_type = None
     room_origin = check_dimensions(row_dimensions, col_dimensions, room_dimensions)
     hall_origin = check_dimensions(row_dimensions, col_dimensions, hall_dimensions)
     if room_origin:
         origin_type = ROOM
-        origin = room_origin
+        pos = room_origin
     elif hall_origin:
         origin_type = HALL
-        origin = hall_origin
-    return {'type': origin_type, 'origin': origin}
+        pos = hall_origin
+    return {'type': origin_type, 'origin': pos}
 
 
 def coord_radius(pos, dimensions):
