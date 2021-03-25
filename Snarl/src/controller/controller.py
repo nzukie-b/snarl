@@ -192,7 +192,6 @@ def parse_manager(game_input):
     gm = GameManager()
     gm.register_players(players)
     gm.register_adversaries(adversaries)
-    gm.start_game()
     #Initialize dictionary with key = player names to use as a hashmap of moves
     moves_map = dict.fromkeys(names)
 
@@ -200,27 +199,9 @@ def parse_manager(game_input):
         try:
             moves_map[players[ii].name] = moves_list[ii]
         except IndexError:
-        # ???
+        # ??? other exceptions ???
             return None
-        
-    turn = 0
-    for ii in range(1, max_turns+1):
-        for name in names:
-            err = 0
-            player = [player for player in gm.players if player.name == name]
-            player_moves = moves_map[player.name]
-            
-            while err in range(len(player_moves)):
-                active_move = to_coord(player_moves[ii + err]['to'])
-                if gm.request_player_move(player.name, active_move):
-                    break
-                else:
-                    err += 1
-                    # if err not in range(len(player_moves)):
-                        #TODO: Stop and return the result?
-                        # return False
-        if len(gm.player_turns) == 0:
-            continue
+    return {'manager': gm, 'level': level, 'max_turns': max_turns, 'moves': moves_map}
     
             
 

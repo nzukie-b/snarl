@@ -80,16 +80,21 @@ class GameManager:
             self.players = self.gamestate.players
 
     def request_player_move(self, name, new_pos):
+        #TODO: Add condition for adversary turns as well
+        # If all players (adversaries later) have gone this turn cycle, then reset the turn order
+        if len(self.player_turns) == 0: self.reset_player_turns()
         player = next(player for player in self.players if player.name == name)
         if player.name in self.player_turns:
-            if self.rc.validate_player_movement(player.pos, new_pos, self.gamestate.level):
+            player_move = self.rc.validate_player_movement(player.pos, new_pos, self.gamestate.level)
+            
+            if player_move['valid_move'] and player_move['info'].traversable:
                 self.players.remove(player)
                 player.pos = new_pos
                 self.players.append(player)
                 self.gamestate = GameState(self.gamestate.level, self.players, self.adversaries, self.gamestate.exit_locked)
                 self.player_turns.remove(player.name)
-                return True
-        return False
+                return player_move['info']
+        return None
 
 
     def apply_player_item_interaction(self, player, item):

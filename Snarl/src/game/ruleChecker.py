@@ -15,7 +15,8 @@ class RuleChecker:
 
         info = level.info_at_coord(new_player_loc)
 
-        return self.__vaildate_movement_distance(cur_player_loc, new_player_loc, True) and info.traversable
+
+        return {'valid_move': self.__vaildate_movement_distance(cur_player_loc, new_player_loc, True), 'info': info}
 
 
     def validate_adversary_movement(self, gamestate, level, new_adversary):
