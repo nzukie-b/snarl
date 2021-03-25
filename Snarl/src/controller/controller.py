@@ -7,7 +7,8 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
 from coord import Coord
-from utilities import to_coord, to_point
+from constants import ROOM, HALL
+from utilities import to_coord, to_point, check_position, coord_radius
 from model.room import Room
 from model.hallway import Hallway
 from model.level import Level
@@ -50,6 +51,37 @@ def parse_room_obj(room_input):
             if layout[ii][jj] == 2:
                 doors.append(Coord(origin[0] + ii, origin[1] + jj))
     return {'coord': to_coord(point) if point else None, 'room': Room(origin_coord, dimensions, tiles, doors)}
+
+def to_layout(pos, level, dimensions):
+    '''Takes a level and returns a layout of tiles centered around the provided point'''
+    pos_info = check_position(pos, level)
+    origin = pos_info['origin']
+    is_room = pos_info['type'] == ROOM
+    layout = [[0 for ii in range(dimensions.row)] for jj in range(dimensions.col)]
+    coords = coord_radius(pos, dimensions)
+
+    if is_room:
+        room = next(room for room in level.room if room.origin == origin)
+        for tile in room.tiles:
+            if tile in coords:
+                #origin 5, 5 
+                layout[tile.row - origin.row][tile.col - origin.col] = 1
+        for door in room.doors:
+            if door in coords:
+                layout[door.row - origin.row][door.col - origin.col] = 2
+    else:
+
+        hall = next(hall for hall in level.hallways if hall.origin == origin)
+        for ii in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1):
+            for jj in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1):
+                hall_coord = Coord(ii, jj)
+                if hall_coord in coords:
+                    layout[hall_coord.row - origin.row][hall_coord.col - origin.col] = 1
+        for door in hall:
+            if door in coords:
+                layout[door.row - origin.row][door.col - origin.col] = 2
+
+    return layout
 
 def parse_room(room_input):
     parsed_input = parse_room_obj(room_input)
