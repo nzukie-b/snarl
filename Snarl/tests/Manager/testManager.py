@@ -6,7 +6,7 @@ snarl_dir = os.path.dirname(tests_dir)
 src_dir = snarl_dir + '/src'
 sys.path.append(src_dir)
 from utilities import to_point
-from controller.controller import parse_manager, to_coord
+from controller.controller import parse_manager, to_layout
 from model.gamestate import State_Obj
 
 def main():
