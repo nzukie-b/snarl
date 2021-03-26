@@ -30,7 +30,6 @@ class Hallway:
 
         if not self.waypoints:
             #Straight hallway no waypoints
-            #TODO: See if this be changed to check if the door - self.dimensions == other door
             horizontal = door_1.row == door_2.row
             vertical = door_1.col == door_2.col
             if horizontal is not vertical:
@@ -39,9 +38,7 @@ class Hallway:
                     is_horizontal = True
                 else:
                     is_horizontal = False
-                #is_horizontal = True if horizontal else False
                 #print("HORTI: " + str(is_horizontal) + str(horizontal) + " DOORS " + "(" + str(door_1.row) + ", " + str(door_1.col) + ") " +
-                #      "(" + str(door_2.row) + ", " + str(door_2.col) + ")")
                 return is_horizontal
             else:
             #Not straight and no waypoint

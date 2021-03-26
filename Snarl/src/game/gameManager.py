@@ -116,6 +116,6 @@ class GameManager:
 
         if self.rc.validate_item_interaction(player, item, new_level):
             self.gamestate = GameState(new_level, self.players,
-                                       self.gamestate.adversaries, self.gamestate.exit_locked)
+                                       self.adversaries, self.gamestate.exit_locked)
         else:
             self.players = self.gamestate.players
