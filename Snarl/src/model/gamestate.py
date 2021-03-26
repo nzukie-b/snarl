@@ -5,7 +5,7 @@ from model.room import Room
 from model.adversary import Adversary
 from model.player import Player
 
-class State_Obj:
+class StateObj:
     def __init__(self, level, players, adversaries, exit_locked):
         self.type = 'state'
         self.level = level
