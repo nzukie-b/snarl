@@ -68,7 +68,7 @@ def main():
 
     ## Move Updates ##
     #NOTE Turn starts at 0
-    
+
     for turn in range(max_turns):
         for name in names:
             err = 0
@@ -76,7 +76,7 @@ def main():
             # Copy the moves map, and use this copy for iteration
             player_moves = copy.deepcopy(moves_map[player.name])
             
-            while err in range(len(player_moves)):
+            while turn in range(len(player_moves)):
                 #print("loop")
                 try:
                     active_move = player_moves[turn + err]
