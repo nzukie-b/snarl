@@ -72,8 +72,9 @@ def to_layout(pos, level, dimensions):
     else:
 
         hall = next(hall for hall in level.hallways if hall.origin == origin)
-        for ii in range(hall.origin.row, hall.origin.row + hall.dimensions.row):
-            for jj in range(hall.origin.col, hall.origin.col + hall.dimensions.col):
+        #TODO: Double check if  + 1 is necessary
+        for ii in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1):
+            for jj in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1):
                 hall_coord = Coord(ii, jj)
                 if hall_coord in coords:
                     layout[hall_coord.row - origin.row][hall_coord.col - origin.col] = 1
