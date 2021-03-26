@@ -7,7 +7,7 @@ class Observable:
         new_gamestate = new_gamestate
     
     def get_new_gamestate():
-        """Gets gamestate from game manager and sets new gamestate to rcieved gamestate.
+        """Gets gamestate from game manager and sets new gamestate to rcieved gamestate."""
         
     def register_observers_with_gamestate():
         """Go into gamestate and run down list of players, adversaries, items, doors, and tiles to create
