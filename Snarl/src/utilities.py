@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from coord import Coord
+from constants import ROOM, HALL
 
 def check_hallway(hallway):
     '''Checks that a hallway is valid by checking that the hallway's orientation is either vertical or horizontal.'''
@@ -101,3 +102,39 @@ def get_reachable_halls(origin, level):
             reachable += [room.origin for room in hall.rooms]
     return reachable
 
+
+def check_position(pos, level):
+    '''Checks if the provide point is inside the level. If so returns whether it is a hallway or a room, and its respective origin.'''
+    row_dimensions = (pos.row, pos.row)
+    col_dimensions = (pos.col, pos.col)
+    room_dimensions = level.get_level_room_dimensions()
+    hall_dimensions = level.get_level_hallway_dimensions()
+    pos = None
+    # Room or Hallway
+    origin_type = None
+    room_origin = check_dimensions(row_dimensions, col_dimensions, room_dimensions)
+    hall_origin = check_dimensions(row_dimensions, col_dimensions, hall_dimensions)
+    if room_origin:
+        origin_type = ROOM
+        pos = room_origin
+    elif hall_origin:
+        origin_type = HALL
+        pos = hall_origin
+    return {'type': origin_type, 'origin': pos}
+
+
+def coord_radius(pos, dimensions):
+    '''Returns a set of coordinates the provided coordinate is at the center'''
+    coords = set()
+    for ii in range(1, round(dimensions.row/2) + 1):
+        for jj in range(1, round(dimensions.col/2) + 1):
+            c1 = Coord(pos.row + ii, pos.col + jj)
+            c2 = Coord(pos.row + ii, pos.col - jj)
+            c3 = Coord(pos.row - ii, pos.col + jj)
+            c4 = Coord(pos.row - ii, pos.col - jj)
+            c5 = Coord(pos.row, pos.col + jj)
+            c6 = Coord(pos.row, pos.col - jj)
+            c7 = Coord(pos.row + ii, pos.col)
+            c8 = Coord(pos.row - ii, pos.col)
+            coords.update([c1, c2, c3, c4, c5, c6, c7, c8])
+    return coords

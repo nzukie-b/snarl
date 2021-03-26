@@ -80,7 +80,7 @@ def test_gamemanager(level2):
     player_names = []
     for i in range(3):
         player_names.append("bruh " + str(i))
-    gm.register_players(player_names)
+    gm.register_player_names(player_names)
     assert len(gm.players) == 3
     assert gm.players[0].name == "bruh 0"
     assert gm.players[1].name == "bruh 1"
@@ -89,8 +89,8 @@ def test_gamemanager(level2):
     rc = RuleChecker()
     assert rc.validate_player_movement(Coord(8, 2), Coord(8, 3), level2)
     assert rc.validate_player_movement(Coord(8, 2), Coord(8, 4), level2)
-    assert not rc.validate_player_movement(Coord(8, 2), Coord(7, 4), level2)
-    assert not rc.validate_player_movement(Coord(8, 2), Coord(112, 10), level2)
-    assert not rc.validate_player_movement(Coord(8, 2), Coord(10, 2), level2)
+    assert not rc.validate_player_movement(Coord(8, 2), Coord(7, 4), level2)['info'].traversable
+    assert not rc.validate_player_movement(Coord(8, 2), Coord(112, 10), level2)['info'].traversable
+    assert not rc.validate_player_movement(Coord(8, 2), Coord(10, 2), level2)['info'].traversable
     gm.apply_player_item_interaction(gm.gamestate.players[2], Coord(8, 17))
     assert rc.validate_item_interaction(gm.gamestate.players[2], Coord(8, 3), level2)

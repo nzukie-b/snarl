@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from utilities import check_dimensions, get_reachable_halls, get_reachable_rooms, to_point
+from utilities import check_dimensions, check_position, get_reachable_halls, get_reachable_rooms, to_point
+from constants import ROOM, HALL
 
 class CoordInfo:
     def __init__(self, traversable=None, obj='null', type_='void', reachable=[]):
@@ -83,28 +84,13 @@ class Level:
             - if a hallway the origins of the connecting rooms | if a room the origins of neighboring rooms, that is, the rooms that are one hallway removed from the current room : .reachable'''
         
         result = CoordInfo()
-        row_dimensions = (coord.row, coord.row)
-        col_dimensions = (coord.col, coord.col)
-        room_dimensions = self.get_level_room_dimensions()
-        hall_dimensions = self.get_level_hallway_dimensions()
-        
-        if not check_dimensions(row_dimensions, col_dimensions, room_dimensions.union(hall_dimensions)):
-            # Provided coordinate is not within the bounds of the level
-            result.traversable = False
-        else:
-            # Point is guaranteed to be within level dimensions
-            origin = None
-            #False if Hallway, True if Room, None otherwise
-            is_room = None
-            room_origin = check_dimensions(row_dimensions, col_dimensions, room_dimensions)
-            hall_origin = check_dimensions(row_dimensions, col_dimensions, hall_dimensions)
-            if room_origin:
-                is_room = True
-                origin = room_origin
-            elif hall_origin:
-                is_room = False
-                origin = hall_origin
 
+        pos_info = check_position(coord, self)
+        is_room = pos_info['type'] == ROOM
+        origin = pos_info['origin']
+        if not origin:
+            result.traversable = False
+        else: 
             if is_room == True:
                 for room in self.rooms:
                     if origin == room.origin:
