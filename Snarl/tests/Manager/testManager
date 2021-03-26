@@ -59,7 +59,7 @@ def main():
             if exit_ in visible_coords:
                 objects.append({"type": 'exit', "position": to_point(exit_)})
         layout = to_layout(player.pos, level, view_radius)
-        update['layout'] = layout
+        update['layout'] = layout['layout']
         update['objects'] = objects
         update['actors'] = actors
         data = [name, update]
