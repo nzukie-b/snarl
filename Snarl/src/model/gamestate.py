@@ -3,7 +3,7 @@ from coord import Coord
 from utilities import to_point, to_coord
 from model.room import Room
 from model.adversary import Adversary
-from model.player import Player
+from model.player import PlayerActor
 
 class StateObj:
     def __init__(self, level, players, adversaries, exit_locked):
@@ -101,7 +101,7 @@ def update_game_state(new_players, new_adversaries, exit_locked):
     adversaries = []
 
     for i in range(len(new_players)):
-        players.append(Player(new_players[i].pos, new_players[i].name, new_players[i].health, new_players[i].inventory, new_players[i].non_walkable_tiles, new_players[i].movement_speed))
+        players.append(PlayerActor(new_players[i].pos, new_players[i].name, new_players[i].health, new_players[i].inventory, new_players[i].non_walkable_tiles, new_players[i].movement_speed))
 
     for i in range(len(new_adversaries)):
         adversaries.append(Adversary(new_adversaries[i].pos, new_adversaries[i].name, new_adversaries[i].health, new_adversaries[i].inventory, new_adversaries[i].non_walkable_tiles, new_adversaries[i].movement_speed))

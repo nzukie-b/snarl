@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
-import game.gameManager
-#TODO: Player abstract class
 class Player(ABC):
-    def __init__(self, name, loc=None, layout=None, visible_tiles=None, actors=None, objects=None, inventory_contents=None):
+    def __init__(self, name, player_obj=None, layout=None, visible_tiles=None, actors=None, objects=None, inventory_contents=None):
         # Unique name chosen by the player
         self.name = name
+        #playerActor
+        self.player_obj = player_obj
         # Coordinate that shows location relative to the origin
-        self.pos = loc
         self.layout = layout
         # The visible tiles two grid coordinates away in cardinal or diagonal directions
         self.visible_tiles = visible_tiles
@@ -21,11 +20,14 @@ class Player(ABC):
             selected as the move location then stay put as the move for that turn. Sends this info to game-manager to be
             handled."""
             if move == None or  move == 'null': move = self.pos
-            move_info = gm.request_player_move(name, move)
+            move_info = gm.request_player_move(self.name, move)
             if move_info is not None:
-                self.pos = next(player.pos for player in gm.players)
+                self.player_obj = next(player for player in gm.players if self.name == player.name)
+                
             else:
+                #Player is trying to go twice or invalid player name
                 print("Invalid Player")
+            return None
             
             
 

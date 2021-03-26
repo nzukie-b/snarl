@@ -2,7 +2,7 @@ from constants import SIZE
 from coord import Coord
 
 
-class Player:
+class PlayerActor:
     def __init__(self, name, pos=None, health=100, inventory=[], non_walkable_tiles=["Wall"], movement_speed=2):
         self.name = name
         self.pos = Coord(pos.row, pos.col) if pos else None

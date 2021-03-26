@@ -11,7 +11,7 @@ from utilities import to_coord, to_point, check_position, coord_radius
 from model.room import Room
 from model.hallway import Hallway
 from model.level import Level
-from model.player import Player
+from model.player import PlayerActor
 from model.adversary import Adversary
 from model.gamestate import GameState
 
@@ -157,7 +157,7 @@ def parse_actor(actor_input):
     name = actor_input['name']
     coord = to_coord(actor_input['position'])
     if actor_type == 'player':
-        return Player(name, coord)
+        return PlayerActor(name, coord)
     else:
         return Adversary(name, coord)
 
@@ -218,7 +218,7 @@ def parse_manager(game_input):
     
     for ii in range(len(initial_coords)):
         if ii < len(names):
-            players.append(Player(names[ii], initial_coords[ii]))
+            players.append(PlayerActor(names[ii], initial_coords[ii]))
         else:
             adversaries.append(Adversary('adv: ' + str(ii), initial_coords[ii]))
 

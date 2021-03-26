@@ -4,7 +4,8 @@ snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
 from constants import MAX_PLAYERS
-from model.player import Player
+from player.localPlayer import LocalPlayer
+from model.player import PlayerActor
 from model.adversary import Adversary
 from model.gamestate import GameState, create_initial_game_state, update_game_state
 from game.ruleChecker import RuleChecker
@@ -33,7 +34,8 @@ class GameManager:
         """Create list of player objects using list of player names."""
         if 1 < len(player_names) <= MAX_PLAYERS:
             for name in player_names:
-                self.players.append(Player(name))
+                p = PlayerActor(name)
+                self.players.append(p)
         else:
             print("Too few or too many players to register, please register between 1 and 4 players.")
 
@@ -53,8 +55,6 @@ class GameManager:
             gs_info = create_initial_game_state(level, self.players, self.adversaries)
             self.gamestate = GameState(level, gs_info[0], gs_info[1])
             self.player_turns = self.reset_player_turns()
-            # self.turn_order = self.players + self.adversaries
-            # self.current_turn = self.turn_order[0]
         else:
             print("Please register at least one player and adversary to start the game.")
 
@@ -72,7 +72,6 @@ class GameManager:
         """
 
         for i in range(len(new_players_locs)):
-            # self.players[i].loc = new_players_locs[i]
             if self.rc.validate_player_movement(self.players[i].pos, new_players_locs[i], self.gamestate.level):
                 self.gamestate = GameState(self.gamestate.level, self.players, self.adversaries, self.gamestate.exit_locked)
         else:
@@ -114,6 +113,7 @@ class GameManager:
                         p.inventory.append(item)
 
         if self.rc.validate_item_interaction(player, item, new_level):
+            #TODO: Check if item was key to unlock exit
             self.gamestate = GameState(new_level, self.players,
                                        self.adversaries, self.gamestate.exit_locked)
         else:

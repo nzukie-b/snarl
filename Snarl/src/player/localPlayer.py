@@ -6,15 +6,16 @@ from common.player import Player
 
 
 # TODO Implementation of common.player
-class Player(Player):
-    def __init__(self, name, loc, visible_tiles, current_player_health, inventory_contents):
-        super().__init__()
+class LocalPlayer(Player):
+    def __init__(self, name, layout=None, visible_tiles=None, actors=None, objects=None, inventory_contents=None):
+        super().__init__(name=name, layout=layout, visible_tiles=visible_tiles, 
+        actors=actors, objects=objects, inventory_contents=inventory_contents)
 
         def move_to_tile(self, move, gm):
             """Move to a location within the visible tiles, if the same tile the player is currently on is
             selected as the move location then stay put as the move for that turn. Sends this info to game-manager to be
             handled."""
-            super().move_to_tile()
+            super().move_to_tile(move, gm)
 
         def interact_with_tile_contents(self, current_tile_info):
             """Interact with the contents on the current tile if it exists. The interaction will take place in the order
