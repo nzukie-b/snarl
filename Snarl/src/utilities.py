@@ -126,8 +126,8 @@ def check_position(pos, level):
 def coord_radius(pos, dimensions):
     '''Returns a set of coordinates the provided coordinate is at the center'''
     coords = set()
-    for ii in range(1, round(dimensions.row)/2 + 1):
-        for jj in range(1, round(dimensions.col)/2 + 1):
+    for ii in range(1, round(dimensions.row/2) + 1):
+        for jj in range(1, round(dimensions.col/2) + 1):
             c1 = Coord(pos.row + ii, pos.col + jj)
             c2 = Coord(pos.row + ii, pos.col - jj)
             c3 = Coord(pos.row - ii, pos.col + jj)

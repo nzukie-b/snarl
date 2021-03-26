@@ -61,7 +61,7 @@ def to_layout(pos, level, dimensions):
     coords = coord_radius(pos, dimensions)
 
     if is_room:
-        room = next(room for room in level.room if room.origin == origin)
+        room = next(room for room in level.rooms if room.origin == origin)
         for tile in room.tiles:
             if tile in coords:
                 #origin 5, 5 
@@ -72,8 +72,8 @@ def to_layout(pos, level, dimensions):
     else:
 
         hall = next(hall for hall in level.hallways if hall.origin == origin)
-        for ii in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1):
-            for jj in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1):
+        for ii in range(hall.origin.row, hall.origin.row + hall.dimensions.row):
+            for jj in range(hall.origin.col, hall.origin.col + hall.dimensions.col):
                 hall_coord = Coord(ii, jj)
                 if hall_coord in coords:
                     layout[hall_coord.row - origin.row][hall_coord.col - origin.col] = 1

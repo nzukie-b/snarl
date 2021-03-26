@@ -18,11 +18,11 @@ def main():
     max_turns = parsed_input['max_turns']
     moves_map = parsed_input['moves']
     level = parsed_input['level']
-    names = [player_name for player_name in gm.player_turns]
     player_updates = []
-    move_update = []
+    move_updates = []
     manager_updates = []
     gm.start_game(level)
+    names = [player_name for player_name in gm.player_turns]
 
     ## Initial player  updates ##
     for name in names:
@@ -45,7 +45,7 @@ def main():
                 actors.append({"type": 'player', "name": player.name, "position": to_point(player.pos)})
         for adv in gm.adversaries:
             if adv.pos in visible_coords:
-                actors.append({"type": 'zombie', "name": adv.name, "posision": to_point(adv.pos)})
+                actors.append({"type": 'ghost', "name": adv.name, "posision": to_point(adv.pos)})
         level = gm.gamestate.level
         pos_info = check_position(player.pos, level)
         is_room = pos_info['type'] == ROOM
@@ -82,24 +82,26 @@ def main():
                 except (IndexError):
                     #Move list exhausted / More turns than moves
                     state_obj = State_Obj(gm.gamestate.level, gm.gamestate.players, gm.gamestate.adversaries, gm.gamestate.exit_locked)
+
                     print('[{}, {}]'.format(state_obj, manager_updates))
                     return manager_updates
 
-                if active_move['to'] == 'null':
+                if not active_move['to']:
                     gm.request_player_move(player.name, player.pos)
                     data = [name, active_move, 'OK']
-                    move_update.append(data)
+                    move_updates.append(data)
                     manager_updates.append(data)
                     break
                 else:
                     move_coord = to_coord(active_move['to'])
 
                 move_info = gm.request_player_move(player.name, move_coord)
-                valid_move = move_info['valid_move']
-                info = move_info['info']
                 adv_coords = [adv.pos for adv in gm.adversaries]
 
                 if move_info is not None:
+                    valid_move = move_info['valid_move']
+                    info = move_info['info']
+                    obj = info.object
                     #Valid player turn
                     res = 'OK'
                     if info.traversable == False or valid_move == False:
@@ -109,30 +111,29 @@ def main():
                         err += 1
                         res = 'Invalid'
                         data = [name, move, res]
-                        move_update.append(data)
+                        move_updates.append(data)
                         manager_updates.append(data)
                         #Continue while loop until a valid move is reached or the move list is exhausted
                         continue
                     
-                    elif move_info.object == 'exit' and gm.gamestate.exit_unlocked:
+                    elif obj == 'exit' and not gm.gamestate.exit_locked:
                         res = 'Exit'
-                        move_update.append(data)
+                        data = [name, active_move, res]
+                        move_updates.append(data)
                         manager_updates.append(data)
                         state_obj = State_Obj(gm.gamestate.level, gm.gamestate.players, gm.gamestate.adversaries, gm.gamestate.exit_locked)
                         print('[{}, {}]'.format(state_obj, manager_updates))
                         return manager_updates
-                    elif move_info.object == 'key':
+
+                    elif obj == 'key':
                         res = 'Key'
                     elif move_coord in adv_coords:
                         res = 'Eject'
                     data = [name, active_move, res]
-                    move_update.append(data)
+                    move_updates.append(data)
                     manager_updates.append(data)
                     break
-                else:
-                    print('Invalid Turn ??')
-                        #TODO: Stop and return the result?
-
+            
     state_obj = State_Obj(gm.gamestate.level, gm.gamestate.players, gm.gamestate.adversaries, gm.gamestate.exit_locked)
     print('[{}, {}]'.format(state_obj, manager_updates))
     return manager_updates
