@@ -6,6 +6,7 @@ class ActorUpdate:
         self.position = position
         self.objects = objects
         self.actors = actors
+        self.layout_coords = None
 
     def __str__(self):
         return '{{"type": {}, "layout": {}, "position": {}, "objects": {}, "actors": {}}}'.format(self.type, self.layout, self.position, self.objects, self.actors)

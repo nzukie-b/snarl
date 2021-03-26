@@ -46,7 +46,6 @@ def main():
         level = gm.gamestate.level
         pos_info = check_position(player.pos, level)
         is_room = pos_info['type'] == ROOM
-        origin = pos_info['origin']
         if is_room:
             for room in level.rooms:
                 for item in room.items:
@@ -59,6 +58,7 @@ def main():
         update.layout = layout['layout']
         update.objects = objects
         update.actors = actors
+        update.layout_coords = view_radius
         data = [name, update]
         player_updates.append(data)
         manager_updates.append(data)
@@ -86,11 +86,8 @@ def main():
                     return manager_updates
 
                 if not active_move['to']:
-                    gm.request_player_move(player.name, player.pos)
-                    data = [name, active_move, 'OK']
-                    move_updates.append(data)
-                    manager_updates.append(data)
-                    break
+                    # move_info = gm.request_player_move(player.name, player.pos)
+                    move_coord = player.pos
                 else:
                     move_coord = to_coord(active_move['to'])
 

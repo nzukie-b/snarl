@@ -1,22 +1,33 @@
 from abc import ABC, abstractmethod
-
+import game.gameManager
 #TODO: Player abstract class
 class Player(ABC):
-    def __init__(self, name, loc, visible_tiles, current_player_health, inventory_contents):
+    def __init__(self, name, loc=None, layout=None, visible_tiles=None, actors=None, objects=None, inventory_contents=None):
         # Unique name chosen by the player
         self.name = name
         # Coordinate that shows location relative to the origin
-        self.loc = loc
+        self.pos = loc
+        self.layout = layout
         # The visible tiles two grid coordinates away in cardinal or diagonal directions
         self.visible_tiles = visible_tiles
-        self.current_player_health = current_player_health
+        self.actors = actors
+        self.objects = objects
+        self.visible_tiles = visible_tiles
         self.inventory_contents = inventory_contents
 
         @abstractmethod
-        def move_to_tile(self, move_location):
+        def move_to_tile(self, move, gm):
             """Move to a location within the visible tiles, if the same tile the player is currently on is
             selected as the move location then stay put as the move for that turn. Sends this info to game-manager to be
             handled."""
+            if move == None or  move == 'null': move = self.pos
+            move_info = gm.request_player_move(name, move)
+            if move_info is not None:
+                self.pos = next(player.pos for player in gm.players)
+            else:
+                print("Invalid Player")
+            
+            
 
         @abstractmethod
         def interact_with_tile_contents(self, current_tile_info):
@@ -33,6 +44,11 @@ class Player(ABC):
             values"""
 
         @abstractmethod
-        def recieve_update(position, tiles):
+        def recieve_update(actor_update):
             """Takes in the position and visible tiles,
             then updates the current player with that info (Also visually updates)"""
+            self.pos = actor_update.pos
+            self.visible_tiles = actor_update.layout_coords
+            self.actors = actor_update.actors
+            self.objecst = actor_update.objects
+
