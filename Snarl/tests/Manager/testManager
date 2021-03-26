@@ -68,6 +68,7 @@ def main():
 
     ## Move Updates ##
     #NOTE Turn starts at 0
+    
     for turn in range(max_turns):
         for name in names:
             err = 0
