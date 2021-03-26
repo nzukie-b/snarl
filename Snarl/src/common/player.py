@@ -50,5 +50,5 @@ class Player(ABC):
             self.pos = actor_update.pos
             self.visible_tiles = actor_update.layout_coords
             self.actors = actor_update.actors
-            self.objecst = actor_update.objects
+            self.objects = actor_update.objects
 
