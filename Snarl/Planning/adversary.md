@@ -24,3 +24,10 @@ Class Adversary:
     def update_info_from_game_manager(new_adversary):
         """Takes in an unpdated version of the adversary from the game-manager and sets the current adversary to these
         values"""
+    
+    def get_update_on_player_locations(self, new_player_locations):
+        """Takes in new player locations when they are about to make a turn."""
+    
+    def get_full_level_info(self, level):
+        """Takes in the full level information with rooms, hallways, and objects for the adversaries to use. This will
+        be called at the beginning of the level."""
