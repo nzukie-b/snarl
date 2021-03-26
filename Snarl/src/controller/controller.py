@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 import sys, os, json
 
-from game.gameManager import GameManager
-
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
+from game.gameManager import GameManager
 from coord import Coord
 from constants import ROOM, HALL
 from utilities import to_coord, to_point, check_position, coord_radius
@@ -82,7 +81,7 @@ def to_layout(pos, level, dimensions):
             if door in coords:
                 layout[door.row - origin.row][door.col - origin.col] = 2
 
-    return layout
+    return {'pos': pos, 'layout': layout}
 
 def parse_room(room_input):
     parsed_input = parse_room_obj(room_input)

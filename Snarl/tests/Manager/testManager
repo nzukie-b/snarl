@@ -59,6 +59,7 @@ def main():
             if exit_ in visible_coords:
                 objects.append({"type": 'exit', "position": to_point(exit_)})
         layout = to_layout(player.pos, level, view_radius)
+        print(str(layout['layout']))
         update['layout'] = layout
         update['objects'] = objects
         update['actors'] = actors
@@ -76,6 +77,7 @@ def main():
             player_moves = copy.deepcopy(moves_map[player.name])
             
             while err in range(len(player_moves)):
+                #print("loop")
                 try:
                     active_move = player_moves[turn + err]
                     # Cases where player_moves[turn] is an invalid index, such as turn 2 (3rd turn when incl. 0) when only 2 moves, are handled below

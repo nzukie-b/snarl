@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys, os
-import pytest
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)

@@ -1,5 +1,4 @@
 import sys, os
-from typing import Mapping
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
