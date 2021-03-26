@@ -100,6 +100,8 @@ def main():
                 move_info = gm.request_player_move(player.name, move_coord)
                 adv_coords = [adv.pos for adv in gm.adversaries]
 
+                print(move_info)
+
                 if move_info is not None:
                     valid_move = move_info['valid_move']
                     info = move_info['info']
@@ -134,6 +136,8 @@ def main():
                     data = [name, active_move, res]
                     move_updates.append(data)
                     manager_updates.append(data)
+                    break
+                else:
                     break
             
     state_obj = State_Obj(gm.gamestate.level, gm.gamestate.players, gm.gamestate.adversaries, gm.gamestate.exit_locked)
