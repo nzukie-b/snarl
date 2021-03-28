@@ -6,7 +6,7 @@ snarl_dir = os.path.dirname(tests_dir)
 src_dir = snarl_dir + '/src'
 sys.path.append(src_dir)
 from coord import Coord
-from constants import ROOM, HALL
+from constants import ROOM
 from utilities import check_position, to_point, to_coord, coord_radius
 from common.actorUpdate import ActorUpdate
 from controller.controller import parse_manager, to_layout
@@ -49,7 +49,7 @@ def main():
         if is_room:
             for room in level.rooms:
                 for item in room.items:
-                    if item in visible_coords:
+                    if item.pos in visible_coords:
                         objects.append({"type": 'key', "position": to_point(item)})
         for exit_ in level.exits:
             if exit_ in visible_coords:

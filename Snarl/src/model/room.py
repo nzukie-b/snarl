@@ -42,7 +42,7 @@ class Room:
     def check_items(self):
         '''Validate items are on a walkable tile'''
         for item in self.items:
-            if item not in self.tiles:
+            if item.pos not in self.tiles:
                 # TODO: Are items on non walkable tiles valid?
                 return False
         return True

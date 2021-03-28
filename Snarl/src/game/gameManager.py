@@ -1,18 +1,23 @@
 import sys, os
+from common.actorUpdate import ActorUpdate
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
-from constants import MAX_PLAYERS
+from constants import INFO, MAX_PLAYERS, PLAYERS, P_UPDATE, VALID_MOVE
+from common.player import Player
 from player.localPlayer import LocalPlayer
 from model.player import PlayerActor
 from model.adversary import Adversary
 from model.gamestate import GameState, create_initial_game_state, update_game_state
 from game.ruleChecker import RuleChecker
+from utilities import create_local_player
 
 class GameManager:
     def __init__(self):
+        #List of player clients
         self.players = []
+        #List of adversary clients
         self.adversaries = []
         self.gamestate = None
         self.rc = RuleChecker()
@@ -38,7 +43,18 @@ class GameManager:
                 self.players.append(p)
         else:
             print("Too few or too many players to register, please register between 1 and 4 players.")
+                
+    def get_player_actor(self, name):
+        '''Returns the PlayerActor object associated with the provided name'''
+        player = next(player for player in self.gamestate.players if player.name == name)
+        return player
 
+    def register_player(self, player_client):
+        if len(self.players) <= MAX_PLAYERS:
+            if (isinstance(player_client, Player)):
+                self.players.append(player_client)
+            else:
+                self.players.append(create_local_player(player_client))
 
     def register_adversaries(self, adversaries):
         '''Create list adversary objects from provided list of adversaries'''
@@ -78,21 +94,28 @@ class GameManager:
             self.players = self.gamestate.players
 
     def request_player_move(self, name, new_pos):
-        #TODO: Add condition for adversary turns as well
         # If all players (adversaries later) have gone this turn cycle, then reset the turn order
         if len(self.player_turns) == 0: self.player_turns = self.reset_player_turns()
         player = next(player for player in self.players if player.name == name)
         if player.name in self.player_turns:
             player_move = self.rc.validate_player_movement(player.pos, new_pos, self.gamestate.level)
             
-            if player_move['valid_move'] and player_move['info'].traversable:
+            if player_move[VALID_MOVE] and player_move[INFO].traversable:
                 self.players.remove(player)
+                other_players = [player for player in self.players]
                 player.pos = new_pos
                 self.players.append(player)
                 self.gamestate = GameState(self.gamestate.level, self.players, self.adversaries, self.gamestate.exit_locked)
                 self.player_turns.remove(player.name)
+                # for other_player in other_players:
+                #     if isinstance(other_player, Player):
+                #         update = ActorUpdate()
+                #         update.type = P_UPDATE
+                #         update.position = to_point
+                #         player.recieve_update()
             return player_move
         return None
+
 
 
     def apply_player_item_interaction(self, player, item):

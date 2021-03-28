@@ -8,7 +8,7 @@ class Item:
 
     def __eq__(self, other):
         if isinstance(other, Item):
-            return self.type == other.typ and self.pos == other.pos
+            return self.type == other.type and self.pos == other.pos
         return False
         
     def __repr__(self):

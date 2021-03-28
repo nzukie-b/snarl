@@ -22,8 +22,7 @@ class Player(ABC):
             if move == None or  move == 'null': move = self.pos
             move_info = gm.request_player_move(self.name, move)
             if move_info is not None:
-                self.player_obj = next(player for player in gm.players if self.name == player.name)
-                
+                self.player_obj = gm.get_player_actor(self.name)
             else:
                 #Player is trying to go twice or invalid player name
                 print("Invalid Player")

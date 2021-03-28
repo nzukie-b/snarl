@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from utilities import check_dimensions, check_position, get_reachable_halls, get_reachable_rooms, to_point
-from constants import ROOM, HALL
+from constants import EXIT, HALLWAY, KEY, ORIGIN, ROOM, TYPE
 
 class CoordInfo:
     def __init__(self, traversable=None, obj='null', type_='void', reachable=[]):
@@ -86,15 +86,15 @@ class Level:
         result = CoordInfo()
 
         pos_info = check_position(coord, self)
-        is_room = pos_info['type'] == ROOM
-        origin = pos_info['origin']
+        is_room = pos_info[TYPE] == ROOM
+        origin = pos_info[ORIGIN]
         if not origin:
             result.traversable = False
         else: 
             if is_room == True:
                 for room in self.rooms:
                     if origin == room.origin:
-                        result.type = 'room'
+                        result.type = ROOM
                         result.traversable = coord in room.tiles
                     reachable = get_reachable_rooms(origin, self)
                     reachable = [] if reachable is None else reachable
@@ -103,7 +103,7 @@ class Level:
             elif is_room == False:
                 for hall in self.hallways:
                     if origin == hall.origin:
-                        result.type = 'hallway'
+                        result.type = HALLWAY
                         traversable = coord.row in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1) and coord.col in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1)
                         result.traversable = traversable
                     reachable = get_reachable_halls(origin, self)
@@ -111,7 +111,7 @@ class Level:
                     result.reachable = [to_point(coord) for coord in reachable]
                         
             if coord in self.exits:
-                result.object = 'exit'
+                result.object = EXIT
             if coord in self.keys:
-                result.object = 'key'
+                result.object = KEY
         return result

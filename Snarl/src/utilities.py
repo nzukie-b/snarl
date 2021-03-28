@@ -1,6 +1,9 @@
 #!/usr/bin/env python
+from common.player import Player
 from coord import Coord
-from constants import ROOM, HALL
+from constants import HALLWAY, ROOM
+from player.localPlayer import LocalPlayer
+from model.player import PlayerActor
 
 def check_hallway(hallway):
     '''Checks that a hallway is valid by checking that the hallway's orientation is either vertical or horizontal.'''
@@ -118,7 +121,7 @@ def check_position(pos, level):
         origin_type = ROOM
         pos = room_origin
     elif hall_origin:
-        origin_type = HALL
+        origin_type = HALLWAY
         pos = hall_origin
     return {'type': origin_type, 'origin': pos}
 
@@ -138,3 +141,9 @@ def coord_radius(pos, dimensions):
             c8 = Coord(pos.row - ii, pos.col)
             coords.update([c1, c2, c3, c4, c5, c6, c7, c8])
     return coords
+
+
+def create_local_player(name):
+    '''Helper for instantiating a localPlayer'''
+    player_obj = PlayerActor(name)
+    return LocalPlayer(name, player_obj=player_obj)

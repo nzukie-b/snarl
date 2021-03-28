@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+### VIEW CONSTANTS ###
 WHITE = (255,255,255)
 BLACK = (0, 0, 0)
 GREY = (125, 125, 125)
@@ -9,6 +10,45 @@ RED = (255, 0, 0)
 WIDTH = 700
 HEIGTH = 500
 SIZE = 25
+
+### GAME CONSTANTS ###
 MAX_PLAYERS = 4
-ROOM = "ROOM"
-HALL = "HALL"
+
+
+### NAME CONSTANTS ##
+ITEM = 'item'
+KEY = 'key'
+EXIT = 'exit'
+
+COORD = 'coord'
+ROOM = "room"
+HALLWAY = "hallway"
+LEVEL = 'level'
+STATE = 'state'
+MANAGER = 'manager'
+MAX_TURNS = 'max_turns'
+MOVES = 'moves'
+INFO = 'info'
+VALID_MOVE = 'valid_move'
+P_UPDATE = 'player-update'
+
+
+### JSON KEYS ###
+EXIT_LOCKED = 'exit-locked'
+PLAYERS = 'players'
+ADVERSARIES = 'adversaries'
+ORIGIN = 'origin'
+LAYOUT = 'layout'
+TYPE = 'type'
+POS = 'position'
+NAME = 'name'
+FROM = 'from'
+TO = 'to'
+
+ROOMS = 'rooms'
+HALLWAYS = 'hallways'
+WAYPOINTS = 'waypoints'
+OBJECTS = 'objects'
+BOUNDS = 'bounds'
+ROWS = 'rows'
+COLS = 'columns'
