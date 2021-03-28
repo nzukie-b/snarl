@@ -1,4 +1,5 @@
 *.pyc
 *.lock
 __pycache__
+.pytest_cache
 Snarl/src/game/memo.md

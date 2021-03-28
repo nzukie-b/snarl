@@ -31,5 +31,5 @@ class LocalPlayer(Player):
         def recieve_update(actor_update):
             """Takes in the position and visible tiles,
             then updates the current player with that info (Also visually updates)"""
-            super().recieve_updaate(actor_update)
+            super().recieve_update(actor_update)
             print(self.layout)

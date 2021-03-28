@@ -1,7 +1,8 @@
 #!/usr/bin/env python
+from common.moveUpdate import MoveUpdate
 from common.player import Player
 from coord import Coord
-from constants import HALLWAY, ROOM
+from constants import HALLWAY, P_UPDATE, ROOM
 from player.localPlayer import LocalPlayer
 from model.player import PlayerActor
 
@@ -47,7 +48,7 @@ def check_dimensions(x_dimensions, y_dimensions, level_dimensions):
                 # print(x,y)
                 if row in range(level_row_origin, level_row_dest + 1) and col in range(level_col_origin, level_col_dest + 1):
                     return Coord(level_row_origin, level_col_origin)
-    return None
+    return False
 
 def check_level(level):
     '''Checks that the provided level is valid'''
@@ -83,7 +84,10 @@ def to_coord(point):
 
 def to_point(coord):
     '''Converts a Coord object to the points coordinate system'''
-    return [coord.row, coord.col]
+    if isinstance(coord, Coord):
+        return [coord.row, coord.col]
+    else:
+        return coord
 
 
 def get_reachable_rooms(origin, level):
@@ -147,3 +151,12 @@ def create_local_player(name):
     '''Helper for instantiating a localPlayer'''
     player_obj = PlayerActor(name)
     return LocalPlayer(name, player_obj=player_obj)
+
+def update_player(current_player, other_player):
+    if isinstance(other_player, Player) and isinstance(current_player, Player):
+        if current_player.player_obj.pos in other_player.visible_tiles:
+            other_player.actors.append(MoveUpdate(P_UPDATE, current_player.name, to_coord(current_player.pos)))
+
+def update_players(current_player, other_players):
+    for other in other_players:
+        update_player(current_player, other)

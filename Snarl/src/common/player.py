@@ -50,6 +50,7 @@ class Player(ABC):
             then updates the current player with that info (Also visually updates)"""
             self.pos = actor_update.pos
             self.visible_tiles = actor_update.layout_coords
+            self.layout = actor_update.layout
             self.actors = actor_update.actors
             self.objects = actor_update.objects
 

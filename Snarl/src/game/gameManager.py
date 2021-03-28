@@ -11,7 +11,7 @@ from model.player import PlayerActor
 from model.adversary import Adversary
 from model.gamestate import GameState, create_initial_game_state, update_game_state
 from game.ruleChecker import RuleChecker
-from utilities import create_local_player
+from utilities import create_local_player, update_players
 
 class GameManager:
     def __init__(self):
@@ -107,6 +107,7 @@ class GameManager:
                 self.players.append(player)
                 self.gamestate = GameState(self.gamestate.level, self.players, self.adversaries, self.gamestate.exit_locked)
                 self.player_turns.remove(player.name)
+                update_players(player, other_players)
                 # for other_player in other_players:
                 #     if isinstance(other_player, Player):
                 #         update = ActorUpdate()

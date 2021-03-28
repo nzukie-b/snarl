@@ -73,7 +73,7 @@ def test_check_dimensions_no_match(level2, room3, room2, hallway):
     cd4_rows = (0, 0)
     cd4_cols = (0, 0)
     res = check_dimensions(cd4_rows, cd4_cols, level_dimensions)
-    assert res == None
+    assert not res
 
 def test_to_coord():
     c1 = Coord(0, 0)
