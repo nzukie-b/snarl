@@ -26,11 +26,18 @@ HALLWAY = "hallway"
 LEVEL = 'level'
 STATE = 'state'
 MANAGER = 'manager'
-MAX_TURNS = 'max_turns'
+MAX_TURNS = 'max-turns'
 MOVES = 'moves'
 INFO = 'info'
-VALID_MOVE = 'valid_move'
+VALID_MOVE = 'valid-move'
 P_UPDATE = 'player-update'
+GAME_END = 'game-end'
+STATUS = 'game-status'
+
+### TYPES OF GAME STATE ##
+START = 'game-start'
+P_WIN = 'player-win'
+A_WIN = 'adversary-win'
 
 
 ### JSON KEYS ###

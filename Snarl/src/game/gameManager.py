@@ -1,5 +1,7 @@
 import sys, os
+from common import player
 from common.actorUpdate import ActorUpdate
+from coord import Coord
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
@@ -9,10 +11,9 @@ from common.player import Player
 from player.localPlayer import LocalPlayer
 from model.player import PlayerActor
 from model.adversary import Adversary
-from model.gamestate import GameState, create_initial_game_state, update_game_state
+from model.gamestate import GameState, create_initial_game_state
 from game.ruleChecker import RuleChecker
 from utilities import create_local_player, update_players
-
 class GameManager:
     def __init__(self):
         #List of player clients
@@ -37,6 +38,11 @@ class GameManager:
 
     def register_player_names(self, player_names):
         """Create list of player objects using list of player names."""
+        temp_names = [name for name in set(player_names)]
+        if len(temp_names) != len(player_names): 
+            print('Duplicate player names.') 
+            return False
+
         if 1 < len(player_names) <= MAX_PLAYERS:
             for name in player_names:
                 p = PlayerActor(name)
@@ -102,18 +108,14 @@ class GameManager:
             
             if player_move[VALID_MOVE] and player_move[INFO].traversable:
                 self.players.remove(player)
-                other_players = [player for player in self.players]
+                other_players = [player.player_obj for player in self.players if isinstance(player, Player)]
+                if not other_players: other_players = [player for player in self.players]
+                
                 player.pos = new_pos
                 self.players.append(player)
                 self.gamestate = GameState(self.gamestate.level, self.players, self.adversaries, self.gamestate.exit_locked)
                 self.player_turns.remove(player.name)
                 update_players(player, other_players)
-                # for other_player in other_players:
-                #     if isinstance(other_player, Player):
-                #         update = ActorUpdate()
-                #         update.type = P_UPDATE
-                #         update.position = to_point
-                #         player.recieve_update()
             return player_move
         return None
 
@@ -127,18 +129,18 @@ class GameManager:
         :return:
         """
 
-        new_level = self.gamestate.level
+        state = self.gamestate
 
-        for room in new_level.rooms:
+        for room in state.level.rooms:
             if item in room.items:
                 room.items.remove(item)
                 for p in self.players:
                     if p.name == player.name:
                         p.inventory.append(item)
 
-        if self.rc.validate_item_interaction(player, item, new_level):
+        if self.rc.validate_item_interaction(player, item, state):
             #TODO: Check if item was key to unlock exit
-            self.gamestate = GameState(new_level, self.players,
+            self.gamestate = GameState(state.level, self.players,
                                        self.adversaries, self.gamestate.exit_locked)
         else:
             self.players = self.gamestate.players

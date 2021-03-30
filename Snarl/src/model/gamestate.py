@@ -1,4 +1,5 @@
 import copy
+from constants import STATE
 from coord import Coord
 from utilities import to_point, to_coord
 from model.room import Room
@@ -7,7 +8,7 @@ from model.player import PlayerActor
 
 class StateObj:
     def __init__(self, level, players, adversaries, exit_locked):
-        self.type = 'state'
+        self.type = STATE
         self.level = level
         self.players = players
         self.adversaries = adversaries
@@ -26,6 +27,8 @@ class GameState:
         self.players = players
         self.adversaries = adversaries
         self.exit_locked = exit_locked
+        self.game_status = None
+        self.out_players = set()
     
     def __str__(self):
         level_str = str(self.level)
@@ -41,24 +44,11 @@ def remove_doors_and_items_from_rooms(first):
     '''Remove doors and items from walkable tiles. Used to determine initial placement of entities'''
     first_rm = copy.deepcopy(first)
     first_rm_removed = []
-
-    # print("1 " + str(len(first.tiles)))
-    # print("2 " + str(len(first_rm.tiles)))
-
     for tile in first_rm.tiles:
-        # print(str(tile.row) + " " + str(tile.col) + " in doors " + str(tile in first.doors))
-        # print(str(tile.row) + " " + str(tile.col) + " in items " + str(tile in first.items))
         if tile not in first.doors and tile not in first.items:
-            # print("ADD TO LIST: " + str(tile.row) + " " + str(tile.col))
             first_rm_removed.append(tile)
-
-    # print("3 " + str(len(first.tiles)))
-    # print("4 " + str(len(first_rm.tiles)))
-
     return Room(first_rm.origin, first_rm.dimensions, first_rm_removed, first_rm.doors, first_rm.items)
 
-
-# def initialize_state(level, players, ad)
 
 def create_initial_game_state(level, players, adversaries):
     '''Creates the initial gamestate. Places entities on their provided position. If not provided then, places players on walkable tiles in the first room. Places adversaries on walkables tiles in the last room.'''
