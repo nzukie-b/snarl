@@ -12,7 +12,7 @@ from model.room import Room
 from model.hallway import Hallway
 from model.level import Level
 from model.gamestate import GameState, create_initial_game_state
-from model.adversary import Adversary
+from model.adversary import AdversaryActor
 from model.player import PlayerActor
 from game.ruleChecker import RuleChecker
 from game.gameManager import GameManager
@@ -66,7 +66,7 @@ def gamestate1(level2):
         p = PlayerActor('Bruh ' + str(i))
         p.health = 3
         players.append(p)
-        a = Adversary('Evil Bruh ' + str(i))
+        a = AdversaryActor('Evil Bruh ' + str(i))
         a.health = 3
         adversaries.append(a)
 

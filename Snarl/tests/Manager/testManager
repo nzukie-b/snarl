@@ -86,7 +86,6 @@ def main():
                     return manager_updates
 
                 if not active_move['to']:
-                    # move_info = gm.request_player_move(player.name, player.pos)
                     move_coord = player.pos
                 else:
                     move_coord = to_coord(active_move['to'])

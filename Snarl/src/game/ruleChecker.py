@@ -5,8 +5,9 @@ snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
 from coord import Coord
-from constants import A_WIN, EXIT, GAME_END, INFO, KEY, P_WIN, STATUS, VALID_MOVE
+from constants import A_WIN, EXIT, GAME_END, INFO, KEY, ORIGIN, P_WIN, ROOM, STATUS, TYPE, VALID_MOVE, ZOMBIE
 from model.item import Item
+from utilities import check_position
 
 class RuleChecker:
     def validate_player_movement(self, cur_player_loc, new_player_loc, level):
@@ -19,9 +20,48 @@ class RuleChecker:
         return {VALID_MOVE: self.__vaildate_movement_distance(cur_player_loc, new_player_loc, True), INFO: info}
 
 
-    def validate_adversary_movement(self, gamestate, level, new_adversary):
+    def validate_adversary_movement(self, adversary, new_adversary_pos, level, player_coords, adversary_coords):
         """Takes in old gamestate, level and new player state, then makes sure that new state is moving to a valid location
         location within the level and in relation to the other players/adversaries in the gamestate."""
+        if adversary.type == ZOMBIE:
+            return self.__validate_zombie_movement(adversary, new_adversary_pos, level, player_coords, adversary_coords)
+
+
+    def __valid_zombie_move(self, coord, walkable_tiles, adversary_coords, door_coords):
+        '''Checks if the the provided coord is a valid tile for a zombie. That it is not the position of a door or other adversary'''
+        return coord in walkable_tiles and (coord not in adversary_coords and coord not in door_coords)
+        
+
+    def __validate_zombie_movement(self, adversary, new_pos, level, player_coords, adversary_coords):
+        '''Validates a moves according to the zombie movement rules. 
+            * Only move 1 tile at a tile. Cannot skip moves, unless no other move is available. Cannot move onto a door. Cannot move onto adversaries'''
+        cur_pos = adversary.pos
+        rooms = [room for room in level.rooms]
+        door_coords = [room.door for room in rooms]
+
+        dest = check_position(new_pos, level)
+        if dest[TYPE] == ROOM:
+            origin = dest[ORIGIN]
+            room = next(room for room in level.rooms if room.origin == origin)
+            tiles = room.tiles
+            if cur_pos == new_pos:
+                up = Coord(cur_pos.row - 1, cur_pos.col)
+                down = Coord(cur_pos.row + 1, cur_pos.col)
+                left = Coord(cur_pos.row, cur_pos.col - 1)
+                right = Coord(cur_pos.row, cur_pos.col + 1)
+
+
+                if not self.__valid_zombie_move(up, tiles, adversary_coords, door_coords) and not self.__valid_zombie_move(
+                    down, tiles, adversary_coords, door_coords) and not self.__valid_zombie_move(left, tiles, adversary_coords, door_coords) and not self.__valid_zombie_move(right, tiles, adversary_coords, door_coords):
+                    return True
+                else: return False
+
+            if ((abs(cur_pos.row - new_pos.row) == 1) and cur_pos.col == new_pos.col) or (cur_pos.row == new_pos.row and (abs(cur_pos.col - new_pos.col) == 1)):
+                if self.__valid_zombie_move(new_pos, tiles, adversary_coords, door_coords):
+                    return True
+        else:
+            return False
+
 
 
     def __vaildate_movement_distance(self, new_player_or_adversary_pos, old_player_or_adversary_pos, is_player):

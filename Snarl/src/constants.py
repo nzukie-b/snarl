@@ -20,6 +20,7 @@ ITEM = 'item'
 KEY = 'key'
 EXIT = 'exit'
 
+
 COORD = 'coord'
 ROOM = "room"
 HALLWAY = "hallway"
@@ -34,6 +35,10 @@ P_UPDATE = 'player-update'
 GAME_END = 'game-end'
 STATUS = 'game-status'
 
+### ADVERSARY TYPES ###
+GHOST = 'ghost'
+ZOMBIE = 'zombie'
+
 ### TYPES OF GAME STATE ##
 START = 'game-start'
 P_WIN = 'player-win'
@@ -42,6 +47,7 @@ A_WIN = 'adversary-win'
 
 ### JSON KEYS ###
 EXIT_LOCKED = 'exit-locked'
+PLAYER = 'player'
 PLAYERS = 'players'
 ADVERSARIES = 'adversaries'
 ORIGIN = 'origin'

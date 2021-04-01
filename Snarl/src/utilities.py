@@ -2,7 +2,7 @@
 from common.moveUpdate import MoveUpdate
 from common.player import Player
 from coord import Coord
-from constants import HALLWAY, P_UPDATE, ROOM
+from constants import HALLWAY, ORIGIN, P_UPDATE, ROOM, TYPE
 from player.localPlayer import LocalPlayer
 from model.player import PlayerActor
 
@@ -127,7 +127,7 @@ def check_position(pos, level):
     elif hall_origin:
         origin_type = HALLWAY
         pos = hall_origin
-    return {'type': origin_type, 'origin': pos}
+    return {TYPE: origin_type, ORIGIN: pos}
 
 
 def coord_radius(pos, dimensions):

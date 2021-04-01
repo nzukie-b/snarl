@@ -19,9 +19,9 @@ class Player(ABC):
             """Move to a location within the visible tiles, if the same tile the player is currently on is
             selected as the move location then stay put as the move for that turn. Sends this info to game-manager to be
             handled."""
-            if move == None or  move == 'null': move = self.pos
+            if move == None or  move == 'null': move = self.player_obj.pos
             move_info = gm.request_player_move(self.name, move)
-            if move_info is not None:
+            if move_info:
                 self.player_obj = gm.get_player_actor(self.name)
             else:
                 #Player is trying to go twice or invalid player name
@@ -48,7 +48,7 @@ class Player(ABC):
         def recieve_update(actor_update):
             """Takes in the position and visible tiles,
             then updates the current player with that info (Also visually updates)"""
-            self.pos = actor_update.pos
+            self.player_obj.pos = actor_update.pos
             self.visible_tiles = actor_update.layout_coords
             self.layout = actor_update.layout
             self.actors = actor_update.actors

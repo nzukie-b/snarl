@@ -14,7 +14,7 @@ from model.item import Item
 from model.hallway import Hallway
 from model.level import Level
 from model.player import PlayerActor
-from model.adversary import Adversary
+from model.adversary import AdversaryActor
 from model.gamestate import GameState
 
 
@@ -160,10 +160,10 @@ def parse_actor(actor_input):
     actor_type = actor_input[TYPE]
     name = actor_input[NAME]
     coord = to_coord(actor_input[POS])
-    if actor_type == PLAYERS:
+    if actor_type == PLAYER:
         return PlayerActor(name, coord)
     else:
-        return Adversary(name, coord)
+        return AdversaryActor(name, type=actor_type, pos=coord)
 
 def parse_state(state_input):
     try:
@@ -224,7 +224,7 @@ def parse_manager(game_input):
         if ii < len(names):
             players.append(PlayerActor(names[ii], initial_coords[ii]))
         else:
-            adversaries.append(Adversary('adv: ' + str(ii), initial_coords[ii]))
+            adversaries.append(AdversaryActor('adv: ' + str(ii), initial_coords[ii]))
 
     gm = GameManager()
     gm.register_players(players)
