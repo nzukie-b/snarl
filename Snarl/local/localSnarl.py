@@ -20,15 +20,11 @@ parser.add_argument('-o', '--observe', dest='observe', action='store_true', defa
 
 
 
-def main():
-
-
-
-if __name__ == '__main__':
-    args = parser.parse_args()
+def main(args):
     levels_file = open(args.levels, 'r')
     levels_input = levels_file.read()
     levels = parse_levels(levels_input)
+    
     gm = GameManager()
     start_level = args.start - 1
 
@@ -47,9 +43,7 @@ if __name__ == '__main__':
     gm.start_game(levels, start_level=start_level)
     
 
-    
 
-
-
-
-
+if __name__ == '__main__':
+    args = parser.parse_args()
+    main(args)

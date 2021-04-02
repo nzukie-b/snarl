@@ -2,7 +2,7 @@ import sys, os
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
-from common.observer import Observer, Observable\
+from common.observer import Observer, Observable
 from view.view import render_level, render_players, render_adversaries
 from model.level import Level
 
