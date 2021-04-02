@@ -154,7 +154,7 @@ def parse_level(level_input):
             exits.append(Item(EXIT, exit_coord))
 
     parsed_level = Level(rooms_list, halls_list, keys, exits)
-    return {'level': parsed_level, 'coord': to_coord(point) if point else None}   
+    return {LEVEL: parsed_level, COORD: to_coord(point) if point else None}   
 
 def parse_actor(actor_input):
     actor_type = actor_input[TYPE]
@@ -239,8 +239,17 @@ def parse_manager(game_input):
         # ??? other exceptions ???
             return None
     return {MANAGER: gm, LEVEL: level, MAX_TURNS: max_turns, MOVES: moves_map}
-    
-            
 
+def parse_levels(levels_input):
+    try:
+       levels_json = json.loads(str(levels_input))
+    except TypeError:
+        levels_json = levels_input
 
+    no_levels = levels_input[0]
+    parsed_levels = []
+    for ii in range(1, no_levels + 1):
+        parsed_level = parse_levels(levels_input[ii])[LEVEL]
+        parsed_levels.append(parsed_level)
 
+    return parse_levels
