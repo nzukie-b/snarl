@@ -135,8 +135,8 @@ class GameManager:
         """
 
         for i in range(len(new_players_locs)):
-            if self.rc.validate_player_movement(self.players[i].pos, new_players_locs[i], self.gamestate.level):
-                self.gamestate = GameState(self.gamestate.level, self.players, self.adversaries, self.gamestate.exit_locked)
+            if self.rc.validate_player_movement(self.players[i].pos, new_players_locs[i], self.gamestate.current_level):
+                self.gamestate = GameState(self.gamestate.current_level, self.players, self.adversaries, self.gamestate.exit_locked)
         else:
             self.players = self.gamestate.players
 
@@ -153,7 +153,7 @@ class GameManager:
         if player.name in self.player_turns:
             p_coords = self.get_player_coords()
             a_coords = self.get_adversary_coords()
-            player_move = self.rc.validate_player_movement(player, new_pos, self.gamestate.level, p_coords, a_coords)
+            player_move = self.rc.validate_player_movement(player, new_pos, self.gamestate.current_level, p_coords, a_coords)
             if player_move[VALID_MOVE] and player_move[INFO].traversable:
                 if player_move[EJECT]:
                     # Skip this players turn until the list of ejected players is reset i.e. in a level change
@@ -171,7 +171,7 @@ class GameManager:
                     updated_players.append(player)
 
                 self.players.append(player)
-                self.gamestate = GameState(self.gamestate.level, updated_players, adversaries, self.gamestate.exit_locked)
+                self.gamestate = GameState(self.gamestate.current_level, updated_players, adversaries, self.gamestate.exit_locked)
                 self.player_turns.remove(player.name)
                 update_players(player, self.players)
             return player_move
@@ -185,7 +185,7 @@ class GameManager:
                 is_client = isinstance(adversary, AdversaryActor)
                 p_coords = self.get_player_coords()
                 adv_coords = self.get_adversary_coords()
-                adv_move = self.rc.validate_adversary_movement(adversary, new_pos, self.gamestate.level, p_coords, adv_coords)
+                adv_move = self.rc.validate_adversary_movement(adversary, new_pos, self.gamestate.current_level, p_coords, adv_coords)
 
             if adv_move[VALID_MOVE]:
                 self.adversaries.remove(adversary)
@@ -204,7 +204,7 @@ class GameManager:
                     updated_advs.append(adversary)
 
                 self.adversaries.append(adversary)
-                self.gamestate = GameState(self.gamestate.level, players, updated_advs, self.gamestate.exit_locked)
+                self.gamestate = GameState(self.gamestate.current_level, players, updated_advs, self.gamestate.exit_locked)
                 self.adv_turns.remove(adversary.name)
             return adv_move
         else:
@@ -220,7 +220,7 @@ class GameManager:
 
         state = self.gamestate
 
-        for room in state.level.rooms:
+        for room in state.current_level.rooms:
             if item in room.items:
                 room.items.remove(item)
                 for p in self.players:
@@ -229,7 +229,7 @@ class GameManager:
 
         if self.rc.validate_item_interaction(player, item, state):
             #TODO: Check if item was key to unlock exit
-            self.gamestate = GameState(state.level, self.players,
+            self.gamestate = GameState(state.current_level, self.players,
                                        self.adversaries, self.gamestate.exit_locked)
         else:
             self.players = self.gamestate.players

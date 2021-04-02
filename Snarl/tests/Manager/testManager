@@ -43,7 +43,7 @@ def main():
         for adv in gm.adversaries:
             if adv.pos in visible_coords:
                 actors.append({"type": 'ghost', "name": adv.name, "position": to_point(adv.pos)})
-        level = gm.gamestate.level
+        level = gm.gamestate.current_level
         pos_info = check_position(player.pos, level)
         is_room = pos_info['type'] == ROOM
         if is_room:
@@ -80,7 +80,7 @@ def main():
                     # Cases where player_moves[turn] is an invalid index, such as turn 2 (3rd turn when incl. 0) when only 2 moves, are handled below
                 except (IndexError):
                     #Move list exhausted / More turns than moves
-                    state_obj = StateObj(gm.gamestate.level, gm.gamestate.players, gm.gamestate.adversaries, gm.gamestate.exit_locked)
+                    state_obj = StateObj(level, gm.gamestate.players, gm.gamestate.adversaries, gm.gamestate.exit_locked)
 
                     print('[{}, {}]'.format(state_obj, manager_updates))
                     return manager_updates
@@ -115,7 +115,7 @@ def main():
                         data = [name, active_move, res]
                         move_updates.append(data)
                         manager_updates.append(data)
-                        state_obj = StateObj(gm.gamestate.level, gm.gamestate.players, gm.gamestate.adversaries, gm.gamestate.exit_locked)
+                        state_obj = StateObj(level, gm.gamestate.players, gm.gamestate.adversaries, gm.gamestate.exit_locked)
                         print('[{}, {}]'.format(state_obj, manager_updates))
                         return manager_updates
 
@@ -130,7 +130,7 @@ def main():
                 else:
                     break
             
-    state_obj = StateObj(gm.gamestate.level, gm.gamestate.players, gm.gamestate.adversaries, gm.gamestate.exit_locked)
+    state_obj = StateObj(level, gm.gamestate.players, gm.gamestate.adversaries, gm.gamestate.exit_locked)
     print('[{}, {}]'.format(state_obj, manager_updates))
     return manager_updates
 

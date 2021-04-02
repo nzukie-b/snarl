@@ -8,6 +8,7 @@ from constants import HALLWAY, ORIGIN, P_UPDATE, ROOM, TYPE
 from model.adversary import AdversaryActor
 from player.localPlayer import LocalPlayer
 from model.player import PlayerActor
+import random
 
 def check_hallway(hallway):
     '''Checks that a hallway is valid by checking that the hallway's orientation is either vertical or horizontal.'''
@@ -168,3 +169,9 @@ def update_players(current_player, other_players):
     other_players = [player for player in other_players if player.name != current_player.name]
     for other in other_players:
         update_player(current_player, other)
+
+def get_random_room_coord(level):
+    '''Returns a random walkable coord in a room'''
+    room = random.choice(level.rooms)
+    tile = random.choice(room.tiles)
+    return tile

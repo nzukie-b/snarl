@@ -18,7 +18,7 @@ def main():
     state = parsed_input['state']
     name = parsed_input['name']
     coord = parsed_input['coord']
-    level = state.level
+    level = state.current_level
     player_names = [player.name for player in state.players]
     if name not in player_names:
         print('[ "Failure", "Player ", {}, " is not a part of the game." ]'.format(name))
@@ -27,21 +27,21 @@ def main():
     for adv in state.adversaries:
         if adv.pos == coord:
             state.players.remove(player)
-            state_obj = StateObj(state.level, state.players, state.adversaries, state.exit_locked)
+            state_obj = StateObj(level, state.players, state.adversaries, state.exit_locked)
             print('[ "Success", "Player ", {}, " was ejected.", {} ]'.format(player.name, state_obj))
             return state_obj
     info = level.info_at_coord(coord)
     if info.traversable:
         if info.object == 'exit' and not state.exit_locked:
             state.players.remove(player)
-            state_obj = StateObj(state.level, state.players, state.adversaries, state.exit_locked)
+            state_obj = StateObj(level, state.players, state.adversaries, state.exit_locked)
             print('[ "Success", "Player ", {}, " exited.", {} ]'.format(name, state_obj))
             return state_obj
         else:
             state.players.remove(player)
             player.pos == coord
             state.players.append(player)
-            state_obj = StateObj(state.level, state.players, state.adversaries, state.exit_locked)
+            state_obj = StateObj(level, state.players, state.adversaries, state.exit_locked)
             print('[ "Success", {} ]'.format(state_obj))
             return state_obj
     else:

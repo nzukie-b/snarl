@@ -15,7 +15,7 @@ class LocalObservable(Observable):
 
     def get_new_gamestate(self):
         """Gets gamestate from game manager and sets new gamestate to received gamestate."""
-        render_level(self.new_gamestate.level.rooms, self.new_gamestate.level.halls)
+        render_level(self.new_gamestate.current_level.rooms, self.new_gamestate.current_level.halls)
         render_players(self.new_gamestate.players)
         render_adversaries(self.new_gamestate.adversaries)
         self.cur_gamestate = self.new_gamestate

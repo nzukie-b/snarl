@@ -85,7 +85,7 @@ def test_gamemanager(level2):
     assert gm.players[1].name == "bruh 1"
     assert gm.players[2].name == "bruh 2"
     gm.start_game(level2)
-    assert gm.gamestate.level
+    assert gm.gamestate.current_level
     assert len(gm.players) == 3
     assert len(gm.gamestate.players) == 3
     assert gm.players[0].name == "bruh 0"
@@ -98,7 +98,7 @@ def test_gamemanager(level2):
     gm.apply_player_item_interaction(gm.gamestate.players[2], Coord(8, 17))
     print(str(gm.gamestate.players[2]))
     assert Coord(8, 17) in gm.gamestate.players[2].inventory
-    for room in gm.gamestate.level.rooms:
+    for room in gm.gamestate.current_level.rooms:
         assert Coord(8, 17) not in room.items
 
 

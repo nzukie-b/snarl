@@ -22,9 +22,15 @@ class StateObj:
 
 
 class GameState:
-    def __init__(self, level, players, adversaries, exit_locked=True):
-        #TODO: CHANGE TO ACCEPT MULTIPLE LEVELS
-        self.level = level
+    def __init__(self, levels, players, adversaries, exit_locked=True):
+        multi_levels = isinstance(levels, list)
+        if multi_levels:
+            next_level = next(l for l in levels)
+            self.current_level = levels.remove(next_level)
+            self.levels = levels
+        else:
+            self.current_level = levels
+            levels = []
         self.players = players
         self.adversaries = adversaries
         self.exit_locked = exit_locked
@@ -32,7 +38,7 @@ class GameState:
         self.ejected_players = set()
     
     def __str__(self):
-        level_str = str(self.level)
+        level_str = str(self.current_level)
         players_str = [str(player) for player in self.players]
         adversaries_str = [str(adversary) for adversary in self.adversaries]
         return '{{"level": {}, "players": {}, "adversaries": {}, "exit_locked": {}}}'.format(level_str, players_str, adversaries_str, self.exit_locked)
@@ -76,7 +82,6 @@ def create_initial_game_state(level, players, adversaries):
 
 
 
-
 def update_game_state(new_players, new_adversaries, exit_locked):
     """
     Replaces the current gamestate with a new gamestate made up of the updated values for all of the game attributes.
@@ -91,9 +96,9 @@ def update_game_state(new_players, new_adversaries, exit_locked):
     adversaries = []
 
     for i in range(len(new_players)):
-        players.append(PlayerActor(new_players[i].pos, new_players[i].name, new_players[i].health, new_players[i].inventory, new_players[i].non_walkable_tiles, new_players[i].movement_speed))
+        players.append(PlayerActor(new_players[i].pos, new_players[i].name, new_players[i].health, new_players[i].inventory, new_players[i].non_walkable_tiles, new_players[i].move_speed))
 
     for i in range(len(new_adversaries)):
-        adversaries.append(AdversaryActor(new_adversaries[i].pos, new_adversaries[i].name, new_adversaries[i].health, new_adversaries[i].inventory, new_adversaries[i].non_walkable_tiles, new_adversaries[i].movement_speed))
+        adversaries.append(AdversaryActor(new_adversaries[i].pos, new_adversaries[i].name, new_adversaries[i].health, new_adversaries[i].inventory, new_adversaries[i].non_walkable_tiles, new_adversaries[i].move_speed))
 
     return GameState(players, adversaries, exit_locked=exit_locked)

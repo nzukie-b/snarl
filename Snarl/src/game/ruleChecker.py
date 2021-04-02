@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 import sys, os
-from common import player
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
+import random
 from coord import Coord
-from constants import A_WIN, EJECT, EXIT, GAME_END, INFO, KEY, LEVEL_END, ORIGIN, P_WIN, ROOM, STATUS, TYPE, VALID_MOVE, ZOMBIE
+from constants import A_WIN, EJECT, EXIT, GAME_END, GHOST, INFO, KEY, LEVEL_END, ORIGIN, P_WIN, ROOM, STATUS, TYPE, VALID_MOVE, ZOMBIE
 from model.item import Item
-from utilities import check_position
+from utilities import check_position, get_random_room_coord
 
 class RuleChecker:
     def validate_player_movement(self, player, new_pos, level, players, adversaries):
@@ -22,7 +22,7 @@ class RuleChecker:
         # Invalid move if multiple coords are filtered out i.e. current_pos is shared by multiple adversaries
         if len(other_coords) > len(players) - 1:
             valid_move = False
-            
+
         eject = False
         if valid_move:
             if new_pos in players:
@@ -40,8 +40,11 @@ class RuleChecker:
         eject = False
         if adversary.type == ZOMBIE:
             valid_move = self.__validate_zombie_movement(adversary, new_adversary_pos, level, adversary_coords)
-            if new_adversary_pos in player_coords:
-                eject = True
+        elif adversary.type == GHOST:
+            valid_move = self.__validate_ghost_movement(adversary, new_adversary_pos, level, adversary_coords)
+
+        if new_adversary_pos in player_coords:
+            eject = True
         
         return {VALID_MOVE: valid_move, EJECT: eject}
 
@@ -68,18 +71,29 @@ class RuleChecker:
                 left = Coord(cur_pos.row, cur_pos.col - 1)
                 right = Coord(cur_pos.row, cur_pos.col + 1)
 
-
                 if not self.__valid_zombie_move(up, tiles, adversary_coords, door_coords) and not self.__valid_zombie_move(
                     down, tiles, adversary_coords, door_coords) and not self.__valid_zombie_move(left, tiles, adversary_coords, door_coords) and not self.__valid_zombie_move(right, tiles, adversary_coords, door_coords):
                     return True
                 else: return False
 
-            if ((abs(cur_pos.row - new_pos.row) == 1) and cur_pos.col == new_pos.col) or (cur_pos.row == new_pos.row and (abs(cur_pos.col - new_pos.col) == 1)):
+            if self.__validate_movement_distance(adversary.pos, new_pos, adversary.move_speed):
                 if self.__valid_zombie_move(new_pos, tiles, adversary_coords, door_coords):
                     return True
         else:
             return False
+        
+    def __validate_ghost_movement(self, adversary, new_pos, level, adversary_coords):
+        valid_move = self.__validate_movement_distance(adversary.pos, new_pos, adversary.move_speed)
+        if valid_move:
+            move_info = level.info_at_coord(new_pos)
+            if not move_info.traversable:
+                # if new pos is not traversable such as being a wall move to a random room
+                new_pos = get_random_room_coord(level)
 
+            if new_pos in adversary_coords:
+                valid_move = False
+        
+        return valid_move
 
 
     def __vaildate_movement_distance(self, current_pos, new_pos, move_distance):
@@ -136,7 +150,7 @@ class RuleChecker:
     def validate_item_interaction(self, player, item, state):
         """Checks that level items and player inventory have been properly updated after interaction between player
         and item. (In the case that adversaries can pick up items this would also check that interaction.)"""
-        level = state.level
+        level = state.current_level
         for room in level.rooms:
             if item in room.items:
                 return False
