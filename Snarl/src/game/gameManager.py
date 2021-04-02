@@ -113,10 +113,15 @@ class GameManager:
         else:
              self.adversaries.append(create_local_adversary(adversary_client, actor_type))
 
-    def start_game(self, level):
+    def start_game(self, levels, start_level=0):
+        is_list = isinstance(levels, list)
+        level = levels[start_level]
+        levels.remove(level)
         if self.players:
-            gs_info = create_initial_game_state(level, self.players, self.adversaries)
-            self.gamestate = GameState(level, gs_info[0], gs_info[1])
+            player_objs = [p.player_obj for p in self.players]
+            adv_objs = [a.adversary_obj for a in self.adversaries]
+            gs_info = create_initial_game_state(level, player_objs, adv_objs)
+            self.gamestate = GameState(levels, gs_info[0], gs_info[1], current_level=level)
             self.reset_turns()
         else:
             print("Please register at least one player and adversary to start the game.")

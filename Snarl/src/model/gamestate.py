@@ -22,10 +22,11 @@ class StateObj:
 
 
 class GameState:
-    def __init__(self, levels, players, adversaries, exit_locked=True):
+    def __init__(self, levels, players, adversaries, exit_locked=True, current_level=None):
         multi_levels = isinstance(levels, list)
         if multi_levels:
             next_level = next(l for l in levels)
+            if not current_level: self.current_level = levels.remove(next_level) 
             self.current_level = levels.remove(next_level)
             self.levels = levels
         else:

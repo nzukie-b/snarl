@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-import sys, os, argparse, json
+import sys, os, argparse, json, math
+from constants import GHOST, ZOMBIE
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
@@ -36,15 +37,19 @@ if __name__ == '__main__':
         name = input('Please enter a username for player number {}\n', ii+1)
         gm.register_player(name)
 
+    num_zombies = math.floor(len(levels) / 2) + 1
+    num_ghosts = math.floor((len(levels) - 1) / 2)
+    for ii in range(num_zombies):
+        gm.register_adversary('zombie: {}'.format(ii), ZOMBIE)
+    for ii in range(num_ghosts):
+        gm.register_adversary('ghost: {}'.format(ii), GHOST)
+    
+    gm.start_game(levels, start_level=start_level)
+    
+
     
 
 
 
 
 
-
-
-# tests_dir = os.path.dirname(currentdir)
-# snarl_dir = os.path.dirname(tests_dir)
-# src_dir = snarl_dir + '/src'
-# sys.path.append(src_dir)
