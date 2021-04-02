@@ -33,7 +33,11 @@ INFO = 'info'
 VALID_MOVE = 'valid-move'
 P_UPDATE = 'player-update'
 GAME_END = 'game-end'
+LEVEL_END = 'level-end'
 STATUS = 'game-status'
+
+RES = 'result'
+EJECT = 'eject'
 
 ### ADVERSARY TYPES ###
 GHOST = 'ghost'

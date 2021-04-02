@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 from constants import GHOST, ZOMBIE
 
 class Adversary(ABC):
-    def __init__(self, name, adversary_obj=None, current_level=None, player_coords=None, adversary_coords=None):
+    def __init__(self, name, type_=ZOMBIE, adversary_obj=None, current_level=None, player_coords=None, adversary_coords=None):
         self.name = name
+        self.type = type_
         self.adversary_obj = adversary_obj
         self.current_level = current_level
         self.player_coords = player_coords
@@ -15,7 +16,7 @@ class Adversary(ABC):
         self.adversary_obj.pos = None
     
     @abstractmethod
-    def update_player_coord(self, new_coords):
+    def update_player_coords(self, new_coords):
         self.player_coords = new_coords
 
     @abstractmethod

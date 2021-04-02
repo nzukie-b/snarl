@@ -5,7 +5,6 @@ sys.path.append(src_dir)
 from common.player import Player
 
 
-# TODO Implementation of common.player
 class LocalPlayer(Player):
     def __init__(self, name, player_obj=None, layout=None, visible_tiles=None, actors=None, objects=None, inventory_contents=None):
         super().__init__(name=name, player_obj=player_obj, layout=layout, visible_tiles=visible_tiles, 

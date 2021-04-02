@@ -1,19 +1,19 @@
 import sys, os
-from common import adversary, player
-from common.actorUpdate import ActorUpdate
-from coord import Coord
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
-from constants import INFO, MAX_PLAYERS, VALID_MOVE
+from constants import EJECT, INFO, MAX_PLAYERS, VALID_MOVE, ZOMBIE
+from coord import Coord
 from common.player import Player
 from player.localPlayer import LocalPlayer
+from common.adversary import Adversary
+from common.actorUpdate import ActorUpdate
 from model.player import PlayerActor
 from model.adversary import AdversaryActor
 from model.gamestate import GameState, create_initial_game_state
 from game.ruleChecker import RuleChecker
-from utilities import create_local_player, update_players
+from utilities import create_local_player, update_players, create_local_adversary
 class GameManager:
     def __init__(self):
         #List of player clients
@@ -27,7 +27,8 @@ class GameManager:
         self.adv_turns = []
 
     def __reset_player_turns(self):
-        return [player.name for player in self.players]
+        ejected_players = self.gamestate.ejected_players
+        return [player.name for player in self.players if player.name not in ejected_players]
 
     def __reset_adversary_turns(self):
         return [adversary.name for adversary in self.adversaries]
@@ -59,14 +60,35 @@ class GameManager:
         else:
             print("Too few or too many players to register, please register between 1 and 4 players.")
                 
+
     def get_player_actor(self, name):
         '''Returns the PlayerActor object associated with the provided name'''
         player = next(player for player in self.gamestate.players if player.name == name)
         return player
 
+    def get_player_actors(self):
+        players = [self.get_player_actor(p.name) for p in self.players]
+        return players
+
+    def get_player_coords(self):
+        players = self.get_player_actors()
+        player_coords = [player.pos for player in players]
+        return player_coords
+
     def get_adversary_actor(self, name):
         adversary = next(adv for adv in self.gamestate.adversaries if adv.name == name)
         return adversary
+    
+    def get_adversary_actors(self):
+        advs = [self.get_adversary_actor(adv.name) for adv in self.adversaries]
+        return advs
+
+    def get_adversary_coords(self):
+        advs = self.get_adversary_actors()
+        adv_coords = [adversary.pos for adversary in advs]
+        return adv_coords
+
+    
 
     def register_player(self, player_client):
         if len(self.players) <= MAX_PLAYERS:
@@ -84,6 +106,12 @@ class GameManager:
         """Create list of adversary objects using list of adversary ids."""
         for id_ in adversary_ids:
             self.adversaries.append(AdversaryActor(id_))
+
+    def register_adversary(self, adversary_client, actor_type=ZOMBIE):
+        if isinstance(adversary_client, Adversary):
+            self.adversaries.append(adversary_client)
+        else:
+             self.adversaries.append(create_local_adversary(adversary_client, actor_type))
 
     def start_game(self, level):
         if self.players:
@@ -123,26 +151,29 @@ class GameManager:
             player.pos = player.player_obj.pos
 
         if player.name in self.player_turns:
-            player_move = self.rc.validate_player_movement(player.pos, new_pos, self.gamestate.level)
-            #TODO: MAKE RC CHECK IF PLAYER POS == ADVERSARY POS TO EJECT THEM FROM THE STATE
+            p_coords = self.get_player_coords()
+            a_coords = self.get_adversary_coords()
+            player_move = self.rc.validate_player_movement(player, new_pos, self.gamestate.level, p_coords, a_coords)
             if player_move[VALID_MOVE] and player_move[INFO].traversable:
+                if player_move[EJECT]:
+                    # Skip this players turn until the list of ejected players is reset i.e. in a level change
+                    self.gamestate.ejected_players.add(name)
+                
                 self.players.remove(player)
+                updated_players = self.get_player_actors()
+                adversaries = self.get_adversary_actors()
 
                 if is_client:
-                    other_players = [player.player_obj for player in self.players]
                     player.player_obj.pos = new_pos
-                    other_players.append(player.player_obj)
-                    updated_players = other_players
+                    updated_players.append(player.player_obj)
                 else:
-                    other_players = [player for player in self.players]
                     player.pos = new_pos
-                    other_players.append(player)
-                    update_players = other_players
+                    updated_players.append(player)
 
                 self.players.append(player)
-                self.gamestate = GameState(self.gamestate.level, other_players, self.gamestate.adversaries, self.gamestate.exit_locked)
+                self.gamestate = GameState(self.gamestate.level, updated_players, adversaries, self.gamestate.exit_locked)
                 self.player_turns.remove(player.name)
-                update_players(player, other_players)
+                update_players(player, self.players)
             return player_move
             
         return False
@@ -151,29 +182,29 @@ class GameManager:
         if len(self.player_turns) == 0:
             if name in self.adv_turns:
                 adversary = next(adversary for adversary in self.adversaries if adversary.name == name)
+                is_client = isinstance(adversary, AdversaryActor)
                 p_coords = self.get_player_coords()
                 adv_coords = self.get_adversary_coords()
                 adv_move = self.rc.validate_adversary_movement(adversary, new_pos, self.gamestate.level, p_coords, adv_coords)
 
-            if adv_move:
+            if adv_move[VALID_MOVE]:
                 self.adversaries.remove(adversary)
+                players = self.get_player_actors()
+                updated_advs = self.get_adversary_actors()
 
-                is_client = isinstance(adversary, AdversaryActor)
+                if adv_move[EJECT]:
+                    player = next(player for player in players if player.pos == new_pos)
+                    self.gamestate.ejected_players.add(player.name)
+
                 if is_client:
-                    other_advs = [adv.adversary_obj for adv in self.adversaries]
                     adversary.adversary_obj.pos = new_pos
-                    other_advs.append(adversary.adversary_obj)
-                    updated_advs = other_advs
+                    updated_advs.append(adversary.adversary_obj)
                 else:
-                    other_advs = [adv for adv in self.adversaries]
                     adversary.pos = new_pos
-                    other_advs.append(adversary)
-                    updated_advs = other_advs
-
+                    updated_advs.append(adversary)
 
                 self.adversaries.append(adversary)
-                #TODO: MAKE RC CHECK IF PLAYER POS == ADVERSARY POS TO EJECT THEM FROM THE STATE
-                self.gamestate = GameState(self.gamestate.level, self.gamestate.players, updated_advs, self.gamestate.exit_locked)
+                self.gamestate = GameState(self.gamestate.level, players, updated_advs, self.gamestate.exit_locked)
                 self.adv_turns.remove(adversary.name)
             return adv_move
         else:

@@ -23,12 +23,13 @@ class StateObj:
 
 class GameState:
     def __init__(self, level, players, adversaries, exit_locked=True):
+        #TODO: CHANGE TO ACCEPT MULTIPLE LEVELS
         self.level = level
         self.players = players
         self.adversaries = adversaries
         self.exit_locked = exit_locked
         self.game_status = None
-        self.out_players = set()
+        self.ejected_players = set()
     
     def __str__(self):
         level_str = str(self.level)
@@ -38,7 +39,6 @@ class GameState:
 
     def __repr__(self):
         return str(self)
-    
 
 def remove_doors_and_items_from_rooms(first):
     '''Remove doors and items from walkable tiles. Used to determine initial placement of entities'''

@@ -1,8 +1,11 @@
 #!/usr/bin/env python
+from adversary.localAdversary import LocalAdversary
+from common import player
 from common.moveUpdate import MoveUpdate
 from common.player import Player
 from coord import Coord
 from constants import HALLWAY, ORIGIN, P_UPDATE, ROOM, TYPE
+from model.adversary import AdversaryActor
 from player.localPlayer import LocalPlayer
 from model.player import PlayerActor
 
@@ -152,11 +155,16 @@ def create_local_player(name):
     player_obj = PlayerActor(name)
     return LocalPlayer(name, player_obj=player_obj)
 
+def create_local_adversary(name, type_):
+    adv_obj = AdversaryActor(name, type_=type_)
+    return LocalAdversary(name, type_=type_, adversary_obj=adv_obj)
+
 def update_player(current_player, other_player):
     if isinstance(other_player, Player) and isinstance(current_player, Player):
         if current_player.player_obj.pos in other_player.visible_tiles:
-            other_player.actors.append(MoveUpdate(P_UPDATE, current_player.name, to_coord(current_player.pos)))
+            other_player.actors.append(MoveUpdate(P_UPDATE, current_player.name, to_coord(current_player.player_obj.pos)))
 
 def update_players(current_player, other_players):
+    other_players = [player for player in other_players if player.name != current_player.name]
     for other in other_players:
         update_player(current_player, other)
