@@ -122,82 +122,83 @@ def main(args):
     
     gm.start_game(levels, start_level=start_level)
 
-    for index_in_players in range(0, len(gm.players)):
-        player = gm.players[index_in_players]
-        invalid_input = True
-        while invalid_input:
-            move_player_loc = input('[Current Player\'s turn: {}] Type in location you want to move to (Type into format ' 
-                                    '\"\'row number\', \'col number\'\""\n'.format(player.name))
-            move_player_loc = [int(x) for x in move_player_loc.split(', ')]
-            print(move_player_loc)
-            if len(move_player_loc) != 2:
-                print("INVALID LOCATION INPUT")
-            else:
-                player.move_to_tile(to_coord(move_player_loc), gm)
-                if player.name in gm.gamestate.out_players:
-                    print("Player " + player.name + " was expelled")
-                if player.name in exited_players:
-                    print("Player " + player.name + " exit")
-                invalid_input = False
+    while True:
+        for index_in_players in range(0, len(gm.players)):
+            player = gm.players[index_in_players]
+            invalid_input = True
+            while invalid_input:
+                move_player_loc = input('[Current Player\'s turn: {}] Type in location you want to move to (Type into format ' 
+                                        '\"\'row number\', \'col number\'\""\n'.format(player.name))
+                move_player_loc = [int(x) for x in move_player_loc.split(', ')]
+                print(move_player_loc)
+                if len(move_player_loc) != 2:
+                    print("INVALID LOCATION INPUT")
+                else:
+                    player.move_to_tile(to_coord(move_player_loc), gm)
+                    if player.name in gm.gamestate.out_players:
+                        print("Player " + player.name + " was expelled")
+                    if player.name in exited_players:
+                        print("Player " + player.name + " exit")
+                    invalid_input = False
 
-        new_player_loc = to_coord(move_player_loc)
+            new_player_loc = to_coord(move_player_loc)
 
-        player_object = gm.get_player_actor(player.name)
+            player_object = gm.get_player_actor(player.name)
 
-        update = ActorUpdate(new_player_loc)
-        update.position = new_player_loc
-        update.type = P_UPDATE
-        view_dimensions = to_coord([(player_object.move_speed * 2) + 1, (player_object.move_speed * 2) + 1])
-        update.layout = to_layout(new_player_loc, gm.gamestate.current_level, view_dimensions)
-        update.layout_coords = coord_radius(new_player_loc, view_dimensions)
+            update = ActorUpdate(new_player_loc)
+            update.position = new_player_loc
+            update.type = P_UPDATE
+            view_dimensions = to_coord([(player_object.move_speed * 2) + 1, (player_object.move_speed * 2) + 1])
+            update.layout = to_layout(new_player_loc, gm.gamestate.current_level, view_dimensions)
+            update.layout_coords = coord_radius(new_player_loc, view_dimensions)
 
-        actors = []
-        other_players = [p for p in gm.players if p.name is not name]
-        for player in other_players:
-            player_obj = gm.get_player_actor(player.name)
-            if player_obj.pos in update.layout_coords:
-                actors.append({"type": 'player', "name": player_obj.name, "position": to_point(player_obj.pos)})
-        for adv in gm.adversaries:
-            adversary_obj = gm.get_adversary_actor(adv.name)
-            if adversary_obj.pos in update.layout_coords:
-                actors.append({"type": 'ghost', "name": adversary_obj.name, "position": to_point(adversary_obj.pos)})
-        level = gm.gamestate.current_level
-        pos_info = check_position(player.pos, level)
+            actors = []
+            other_players = [p for p in gm.players if p.name is not name]
+            for player in other_players:
+                player_obj = gm.get_player_actor(player.name)
+                if player_obj.pos in update.layout_coords:
+                    actors.append({"type": 'player', "name": player_obj.name, "position": to_point(player_obj.pos)})
+            for adv in gm.adversaries:
+                adversary_obj = gm.get_adversary_actor(adv.name)
+                if adversary_obj.pos in update.layout_coords:
+                    actors.append({"type": 'ghost', "name": adversary_obj.name, "position": to_point(adversary_obj.pos)})
+            level = gm.gamestate.current_level
+            pos_info = check_position(player.pos, level)
 
-        is_room = pos_info[TYPE] == ROOM
-        objects = []
-        if is_room:
-            for room in level.rooms:
-                for item in room.items:
-                    if item.pos in update.layout_coords:
-                        objects.append({"type": 'key', "position": to_point(item)})
-        for exit_ in level.exits:
-            if exit_ in update.layout_coords:
-                objects.append({"type": 'exit', "position": to_point(exit_)})
+            is_room = pos_info[TYPE] == ROOM
+            objects = []
+            if is_room:
+                for room in level.rooms:
+                    for item in room.items:
+                        if item.pos in update.layout_coords:
+                            objects.append({"type": 'key', "position": to_point(item)})
+            for exit_ in level.exits:
+                if exit_ in update.layout_coords:
+                    objects.append({"type": 'exit', "position": to_point(exit_)})
 
-        update.actors = actors
-        update.objects = objects
+            update.actors = actors
+            update.objects = objects
 
-        player.recieve_update(update)
+            player.recieve_update(update)
 
-        item = Item(KEY, player.pos)
+            item = Item(KEY, player.pos)
 
-        if RuleChecker.validate_item_interaction(player_object, item):
-            print("Player " + player.name + " found the " + item.type)
+            if RuleChecker.validate_item_interaction(player_object, item):
+                print("Player " + player.name + " found the " + item.type)
 
-        if RuleChecker.is_game_over(gm.gamestate):
-            print("GAME OVER, exited successfully {} times and found {} keys")
-            exit()
-
-        is_last_level = False
-        current_level = gm.gamestate.current_level
-        if RuleChecker.is_level_over(gm.gamestate):
-            if is_last_level and gm.game_status == P_WIN:
-                "Congratulations players, you have won!"
+            if RuleChecker.is_game_over(gm.gamestate):
+                print("GAME OVER, exited successfully {} times and found {} keys")
                 exit()
-            else:
-                "Sorry players, you have lost :'( You failed on level {}".format(current_level)
-                exit()
+
+            is_last_level = False
+            current_level = gm.gamestate.current_level
+            if RuleChecker.is_level_over(gm.gamestate):
+                if is_last_level and gm.game_status == P_WIN:
+                    "Congratulations players, you have won!"
+                    exit()
+                else:
+                    "Sorry players, you have lost :'( You failed on level {}".format(current_level)
+                    exit()
 
 
 
