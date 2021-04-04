@@ -158,7 +158,7 @@ class GameManager:
         if player.name in self.player_turns:
             p_coords = self.get_player_coords()
             a_coords = self.get_adversary_coords()
-            player_move = self.rc.validate_player_movement(player, new_pos, self.gamestate.current_level, p_coords, a_coords)
+            player_move = self.rc.validate_player_movement(self.get_player_actor(player.name), new_pos, self.gamestate.current_level, p_coords, a_coords)
             if player_move[VALID_MOVE] and player_move[INFO].traversable:
                 if player_move[EJECT]:
                     # Skip this players turn until the list of ejected players is reset i.e. in a level change

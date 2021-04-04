@@ -241,15 +241,20 @@ def parse_manager(game_input):
     return {MANAGER: gm, LEVEL: level, MAX_TURNS: max_turns, MOVES: moves_map}
 
 def parse_levels(levels_input):
-    try:
-       levels_json = json.loads(str(levels_input))
-    except TypeError:
-        levels_json = levels_input
+    # levels_json = []
+    # try:
+    #     for x in levels_input:
+    #         levels_json.append(x)
+    # except TypeError:
+    #     levels_json = levels_input
 
-    no_levels = levels_input[0]
+    print("LU: " + str(levels_input))
+
+    no_levels = int(levels_input[0])
     parsed_levels = []
-    for ii in range(1, no_levels + 1):
-        parsed_level = parse_levels(levels_input[ii])[LEVEL]
+    #print("NL: " + str(no_levels))
+    for ii in range(1, int(no_levels) + 1):
+        parsed_level = parse_level(levels_input[ii])[LEVEL]
         parsed_levels.append(parsed_level)
 
-    return parse_levels
+    return parsed_levels

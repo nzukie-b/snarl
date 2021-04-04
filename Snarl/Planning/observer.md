@@ -1,4 +1,4 @@
-Observer loocal api
+Observer local api
 
 class Observable:
     def __init__(self, cur_gamestate, new_gamestate = cur_gamestate) -> None:

@@ -26,12 +26,13 @@ class GameState:
         multi_levels = isinstance(levels, list)
         if multi_levels:
             next_level = next(l for l in levels)
-            if not current_level: self.current_level = levels.remove(next_level) 
-            self.current_level = levels.remove(next_level)
+            print(next_level)
+            if not current_level: current_level = levels.remove(next_level)
+            self.current_level = current_level
             self.levels = levels
         else:
             self.current_level = levels
-            levels = []
+            self.levels = []
         self.players = players
         self.adversaries = adversaries
         self.exit_locked = exit_locked

@@ -120,9 +120,7 @@ class RuleChecker:
         by the attack."""
 
 
-
-
-    def is_level_over(state):
+    def is_level_over(self, state):
         is_over = False
         status = None
         if len(state.out_players) == len(state.players):
@@ -133,7 +131,7 @@ class RuleChecker:
                 status = A_WIN
         return {LEVEL_END: is_over, STATUS: status}
 
-    def is_game_over(state):
+    def is_game_over(self, state):
         '''Checks whether the current state is one of the game end states. That is
         * - At least 1 player has exited the level, and all other players have been removed
         * - All players have been removed from the level by adversaries'''
