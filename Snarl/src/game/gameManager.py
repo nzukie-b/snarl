@@ -3,7 +3,7 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
-from constants import EJECT, INFO, MAX_PLAYERS, VALID_MOVE, ZOMBIE
+from constants import EJECT, INFO, LEVEL_END, MAX_PLAYERS, P_WIN, STATUS, VALID_MOVE, ZOMBIE
 from coord import Coord
 from common.player import Player
 from player.localPlayer import LocalPlayer
@@ -27,8 +27,8 @@ class GameManager:
         self.adv_turns = []
 
     def __reset_player_turns(self):
-        ejected_players = self.gamestate.ejected_players
-        return [player.name for player in self.players if player.name not in ejected_players]
+        out_players = self.gamestate.out_players
+        return [player.name for player in self.players if player.name not in out_players]
 
     def __reset_adversary_turns(self):
         return [adversary.name for adversary in self.adversaries]
@@ -113,18 +113,31 @@ class GameManager:
         else:
              self.adversaries.append(create_local_adversary(adversary_client, actor_type))
 
+    def __init_state(self, levels, start_level=0):
+        try:
+            level = levels[start_level]
+        except ValueError:
+            print('Invalid Starting level')
+            return False
+        player_objs = [p.player_obj for p in self.players]
+        adv_objs = [a.adversary_obj for a in self.adversaries]
+        gs_info = create_initial_game_state(level, player_objs, adv_objs)
+        return GameState(levels, gs_info[0], gs_info[1], current_level=level)
+
     def start_game(self, levels, start_level=0):
-        is_list = isinstance(levels, list)
-        level = levels[start_level]
-        levels.remove(level)
         if self.players:
-            player_objs = [p.player_obj for p in self.players]
-            adv_objs = [a.adversary_obj for a in self.adversaries]
-            gs_info = create_initial_game_state(level, player_objs, adv_objs)
-            self.gamestate = GameState(levels, gs_info[0], gs_info[1], current_level=level)
+            self.gamestate = self.__init_state(levels, start_level)
             self.reset_turns()
         else:
             print("Please register at least one player and adversary to start the game.")
+
+    def next_level(self):
+        if len(self.gamestate) > 0:
+            old_state = self.gamestate
+            new_state = self.__init_state(old_state.levels)
+            self.gamestate = new_state
+    
+
 
     """Players are in gamestate in our implementation and inherently have access to updated gamestate info.
         Therefore updating the gmaestate with the game manager fulfills the requirement to have the game manager update
@@ -162,7 +175,7 @@ class GameManager:
             if player_move[VALID_MOVE] and player_move[INFO].traversable:
                 if player_move[EJECT]:
                     # Skip this players turn until the list of ejected players is reset i.e. in a level change
-                    self.gamestate.ejected_players.add(name)
+                    self.gamestate.out_players.add(name)
                 
                 self.players.remove(player)
                 updated_players = self.get_player_actors()
@@ -190,7 +203,7 @@ class GameManager:
                 is_client = isinstance(adversary, AdversaryActor)
                 p_coords = self.get_player_coords()
                 adv_coords = self.get_adversary_coords()
-                adv_move = self.rc.validate_adversary_movement(adversary, new_pos, self.gamestate.current_level, p_coords, adv_coords)
+                adv_move = self.rc.validate_adversary_movement(self.get_adversary_actor(adversary.name), new_pos, self.gamestate.current_level, p_coords, adv_coords)
 
             if adv_move[VALID_MOVE]:
                 self.adversaries.remove(adversary)
@@ -199,7 +212,7 @@ class GameManager:
 
                 if adv_move[EJECT]:
                     player = next(player for player in players if player.pos == new_pos)
-                    self.gamestate.ejected_players.add(player.name)
+                    self.gamestate.out_players.add(player.name)
 
                 if is_client:
                     adversary.adversary_obj.pos = new_pos
@@ -233,8 +246,15 @@ class GameManager:
                         p.inventory.append(item)
 
         if self.rc.validate_item_interaction(player, item, state):
-            #TODO: Check if item was key to unlock exit
-            self.gamestate = GameState(state.current_level, self.players,
-                                       self.adversaries, self.gamestate.exit_locked)
+            level_over = self.rc.is_level_over(state)
+            game_over = self.rc.is_game_over(state)
+
+            if not level_over[LEVEL_END]:
+                self.gamestate = GameState(state.current_level, self.players,
+                                        self.adversaries, self.gamestate.exit_locked)
+            elif level_over[STATUS] == P_WIN:
+                self.next_level()
+            else:
+                print('L')
         else:
             self.players = self.gamestate.players

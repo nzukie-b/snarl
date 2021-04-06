@@ -1,6 +1,7 @@
 import copy
 from constants import STATE
 from coord import Coord
+from model import level
 from utilities import to_point, to_coord
 from model.room import Room
 from model.adversary import AdversaryActor
@@ -23,21 +24,26 @@ class StateObj:
 
 class GameState:
     def __init__(self, levels, players, adversaries, exit_locked=True, current_level=None):
+        # print(current_level)
         multi_levels = isinstance(levels, list)
         if multi_levels:
-            next_level = next(l for l in levels)
-            print(next_level)
-            if not current_level: current_level = levels.remove(next_level)
-            self.current_level = current_level
+            try:
+                levels.remove(current_level)
+                self.current_level = current_level
+            except (KeyError, ValueError):
+                next_level = next(l for l in levels)
+                removed_level = levels.remove(next_level)
+                self.current_level = removed_level
             self.levels = levels
         else:
+            # Single level
             self.current_level = levels
-            self.levels = []
+            levels = []
         self.players = players
         self.adversaries = adversaries
         self.exit_locked = exit_locked
         self.game_status = None
-        self.ejected_players = set()
+        self.out_players = set()
     
     def __str__(self):
         level_str = str(self.current_level)

@@ -61,7 +61,7 @@ def to_layout(pos, level, dimensions):
     layout = [[0 for ii in range(dimensions.row)] for jj in range(dimensions.col)]
     coords = coord_radius(pos, dimensions)
 
-    if is_room:
+    if pos_info[TYPE] == ROOM:
         room = next(room for room in level.rooms if room.origin == origin)
         for tile in room.tiles:
             if tile in coords:
@@ -70,10 +70,8 @@ def to_layout(pos, level, dimensions):
         for door in room.doors:
             if door in coords:
                 layout[door.row - origin.row][door.col - origin.col] = 2
-    else:
-
+    elif pos_info[TYPE] == HALLWAY:
         hall = next(hall for hall in level.hallways if hall.origin == origin)
-        #TODO: Double check if  + 1 is necessary
         for ii in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1):
             for jj in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1):
                 hall_coord = Coord(ii, jj)
@@ -82,7 +80,6 @@ def to_layout(pos, level, dimensions):
         for door in hall:
             if door in coords:
                 layout[door.row - origin.row][door.col - origin.col] = 2
-
     return {POS: pos, LAYOUT: layout}
 
 def parse_room(room_input):
@@ -241,19 +238,9 @@ def parse_manager(game_input):
     return {MANAGER: gm, LEVEL: level, MAX_TURNS: max_turns, MOVES: moves_map}
 
 def parse_levels(levels_input):
-    # levels_json = []
-    # try:
-    #     for x in levels_input:
-    #         levels_json.append(x)
-    # except TypeError:
-    #     levels_json = levels_input
-
-    print("LU: " + str(levels_input))
-
     no_levels = int(levels_input[0])
     parsed_levels = []
-    #print("NL: " + str(no_levels))
-    for ii in range(1, int(no_levels) + 1):
+    for ii in range(1, no_levels + 1):
         parsed_level = parse_level(levels_input[ii])[LEVEL]
         parsed_levels.append(parsed_level)
 

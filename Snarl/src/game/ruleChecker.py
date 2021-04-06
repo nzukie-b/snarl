@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import re
 import sys, os
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
@@ -48,7 +49,7 @@ class RuleChecker:
         
         return {VALID_MOVE: valid_move, EJECT: eject}
 
-    def __valid_zombie_move(self, coord, walkable_tiles, adversary_coords, door_coords):
+    def __valid_adversary_pos(self, coord, walkable_tiles, adversary_coords, door_coords):
         '''Checks if the the provided coord is a valid tile for a zombie. That it is not the position of a door or other adversary'''
         return coord in walkable_tiles and (coord not in adversary_coords and coord not in door_coords)
         
@@ -70,14 +71,18 @@ class RuleChecker:
                 down = Coord(cur_pos.row + 1, cur_pos.col)
                 left = Coord(cur_pos.row, cur_pos.col - 1)
                 right = Coord(cur_pos.row, cur_pos.col + 1)
+                directions = [up, down, left, right]
+                for d in directions:
+                    if self.__valid_adversary_pos(d, tiles, adversary_coords, door_coords):
+                        return False
 
-                if not self.__valid_zombie_move(up, tiles, adversary_coords, door_coords) and not self.__valid_zombie_move(
-                    down, tiles, adversary_coords, door_coords) and not self.__valid_zombie_move(left, tiles, adversary_coords, door_coords) and not self.__valid_zombie_move(right, tiles, adversary_coords, door_coords):
-                    return True
-                else: return False
+                # if not self.__valid_adversary_pos(up, tiles, adversary_coords, door_coords) and not self.__valid_adversary_pos(
+                #     down, tiles, adversary_coords, door_coords) and not self.__valid_adversary_pos(left, tiles, adversary_coords, door_coords) and not self.__valid_adversary_pos(right, tiles, adversary_coords, door_coords):
+                #     return True
+                # else: return False
 
             if self.__validate_movement_distance(adversary.pos, new_pos, adversary.move_speed):
-                if self.__valid_zombie_move(new_pos, tiles, adversary_coords, door_coords):
+                if self.__valid_adversary_pos(new_pos, tiles, adversary_coords, door_coords):
                     return True
         else:
             return False
@@ -154,7 +159,7 @@ class RuleChecker:
                 return False
 
         if player.pos in level.exits and not state.exit_locked:
-                state.ejected_players.add(player.name)
+                state.out_players.add(player.name)
                 state.game_status == P_WIN
                 return True
                 # game_info = self.is_game_over(state)

@@ -35,6 +35,7 @@ P_UPDATE = 'player-update'
 GAME_END = 'game-end'
 LEVEL_END = 'level-end'
 STATUS = 'game-status'
+INVALID = 'invalid'
 
 RES = 'result'
 EJECT = 'eject'

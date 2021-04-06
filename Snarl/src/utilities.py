@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from adversary.localAdversary import LocalAdversary
-from common import player
 from common.moveUpdate import MoveUpdate
 from common.player import Player
 from coord import Coord
