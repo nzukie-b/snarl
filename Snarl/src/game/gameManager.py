@@ -129,13 +129,6 @@ class GameManager:
                 adv.update_current_level(cur_level)
             self.gamestate = new_state
     
-
-
-    """Players are in gamestate in our implementation and inherently have access to updated gamestate info.
-        Therefore updating the gmaestate with the game manager fulfills the requirement to have the game manager update
-        the players with any changes in the gamestate."""
-
-
     def request_player_moves(self, new_players_locs):
         """
         Updates player info based on player move.
@@ -220,6 +213,7 @@ class GameManager:
             return adv_move
         else:
          return False
+
 
     def apply_player_item_interaction(self, player, item):
         """
