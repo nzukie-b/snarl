@@ -17,7 +17,7 @@ class RuleChecker:
         location within the level and in relation to the other players/adversaries in the gamestate."""
         info = level.info_at_coord(new_pos)
         current_pos = player.pos
-        valid_move = self.__vaildate_movement_distance(current_pos, new_pos, player.move_speed)
+        valid_move = self.vaildate_movement_distance(current_pos, new_pos, player.move_speed)
         # list of player coords with new pos filtered out
         other_coords = [coord for coord in players if coord != current_pos]
         # Invalid move if multiple coords are filtered out i.e. current_pos is shared by multiple adversaries
@@ -72,14 +72,10 @@ class RuleChecker:
                 left = Coord(cur_pos.row, cur_pos.col - 1)
                 right = Coord(cur_pos.row, cur_pos.col + 1)
                 directions = [up, down, left, right]
+                
                 for d in directions:
                     if self.__valid_adversary_pos(d, tiles, adversary_coords, door_coords):
                         return False
-
-                # if not self.__valid_adversary_pos(up, tiles, adversary_coords, door_coords) and not self.__valid_adversary_pos(
-                #     down, tiles, adversary_coords, door_coords) and not self.__valid_adversary_pos(left, tiles, adversary_coords, door_coords) and not self.__valid_adversary_pos(right, tiles, adversary_coords, door_coords):
-                #     return True
-                # else: return False
 
             if self.__validate_movement_distance(adversary.pos, new_pos, adversary.move_speed):
                 if self.__valid_adversary_pos(new_pos, tiles, adversary_coords, door_coords):
@@ -87,7 +83,7 @@ class RuleChecker:
         else:
             return False
         
-    def __validate_ghost_movement(self, adversary, new_pos, level, adversary_coords):
+    def __validate_ghost_movement(self, adversary, new_pos, level, adversary_coords) -> bool:
         valid_move = self.__validate_movement_distance(adversary.pos, new_pos, adversary.move_speed)
         if valid_move:
             move_info = level.info_at_coord(new_pos)
@@ -101,7 +97,7 @@ class RuleChecker:
         return valid_move
 
 
-    def __vaildate_movement_distance(self, current_pos, new_pos, move_distance):
+    def vaildate_movement_distance(self, current_pos, new_pos, move_distance) -> bool:
         """Helper for validating movements, takes new players position compared to old player/adversary position and
         checks that the movement is within the cardinal distance relative to the player/adversary movement speed."""
         return 0 <= abs(current_pos.row - new_pos.row) + \
@@ -150,7 +146,7 @@ class RuleChecker:
 
     
 
-    def validate_item_interaction(self, player, item, state):
+    def validate_item_interaction(self, player, item, state) -> bool:
         """Checks that level items and player inventory have been properly updated after interaction between player
         and item. (In the case that adversaries can pick up items this would also check that interaction.)"""
         level = state.current_level

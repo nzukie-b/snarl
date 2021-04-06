@@ -38,7 +38,7 @@ class GameState:
         else:
             # Single level
             self.current_level = levels
-            levels = []
+            self.levels = []
         self.players = players
         self.adversaries = adversaries
         self.exit_locked = exit_locked

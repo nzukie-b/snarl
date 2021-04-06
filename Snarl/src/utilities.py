@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from adversary.localAdversary import LocalAdversary
+from common.adversary import Adversary
 from common.moveUpdate import MoveUpdate
 from common.player import Player
 from coord import Coord
@@ -133,7 +134,7 @@ def check_position(pos, level):
     return {TYPE: origin_type, ORIGIN: pos}
 
 
-def coord_radius(pos, dimensions):
+def coord_radius(pos, dimensions) -> set:
     '''Returns a set of coordinates the provided coordinate is at the center'''
     coords = set()
     for ii in range(1, int(round(dimensions.row/2)) + 1):
@@ -149,28 +150,45 @@ def coord_radius(pos, dimensions):
             coords.update([c1, c2, c3, c4, c5, c6, c7, c8])
     return coords
 
-
-def create_local_player(name):
-    '''Helper for instantiating a localPlayer'''
-    player_obj = PlayerActor(name)
-    return LocalPlayer(name, player_obj=player_obj)
-
-def create_local_adversary(name, type_):
-    adv_obj = AdversaryActor(name, type_=type_)
-    return LocalAdversary(name, type_=type_, adversary_obj=adv_obj)
-
-def update_player(current_player, other_player):
+def update_player(current_player: Player, other_player: Player):
     if isinstance(other_player, Player) and isinstance(current_player, Player):
         if current_player.player_obj.pos in other_player.visible_tiles:
             other_player.actors.append(MoveUpdate(P_UPDATE, current_player.name, to_coord(current_player.player_obj.pos)))
 
-def update_players(current_player, other_players):
+def update_players(current_player: Player, other_players: Player):
     other_players = [player for player in other_players if player.name != current_player.name]
     for other in other_players:
         update_player(current_player, other)
 
-def get_random_room_coord(level):
+
+def update_adversary_players(adversaries: Adversary, player_coords):
+    for adv in adversaries:
+        adv.update_player_coords(player_coords)
+
+def update_adversary_levels(adversaries: Adversary, cur_level):
+    for adv in adversaries:
+        adv.update_current_level(cur_level)
+    
+def get_random_room_coord(level) -> Coord:
     '''Returns a random walkable coord in a room'''
     room = random.choice(level.rooms)
     tile = random.choice(room.tiles)
     return tile
+
+def get_closest_coord(cur_pos, target):
+    temp_rows = [cur_pos.row + 1, cur_pos.row, cur_pos.row - 1]
+    temp_cols = [cur_pos.col + 1, cur_pos.col, cur_pos.col - 1]
+    min_row = lambda row_val: abs(row_val - target.row)
+    min_col = lambda col_val: abs(col_val - target.col)
+    move_row = min(temp_rows, min_row)
+    move_col = min(temp_cols, min_col) if move_row == cur_pos.row else cur_pos.col 
+    move = Coord(move_row, move_col)
+    return move
+
+def get_cardinal_coords(cur_pos):
+    up = Coord(cur_pos.row - 1, cur_pos.col)
+    down = Coord(cur_pos.row + 1, cur_pos.col)
+    left = Coord(cur_pos.row, cur_pos.col - 1)
+    right = Coord(cur_pos.row, cur_pos.col + 1)
+    directions = [up, down, left, right]
+    return directions

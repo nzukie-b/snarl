@@ -43,6 +43,9 @@ EJECT = 'eject'
 ### ADVERSARY TYPES ###
 GHOST = 'ghost'
 ZOMBIE = 'zombie'
+# How far they can see, i.e. must move to player if in range
+Z_RNG = 5
+G_RNG = 9
 
 ### TYPES OF GAME STATE ##
 START = 'game-start'
