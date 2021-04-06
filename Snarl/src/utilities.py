@@ -1,13 +1,9 @@
 #!/usr/bin/env python
-from adversary.localAdversary import LocalAdversary
 from common.adversary import Adversary
 from common.moveUpdate import MoveUpdate
 from common.player import Player
 from coord import Coord
 from constants import HALLWAY, ORIGIN, P_UPDATE, ROOM, TYPE
-from model.adversary import AdversaryActor
-from player.localPlayer import LocalPlayer
-from model.player import PlayerActor
 import random
 
 def check_hallway(hallway):
