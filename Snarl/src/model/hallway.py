@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import json
+from constants import ORIGIN
 from coord import Coord
 
 class Hallway:
@@ -9,8 +10,19 @@ class Hallway:
         self.rooms = rooms
         #Waypoints are alternate entrance point
         self.waypoints = waypoints if waypoints != None else []
+        waypoint1 = doors[0]
+        waypoint2 = doors[1] 
         self.origin = doors[0]
-        self.dimensions = Coord(abs(doors[1].row - doors[0].row), abs(doors[1].col - doors[0].col)) 
+        try:
+            waypoint1 = waypoints[0]
+            self.origin = waypoint1
+            try:
+                waypoint2 = waypoints[1]
+            except IndexError:
+                pass
+        except IndexError:
+            pass
+        self.dimensions = Coord(abs(waypoint2.row - waypoint1.row), abs(waypoint2.col - waypoint1.col)) 
     
     def __str__(self):
         doors_str = [str(door) for door in self.doors]
@@ -38,7 +50,6 @@ class Hallway:
                     is_horizontal = True
                 else:
                     is_horizontal = False
-                #print("HORTI: " + str(is_horizontal) + str(horizontal) + " DOORS " + "(" + str(door_1.row) + ", " + str(door_1.col) + ") " +
                 return is_horizontal
             else:
             #Not straight and no waypoint
@@ -57,7 +68,6 @@ class Hallway:
                     if is_horizontal == True:
                         raise Exception(self)
                 is_horizontal = False
-        #print("DRS: " + str(door_1.row) + str(door_2.row) + ":" + str(door_1.col) + str(door_2.col))
         return is_horizontal
 
     def get_reachable_tiles(self, coord):
@@ -87,4 +97,11 @@ class Hallway:
         except Exception as err:
             print(err)
             return None
+    
+    def in_hallway(self, coord):
+        origin_row = self.origin.row
+        origin_col = self.origin.col
+        dest_row = self.origin.row + self.dimensions.row
+        dest_col = self.origin.col + self.dimensions.col
+        return coord.row in range(origin_row, dest_row + 1) and coord.col in range(origin_col, dest_col + 1)
                 

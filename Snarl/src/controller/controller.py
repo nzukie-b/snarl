@@ -160,7 +160,7 @@ def parse_actor(actor_input):
     if actor_type == PLAYER:
         return PlayerActor(name, coord)
     else:
-        return AdversaryActor(name, type=actor_type, pos=coord)
+        return AdversaryActor(name, type_=actor_type, pos=coord)
 
 def parse_state(state_input):
     try:
