@@ -4,7 +4,7 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
-from constants import EJECT, INFO, LEVEL_END, MAX_PLAYERS, P_WIN, STATUS, VALID_MOVE, ZOMBIE
+from constants import EJECT, GAME_END, INFO, LEVEL_END, MAX_PLAYERS, P_WIN, STATUS, VALID_MOVE, ZOMBIE
 from coord import Coord
 from common.player import Player
 from player.localPlayer import LocalPlayer
@@ -78,16 +78,6 @@ class GameManager:
                 else:
                     self.players.append(__create_local_player(player_client))
 
-
-    def register_adversaries(self, adversaries):
-        '''Create list adversary objects from provided list of adversaries'''
-        for adv in adversaries:
-            self.adversaries.append(adv)
-
-    def register_adversary_names(self, adversary_ids):
-        """Create list of adversary objects using list of adversary ids."""
-        for id_ in adversary_ids:
-            self.adversaries.append(AdversaryActor(id_))
 
     def register_adversary(self, adversary_client, actor_type=ZOMBIE):
         if isinstance(adversary_client, Adversary):
@@ -222,9 +212,7 @@ class GameManager:
         :param new_players_healths: [int]
         :return:
         """
-
         state = self.gamestate
-
         for room in state.current_level.rooms:
             if item in room.items:
                 room.items.remove(item)
@@ -237,12 +225,15 @@ class GameManager:
             game_over = self.rc.is_game_over(state)
 
             if not level_over[LEVEL_END]:
+                # if level is not over
                 self.gamestate = GameState(state.current_level, self.players,
                                         self.adversaries, self.gamestate.exit_locked)
             elif level_over[STATUS] == P_WIN:
+                # Player win level
                 self.next_level()
             else:
-                print('L')
+                # Not really sure what to return here 
+                print('GAME OVER: {} LEVEL STATUS: {}'.format(game_over[GAME_END], game_over[STATUS]))
         else:
             self.players = self.gamestate.players
 
@@ -253,6 +244,17 @@ class GameManager:
                 self.players.append(player)
         else:
             print('Invalid number of players to register please register between 1 and {} people'.format(MAX_PLAYERS))
+
+    def register_adversaries(self, adversaries):
+        '''Create list adversary objects from provided list of adversaries'''
+        for adv in adversaries:
+            self.adversaries.append(adv)
+
+    def register_adversary_names(self, adversary_ids):
+        """Create list of adversary objects using list of adversary ids."""
+        for id_ in adversary_ids:
+            self.adversaries.append(AdversaryActor(id_))
+
 
     def register_player_names(self, player_names):
         """Create list of player objects using list of player names."""
