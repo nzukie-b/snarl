@@ -40,22 +40,21 @@ def render_hallway(hallway, orientation):
         tiles = []
         for ii in range(row_start, row_end + 1):
             for jj in range(col_start, col_end + 1):
-                coord = Coord(ii, jj)
-                if hallway.in_hallway(coord):
-                    tile = Tile(ii, jj)
-                    tiles.append(tile)
-                    pygame.draw.rect(SCREEN, WHITE, render_square(tile))
-                    # Walls aren't defined from the dimensions we assume the provided dimensions are all walkable
-                    # if orientation == False:
-                        # Vertical path hallway case
-                    left_wall = Tile(row_start - 1, jj)
-                    right_wall = Tile(row_end + 1, jj)
-                    top_wall = Tile(ii, col_start - 1)
-                    bot_wall = Tile(ii, col_end + 1 )
-                    pygame.draw.rect(SCREEN, BLACK, render_square(top_wall))
-                    pygame.draw.rect(SCREEN, BLACK, render_square(bot_wall))
-                    pygame.draw.rect(SCREEN, BLACK, render_square(left_wall))
-                    pygame.draw.rect(SCREEN, BLACK, render_square(right_wall))
+                tile = Tile(ii, jj)
+                tiles.append(tile)
+                pygame.draw.rect(SCREEN, WHITE, render_square(tile))
+                # Walls aren't defined from the dimensions we assume the provided dimensions are all walkable
+                # TODO: Decide wether or not to include tile at end or walls
+                # if orientation == False:
+                    # Vertical path hallway case
+                left_wall = Tile(row_start - 1, jj)
+                right_wall = Tile(row_end + 1, jj)
+                top_wall = Tile(ii, col_start - 1)
+                bot_wall = Tile(ii, col_end + 1 )
+                pygame.draw.rect(SCREEN, BLACK, render_square(top_wall))
+                pygame.draw.rect(SCREEN, BLACK, render_square(bot_wall))
+                pygame.draw.rect(SCREEN, BLACK, render_square(left_wall))
+                pygame.draw.rect(SCREEN, BLACK, render_square(right_wall))
                     # elif orientation == True:
                     #     # Horizontal path hallway
                     #     upper_wall = Tile(ii, col_start - 1)
