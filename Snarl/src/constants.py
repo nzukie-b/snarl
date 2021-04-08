@@ -21,6 +21,8 @@ MAX_PLAYERS = 4
 ITEM = 'item'
 KEY = 'key'
 EXIT = 'exit'
+WELCOME = 'welcome'
+
 
 
 COORD = 'coord'

@@ -8,7 +8,7 @@ from game.gameManager import GameManager
 from coord import Coord
 # from constants import ADVERSARIES, BOUNDS, COLS, COORD, EXIT_LOCKED, FROM, HALLWAY, HALLWAYS, LAYOUT, MANAGER, MAX_TURNS, OBJECTS, ORIGIN, PLAYERS, POS, ROOM, LEVEL, ROOMS, ROWS, STATE, KEY, EXIT, MOVES, NAME, TO, TYPE, WAYPOINTS
 from constants import *
-from utilities import to_coord, to_point, check_position, coord_radius
+from utilities import to_coord, to_point, check_position, coord_radius, streaming_iterload
 from model.room import Room
 from model.item import Item
 from model.hallway import Hallway
@@ -52,35 +52,6 @@ def parse_room_obj(room_input):
             if layout[ii][jj] == 2:
                 doors.append(Coord(origin[0] + ii, origin[1] + jj))
     return {COORD: to_coord(point) if point else None, ROOM: Room(origin_coord, dimensions, tiles, doors)}
-
-def to_layout(pos, level, dimensions):
-    '''Takes a level and returns a layout of tiles centered around the provided point'''
-    pos_info = check_position(pos, level)
-    origin = pos_info['origin']
-    is_room = pos_info[TYPE] == ROOM
-    layout = [[0 for ii in range(dimensions.row)] for jj in range(dimensions.col)]
-    coords = coord_radius(pos, dimensions)
-
-    if pos_info[TYPE] == ROOM:
-        room = next(room for room in level.rooms if room.origin == origin)
-        for tile in room.tiles:
-            if tile in coords:
-                #origin 5, 5 
-                layout[tile.row - origin.row][tile.col - origin.col] = 1
-        for door in room.doors:
-            if door in coords:
-                layout[door.row - origin.row][door.col - origin.col] = 2
-    elif pos_info[TYPE] == HALLWAY:
-        hall = next(hall for hall in level.hallways if hall.origin == origin)
-        for ii in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1):
-            for jj in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1):
-                hall_coord = Coord(ii, jj)
-                if hall_coord in coords:
-                    layout[hall_coord.row - origin.row][hall_coord.col - origin.col] = 1
-        for door in hall:
-            if door in coords:
-                layout[door.row - origin.row][door.col - origin.col] = 2
-    return {POS: pos, LAYOUT: layout}
 
 def parse_room(room_input):
     parsed_input = parse_room_obj(room_input)
@@ -238,10 +209,14 @@ def parse_manager(game_input):
     return {MANAGER: gm, LEVEL: level, MAX_TURNS: max_turns, MOVES: moves_map}
 
 def parse_levels(levels_input):
-    no_levels = int(levels_input[0])
+    parsed_input = []
+    for x in streaming_iterload(levels_input):
+        parsed_input.append(x)
+
+    no_levels = int(parsed_input[0])
     parsed_levels = []
     for ii in range(1, no_levels + 1):
-        parsed_level = parse_level(levels_input[ii])[LEVEL]
+        parsed_level = parse_level(parsed_input[ii])[LEVEL]
         parsed_levels.append(parsed_level)
 
     return parsed_levels

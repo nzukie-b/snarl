@@ -8,6 +8,7 @@ class Adversary(ABC):
         self.adversary_obj = adversary_obj
         self.current_level = current_level
         self.player_coords = player_coords
+        self.adversary_coords = adversary_coords
 
     @abstractmethod
     def update_current_level(self, new_level):

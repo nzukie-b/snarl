@@ -9,7 +9,8 @@ from coord import Coord
 from constants import ROOM
 from utilities import check_position, to_point, to_coord, coord_radius
 from common.actorUpdate import ActorUpdate
-from controller.controller import parse_manager, to_layout
+from controller.controller import parse_manager
+from view.view import to_layout
 from model.gamestate import StateObj
 
 def main():

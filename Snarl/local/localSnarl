@@ -11,8 +11,9 @@ src_dir = snarl_dir + '/src'
 sys.path.append(src_dir)
 from constants import GHOST, ZOMBIE, P_UPDATE, ROOM, TYPE, P_WIN, KEY
 from game.gameManager import GameManager
-from controller.controller import parse_levels, to_layout
+from controller.controller import parse_levels
 from utilities import to_coord, coord_radius, to_point, check_position
+from view.view import to_layout
 from common.actorUpdate import ActorUpdate
 from game.ruleChecker import RuleChecker
 from model.item import Item
@@ -96,13 +97,7 @@ def streaming_iterload(stream):
 def main(args):
     levels_file = open(args.levels, 'r')
     levels_input = Path(args.levels).read_text()
-    temp_levels = []
-    for x in streaming_iterload(levels_input):
-        #if not isinstance(x, int):
-            #    str(x.replace('\'', '\"'))
-        temp_levels.append(json.dumps(x))
-
-    levels = parse_levels(temp_levels)
+    levels = parse_levels(levels_input)
     
     gm = GameManager()
     start_level = args.start - 1

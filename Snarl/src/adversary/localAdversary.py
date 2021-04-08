@@ -14,6 +14,8 @@ class LocalAdversary(Adversary):
         super().__init__(name=name, type_=type_, adversary_obj=adversary_obj, current_level=current_level,
          player_coords=player_coords, adversary_coords=adversary_coords)
 
+    #TODO: MOVE THIS TO ABSTRACT CLASS
+
     def move_to_tile(self, move, gm):
         cur_pos = self.adversary_obj.pos
         move = self.__move_to_player(cur_pos)

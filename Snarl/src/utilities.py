@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import io, re, json
+from json.decoder import WHITESPACE
 from common.adversary import Adversary
 from common.moveUpdate import MoveUpdate
 from common.player import Player
@@ -188,3 +190,66 @@ def get_cardinal_coords(cur_pos):
     right = Coord(cur_pos.row, cur_pos.col + 1)
     directions = [up, down, left, right]
     return directions
+
+# CODE BLOCK FROM STACK OVERFLOW #
+
+braces = '{}[]'
+whitespace_esc = ' \t'
+braces_esc = '\\'+'\\'.join(braces)
+balance_map = dict(zip(braces, [1, -1, 1, -1]))
+braces_pat = '['+braces_esc+']'
+no_braces_pat = '[^'+braces_esc+']*'
+exited_players = []
+until_braces_pat = no_braces_pat+braces_pat
+
+
+def streaming_find_iter(pat, stream):
+    for s in stream:
+        while True:
+            match = re.search(pat, s)
+            if not match:
+                yield (False, s)
+                break
+            yield (True, match.group())
+            s = re.split(pat, s, 1)[1]
+
+def simple_or_compound_objs(stream):
+    obj = ''
+    unbalanced = 0
+    for (c, m) in streaming_find_iter(re.compile(until_braces_pat), stream):
+        if (c == 0):  # no match
+            if (unbalanced == 0):
+                yield (0, m)
+            else:
+                obj += m
+        if (c == 1):  # match found
+            if (unbalanced == 0):
+                yield (0, m[:-1])
+                obj += m[-1]
+            else:
+                obj += m
+            unbalanced += balance_map[m[-1]]
+            if (unbalanced == 0):
+                yield (1, obj)
+                obj = ""
+
+def iterload(fp, cls=json.JSONDecoder, **kwargs):
+    if (isinstance(fp, io.TextIOBase) or isinstance(fp, io.BufferedIOBase) or
+            isinstance(fp, io.RawIOBase) or isinstance(fp, io.IOBase)):
+        string = fp.read()
+    else:
+        string = str(fp)
+
+    decoder = cls(**kwargs)
+    idx = WHITESPACE.match(string, 0).end()
+    while idx < len(string):
+        obj, end = decoder.raw_decode(string, idx)
+        yield obj
+        idx = WHITESPACE.match(string, end).end()
+
+def streaming_iterload(stream):
+    for c, o in simple_or_compound_objs(stream):
+        for x in iterload(o):
+            yield x
+
+# END OF STACK OVERFLOW CODE BLOCK

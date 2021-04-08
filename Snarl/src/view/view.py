@@ -4,20 +4,20 @@ import pygame
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
-from utilities import check_position
+from model.player import PlayerActor
+from utilities import check_position, coord_radius
 from coord import Coord
 from model.room import Room
 from model.hallway import Hallway
 from model.level import Level
 from model.gamestate import GameState, create_initial_game_state
 from controller.controller import parse_state
-from constants import BLACK, WHITE, YELLOW, GREY, RED, BLUE, GREEN, PURPLE, HEIGTH, WIDTH, SIZE
+from constants import BLACK, EXIT, HALLWAY, KEY, LAYOUT, POS, ROOM, TYPE, WHITE, YELLOW, GREY, RED, BLUE, GREEN, PURPLE, HEIGTH, WIDTH, SIZE
 
 
 SCREEN = pygame.display.set_mode((WIDTH, HEIGTH), 0, 32)
 SCREEN.fill(GREY)
 pygame.display.set_caption('Snarl')
-
 
 class Tile:
     def __init__(self, row, col, wall=True, item=None):
@@ -112,18 +112,64 @@ def render_room(room):
                 pygame.draw.rect(SCREEN, BLACK, render_square(tile))
     return tiles
 
-
 def render_players(players):
     for player in players:
         tile = Tile(player.pos.row, player.pos.col)
         pygame.draw.circle(SCREEN, BLUE, render_circle(tile), SIZE / 2)
-
 
 def render_adversaries(adversaries):
     for adversary in adversaries:
         tile = Tile(adversary.pos.row, adversary.pos.col)
         pygame.draw.circle(SCREEN, RED, render_circle(tile), SIZE / 2)
 
+def render_player_view(player: PlayerActor, state: GameState):
+    level = state.current_level
+    view_distance = (2 * player.move_speed) + 1
+    coords = set()
+    for ii in range(view_distance):
+        for jj in range(view_distance):
+            coords.add(Coord(ii, jj))
+    coords = list(coords)
+    for coord in coords:
+        tile = Tile(coord.row, coord.col)
+        info = level.get_info_at_coord()
+        if info.object == KEY:
+            pygame.draw.circle(SCREEN, YELLOW, render_circle(tile), SIZE / 2)
+        elif info.object == EXIT:
+            pygame.draw.circle(SCREEN, GREEN, render_square(tile))
+        elif info.traversable:
+            pygame.draw.rect(SCREEN, WHITE, render_square(tile))
+        else:
+            pygame.draw.rect(SCREEN, BLACK, render_square(tile))
+
+def to_layout(pos, level, dimensions):
+    '''Takes a level and returns a layout of tiles centered around the provided point'''
+    pos_info = check_position(pos, level)
+    origin = pos_info['origin']
+    is_room = pos_info[TYPE] == ROOM
+    layout = [[0 for ii in range(dimensions.row)] for jj in range(dimensions.col)]
+    coords = coord_radius(pos, dimensions)
+
+    if pos_info[TYPE] == ROOM:
+        room = next(room for room in level.rooms if room.origin == origin)
+        for tile in room.tiles:
+            if tile in coords:
+                #origin 5, 5 
+                layout[tile.row - origin.row][tile.col - origin.col] = 1
+        for door in room.doors:
+            if door in coords:
+                layout[door.row - origin.row][door.col - origin.col] = 2
+    elif pos_info[TYPE] == HALLWAY:
+        hall = next(hall for hall in level.hallways if hall.origin == origin)
+        for ii in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1):
+            for jj in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1):
+                hall_coord = Coord(ii, jj)
+                if hall_coord in coords:
+                    layout[hall_coord.row - origin.row][hall_coord.col - origin.col] = 1
+        for door in hall:
+            if door in coords:
+                layout[door.row - origin.row][door.col - origin.col] = 2
+    return {POS: pos, LAYOUT: layout}
 
 def main(state: GameState):
     pygame.init()
