@@ -22,7 +22,8 @@ ITEM = 'item'
 KEY = 'key'
 EXIT = 'exit'
 WELCOME = 'welcome'
-
+START_LVL = 'start-level'
+CONN = 'connection'
 
 
 COORD = 'coord'

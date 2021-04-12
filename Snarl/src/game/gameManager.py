@@ -1,5 +1,6 @@
 import sys, os
 from typing import Type
+from adversary.remoteAdversary import RemoteAdversary
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
@@ -69,19 +70,23 @@ class GameManager:
         adv_coords = [adversary.pos for adversary in advs]
         return adv_coords
 
-    def register_player(self, player_client):
+    def register_player(self, player_client, connection=None):
         if len(self.players) <= MAX_PLAYERS:
             registered_players = [p.name for p in self.players]
             if player_client not in registered_players:
                 if (isinstance(player_client, Player)):
                     self.players.append(player_client)
+                elif connection:
+                    self.players.append(__create_remote_player(player_client, connection))
                 else:
                     self.players.append(__create_local_player(player_client))
 
 
-    def register_adversary(self, adversary_client, actor_type=ZOMBIE):
+    def register_adversary(self, adversary_client, actor_type=ZOMBIE, remote=False):
         if isinstance(adversary_client, Adversary):
             self.adversaries.append(adversary_client)
+        elif remote:
+             self.adversaries.append(__create_remote_adversary(adversary_client, actor_type))
         else:
              self.adversaries.append(__create_local_adversary(adversary_client, actor_type))
 
@@ -279,3 +284,11 @@ def __create_local_player(name) -> Player:
 def __create_local_adversary(name, type_) -> Adversary:
     adv_obj = AdversaryActor(name, type_=type_)
     return LocalAdversary(name, type_=type_, adversary_obj=adv_obj)
+
+def __create_remote_player(name, conn) -> Player:
+    #TODO: Implement Remote Players
+    NotImplemented
+
+def __create_remote_adversary(name, type_) -> Adversary:
+    adv_obj = AdversaryActor(name, type_=type_)
+    return RemoteAdversary(name, type_=type_, adversary_obj=adv_obj)

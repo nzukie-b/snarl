@@ -1,11 +1,11 @@
-import sys, os, argparse, time, json
+import sys, os, argparse, time, json, math
 import socket
 from pathlib import Path
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
 from remote.messages import Welcome
-from constants import MAX_PLAYERS
+from constants import CONN, MAX_PLAYERS, NAME, GHOST, ZOMBIE
 from controller.controller import parse_levels
 from game.gameManager import GameManager
 
@@ -26,7 +26,41 @@ def __send_server_welcome(connection, server_addr):
     info = '(Enesseand) server_address: {}'.format(server_addr)
     welcome_msg = Welcome(info)
     formatted_msg = json.dumps(welcome_msg)
-    connection.send(formatted_msg.encode('utf-8'))
+    connection.sendall(formatted_msg.encode('utf-8'))
+
+def __request_client_name(connection, clients):
+    '''Send name prompt to client client connection. If the name is already taken it will attempt to reprompt 4 times before moving on.'''
+    msg = 'name'
+    msg = json.dumps(msg)
+    names = []
+    client_info = {NAME: None, CONN: connection}
+    for client in clients:
+        names.append(client)
+    for i in range(4):
+        connection.sendall(msg.encode('utf-8'))
+        client_name = connection.recv(4096).decode('utf-8')
+        if client_name not in names:
+            client_info[NAME] = client_name
+            break
+    return client_info
+
+def __close_invalid_clients(clients):
+    '''Goes throgh clients, and closes any connections that did not provided a valid name'''
+    for client in clients:
+        if client[NAME] == None:
+            client[CONN].close()
+
+def __register_players(gm, clients):
+    for client in clients:
+        gm.register_player(client[NAME], client[CONN])
+
+def __register_adversaries(gm, no_levels):
+    num_zombies = math.floor(no_levels / 2) + 1
+    num_ghosts = math.floor((no_levels - 1) / 2)
+    for ii in range(num_zombies):
+        gm.register_adversary('zombie: {}'.format(ii), ZOMBIE, remote=True)
+    for ii in range(num_ghosts):
+        gm.register_adversary('ghost: {}'.format(ii), GHOST, remote=True)
 
 def main(args):
     if not __valid_clients_num(args.clients):
@@ -42,6 +76,7 @@ def main(args):
 
     levels_file = Path(args.levels).read_text()
     levels_list = parse_levels(levels_file)
+    start_level = args.start
 
     clients = []
     start = time.perf_counter()
@@ -50,13 +85,23 @@ def main(args):
         try:
             conn, addr = server_socket.accept()
             __send_server_welcome(conn, server_addr[0])
+            client_info =__request_client_name(conn, clients)
+            clients.append(client_info)
         except socket.timeout:
             end = time.perf_counter()
             dur = int(end - start)
+            # Should we close client connections here?
+            for client in clients:
+                client[CONN].close()
             print('Timeout: {} seconds have passed since last player connected'.format(dur))
             server_socket.close()
             exit()
-
+    __close_invalid_clients(clients)
+    gm = GameManager()
+    __register_players(gm, clients)
+    __register_adversaries(gm, len(levels_list))
+    gm.start_game(levels_list, start_level)
+    
 
 
 
