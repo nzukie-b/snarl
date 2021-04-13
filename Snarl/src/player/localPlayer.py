@@ -8,7 +8,7 @@ from common.player import Player
 class LocalPlayer(Player):
     def __init__(self, name, player_obj=None, layout=None, visible_tiles=None, actors=None, objects=None, inventory_contents=None):
         super().__init__(name=name, player_obj=player_obj, layout=layout, visible_tiles=visible_tiles, 
-        actors=actors, objects=objects, inventory_contents=inventory_contents)
+        actors=actors, objects=objects, inventory=inventory_contents)
 
     def move_to_tile(self, move, gm):
         """Move to a location within the visible tiles, if the same tile the player is currently on is

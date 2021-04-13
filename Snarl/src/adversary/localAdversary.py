@@ -12,8 +12,8 @@ class LocalAdversary(Adversary):
         super().__init__(name=name, type_=type_, adversary_obj=adversary_obj, current_level=current_level,
          player_coords=player_coords, adversary_coords=adversary_coords)
 
-    def move_to_tile(self, move, gm):
-        return super().move_to_tile(move, gm)
+    def move_to_tile(self, gm):
+        return super().move_to_tile(gm)
 
     def update_current_level(self, new_level):
         return super().update_current_level(new_level)

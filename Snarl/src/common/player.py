@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 class Player(ABC):
-    def __init__(self, name, player_obj=None, layout=None, visible_tiles=None, actors=None, objects=None, inventory_contents=None):
+    def __init__(self, name, player_obj=None, layout=None, visible_tiles=None, actors=None, objects=None, inventory=None):
         # Unique name chosen by the player
         self.name = name
         #playerActor
@@ -12,7 +12,7 @@ class Player(ABC):
         self.actors = actors
         self.objects = objects
         self.visible_tiles = visible_tiles
-        self.inventory_contents = inventory_contents
+        self.inventory = inventory
 
     @abstractmethod
     def move_to_tile(self, move, gm):

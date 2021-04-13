@@ -27,7 +27,7 @@ class Adversary(ABC):
         self.player_coords = new_coords
 
     @abstractmethod
-    def move_to_tile(self, move, gm):
+    def move_to_tile(self, gm):
         cur_pos = self.adversary_obj.pos
         move = self.__move_to_player(cur_pos)
         # Player noticed in range. returned a coordinate

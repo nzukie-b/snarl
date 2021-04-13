@@ -204,7 +204,10 @@ class GameManager:
                 if adv_move[EJECT]:
                     player = next(player for player in players if player.pos == new_pos)
                     self.gamestate.out_players.add(player.name)
-
+                
+                door_pos = __handle_door_traversal(new_pos, self.gamestate.current_level)
+                if door_pos: new_pos = door_pos
+                
                 if is_client:
                     adversary.adversary_obj.pos = new_pos
                     updated_advs.append(adversary.adversary_obj)

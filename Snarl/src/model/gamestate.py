@@ -28,7 +28,6 @@ class GameState:
         multi_levels = isinstance(levels, list)
         if multi_levels:
             self.current_level = current_level
-            # This should only happen when players 
             self.levels = levels
         else:
             # Single level

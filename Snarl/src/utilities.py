@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import io, re, json
 from json.decoder import WHITESPACE
+import socket
 from common.player import Player
 from coord import Coord
 from constants import EXIT, HALLWAY, KEY, LAYOUT, ORIGIN, PLAYER, POS, P_UPDATE, ROOM, TYPE
@@ -282,6 +283,18 @@ def to_layout(pos, level, dimensions):
                 layout[door.row - origin.row][door.col - origin.col] = 2
     return {POS: pos, LAYOUT: layout}
 
+
+def send_msg(sock: socket.SocketType, msg: str, to: str):
+    print(to, '<<', msg)
+    sock.sendall(msg.encode('utf-8'))
+
+def receive_msg(sock: socket.SocketType, from_: str):
+    data = sock.recv(4096)
+    if not data:
+        return data
+    res = data.decode('utf-8')
+    print(from_, '>>', res)
+    return res
 # CODE BLOCK FROM STACK OVERFLOW #
 
 braces = '{}[]'

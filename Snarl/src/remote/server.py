@@ -1,11 +1,13 @@
 import sys, os, argparse, time, json, math
 import socket
 from pathlib import Path
+
+from player.remotePlayer import RemotePlayer
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
 from coord import Coord
-from utilities import to_point, update_remote_players
+from utilities import to_point, update_remote_players, send_msg, receive_msg
 from remote.messages import RemoteActorUpdate, StartLevel, Welcome
 from constants import CONN, EJECT, INVALID, MAX_PLAYERS, NAME, GHOST, OK, P_UPDATE, VALID_MOVE, ZOMBIE
 from controller.controller import parse_levels, parse_move
@@ -76,39 +78,29 @@ def __send_player_updates(gm):
     update_remote_players(gm.players, gm)
 
 
-def __request_client_move(client, gm: GameManager):
+def __request_client_move(player: RemotePlayer, gm: GameManager):
     msg = 'move'
-    msg = json.dump(msg)
-    conn = client[CONN]
-    player_client = next(player for player in gm.players if player.name == client[NAME])
-    player_obj = gm.get_player_actor(client[NAME])
+    msg = json.dumps(msg)
+    conn = player.socket
     for i in range(4):
-        conn.sendall(msg.encode('utf-8'))
-        player_move = conn.recv(4096).decode('utf-8')
-        move_pos = parse_move(player_move)
-        if move_pos == None: move_pos = player_obj.pos
-        move_result = gm.request_player_move(client[NAME], move_pos)
-
-        if move_result:
-            if move_result[VALID_MOVE]:
-                res = gm.apply_player_item_interaction(player_obj, move_pos)
+        send_msg(conn, msg, player.name)
+        move_res = player.move_to_tile(gm)
+        if move_res:
+            player_obj = gm.get_player_actor(player.name)
+            if move_res[VALID_MOVE]:
+                res = gm.apply_player_item_interaction(player_obj, player_obj.pos)
                 if res:
                     move_msg = json.dumps(res)
-                elif move_result[EJECT]:
+                elif move_res[EJECT]:
                     move_msg = json.dumps(EJECT)
                 else:
                     move_msg = json.dumps(OK)
-                conn.sendall(move_msg.encode('utf-8'))
+                send_msg(conn, move_msg, player.name)
                 break
         else: 
             move_msg = json.dumps(INVALID)
-            conn.sendall(move_msg.encode('utf-8'))
+            send_msg(conn, move_msg, player.name)
 
-
-
-
-
-    
 
 def main(args):
     if not __valid_clients_num(args.clients):
@@ -153,12 +145,14 @@ def main(args):
     __send_player_updates(gm)
 
     while True:
-        for ii in range(len(clients)):
-            __request_client_move(clients[ii])
+        for player in gm.players:
+            __request_client_move(player, gm)
+            __send_player_updates(gm)
+        for adv in gm.adversaries:
+            adv.move_to_tile(gm)
+        #TODO LEVEL OVER and GAME OVER
 
-
-
-
+            
 
 
 if __name__ == '__main__':
