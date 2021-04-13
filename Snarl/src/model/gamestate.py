@@ -27,13 +27,8 @@ class GameState:
         # print(current_level)
         multi_levels = isinstance(levels, list)
         if multi_levels:
-            try:
-                levels.remove(current_level)
-                self.current_level = current_level
-            except (KeyError, ValueError):
-                next_level = next(l for l in levels)
-                removed_level = levels.remove(next_level)
-                self.current_level = removed_level
+            self.current_level = current_level
+            # This should only happen when players 
             self.levels = levels
         else:
             # Single level

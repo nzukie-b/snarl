@@ -220,3 +220,14 @@ def parse_levels(levels_input):
         parsed_levels.append(parsed_level)
 
     return parsed_levels
+
+def parse_move(move_input):
+    try:
+        move = json.loads(move_input)
+    except TypeError:
+        move = move_input
+    move_pos = None
+    if move[TYPE] == 'move':
+        if move[TO] != 'null':
+            move_pos = to_point(move[TO])
+    return move_pos

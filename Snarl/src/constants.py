@@ -24,6 +24,7 @@ EXIT = 'exit'
 WELCOME = 'welcome'
 START_LVL = 'start-level'
 CONN = 'connection'
+OK = 'ok'
 
 
 COORD = 'coord'

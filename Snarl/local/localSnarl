@@ -13,7 +13,7 @@ from constants import GHOST, ZOMBIE, P_UPDATE, ROOM, TYPE, P_WIN, KEY
 from game.gameManager import GameManager
 from controller.controller import parse_levels
 from utilities import to_coord, coord_radius, to_point, check_position
-from view.view import to_layout
+from utilities import to_layout
 from common.actorUpdate import ActorUpdate
 from game.ruleChecker import RuleChecker
 from model.item import Item
@@ -136,7 +136,7 @@ def main(args):
 
             player_object = gm.get_player_actor(player.name)
 
-            update = ActorUpdate(new_player_loc)
+            update = ActorUpdate()
             update.position = new_player_loc
             update.type = P_UPDATE
             view_dimensions = to_coord([(player_object.move_speed * 2) + 1, (player_object.move_speed * 2) + 1])

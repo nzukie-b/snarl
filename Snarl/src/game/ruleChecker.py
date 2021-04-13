@@ -7,7 +7,7 @@ game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
 import random
 from coord import Coord
-from constants import A_WIN, EJECT, EXIT, GAME_END, GHOST, INFO, KEY, LEVEL_END, ORIGIN, P_WIN, ROOM, STATUS, TYPE, VALID_MOVE, ZOMBIE
+from constants import A_WIN, EJECT, EXIT, GAME_END, GHOST, INFO, KEY, LEVEL_END, OK, ORIGIN, P_WIN, ROOM, STATUS, TYPE, VALID_MOVE, ZOMBIE
 from model.item import Item
 from utilities import check_position, get_random_room_coord
 
@@ -132,11 +132,12 @@ class RuleChecker:
                 status = A_WIN
         return {LEVEL_END: is_over, STATUS: status}
 
-    def is_game_over(self, state):
+    def is_game_over(self, start_level, next_level, state):
         '''Checks whether the current state is one of the game end states. That is
         * - At least 1 player has exited the level, and all other players have been removed
         * - All players have been removed from the level by adversaries'''
-        is_over = len(state.levels) == 0
+        level_over = self.is_level_over(state)[LEVEL_END]
+        is_over = level_over and start_level == next_level
         status = None
         if state.game_status == P_WIN:
              status = P_WIN
@@ -146,23 +147,32 @@ class RuleChecker:
 
     
 
-    def validate_item_interaction(self, player, item, state) -> bool:
+    def validate_item_interaction(self, player, item_pos, state):
         """Checks that level items and player inventory have been properly updated after interaction between player
         and item. (In the case that adversaries can pick up items this would also check that interaction.)"""
         level = state.current_level
         for room in level.rooms:
-            if item in room.items:
-                return False
-
+            room_items = [item.pos for item in room.items]
+            try:
+                item = next(item for item in room.items if item.pos == item_pos)
+                if item_pos in room_items:
+                    return False
+            except StopIteration:
+                # No item found as it should have been removed from the room
+                item = next(item for item in player.inventory if item.pos == item_pos)
+                
+        res = OK
+        inventory = [item.pos for item in player.inventory]
         if player.pos in level.exits and not state.exit_locked:
                 state.out_players.add(player.name)
                 state.game_status == P_WIN
-                return True
+                res = EXIT
                 # game_info = self.is_game_over(state)
                 # TODO: What to actually do once game is over?
                 # if game_info[GAME_END]:
-        elif item in player.inventory:
+        elif item_pos in inventory:
             if isinstance(item, Item):
                 if item.type == KEY and state.exit_locked:
                     state.exit_locked = False
-        return True
+                res = KEY
+        return res

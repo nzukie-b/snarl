@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 import io, re, json
 from json.decoder import WHITESPACE
-from common.adversary import Adversary
-from common.moveUpdate import MoveUpdate
 from common.player import Player
 from coord import Coord
-from constants import HALLWAY, ORIGIN, P_UPDATE, ROOM, TYPE
+from constants import EXIT, HALLWAY, KEY, LAYOUT, ORIGIN, PLAYER, POS, P_UPDATE, ROOM, TYPE
 import random
-from model.hallway import Hallway
-
-from model.level import Level
-from model.room import Room
+from remote.messages import ActorPosition, ObjectPos, RemoteActorUpdate
 
 def check_hallway(hallway):
     '''Checks that a hallway is valid by checking that the hallway's orientation is either vertical or horizontal.'''
@@ -152,22 +147,74 @@ def coord_radius(pos, dimensions) -> set:
             coords.update([c1, c2, c3, c4, c5, c6, c7, c8])
     return coords
 
-def update_player(current_player: Player, other_player: Player):
-    if isinstance(other_player, Player) and isinstance(current_player, Player):
-        if current_player.player_obj.pos in other_player.visible_tiles:
-            other_player.actors.append(MoveUpdate(P_UPDATE, current_player.name, to_coord(current_player.player_obj.pos)))
+# def update_player(current_player: Player, other_player: Player):
+#     if isinstance(other_player, Player) and isinstance(current_player, Player):
+#         if current_player.player_obj.pos in other_player.visible_tiles:
+#             other_player.actors.append(MoveUpdate(P_UPDATE, current_player.name, to_coord(current_player.player_obj.pos)))
 
-def update_players(current_player: Player, other_players: Player):
-    other_players = [player for player in other_players if player.name != current_player.name]
-    for other in other_players:
-        update_player(current_player, other)
+# def update_players(current_player: Player, other_players: Player):
+#     other_players = [player for player in other_players if player.name != current_player.name]
+#     for other in other_players:
+#         update_player(current_player, other)
 
 
-def update_adversary_players(adversaries: Adversary, player_coords):
+def update_remote_player(player: Player, gm):
+        player_obj = gm.get_player_actor(player.name)
+        update = RemoteActorUpdate()
+        update.position = player_obj.pos
+        update.type = P_UPDATE
+        view_dimensions = [(player_obj.move_speed * 2) + 1, (player_obj.move_speed * 2) + 1]
+        layout = to_layout(player_obj.pos, gm.gamestate.current_level, view_dimensions) 
+        update.layout = str(layout).replace('],', ']\n').replace('[[', '\n [').replace(']]', ']')
+        update.layout_coords = coord_radius(player_obj.pos, to_coord(view_dimensions))
+
+        actors = []
+        other_players = [p for p in gm.players if p.name is not player.name]
+        for player in other_players:
+            player_obj = gm.get_player_actor(player.name)
+            if player_obj.pos in update.layout_coords:
+                actor_type = PLAYER
+                actor_name = player_obj.name
+                pos = to_point(player_obj.pos)
+                actor_pos = ActorPosition(actor_type, actor_name, pos)
+                actors.append(actor_pos)      
+        for adv in gm.adversaries:
+            adversary_obj = gm.get_adversary_actor(adv.name)
+            if adversary_obj.pos in update.layout_coords:
+                actor_type = adversary_obj.type
+                actor_name = adversary_obj.name
+                pos = to_point(adversary_obj.pos)
+                actor_pos = ActorPosition(actor_type, actor_name, pos)
+                actors.append(actor_pos)
+        level = gm.gamestate.current_level
+        pos_info = check_position(player.pos, level)
+
+        is_room = pos_info[TYPE] == ROOM
+        objects = []
+        if is_room:
+            for room in level.rooms:
+                for item in room.items:
+                    if item.pos in update.layout_coords:
+                        obj_pos = ObjectPos(KEY, to_point(item.pos))
+                        objects.append(obj_pos)
+        for exit_ in level.exits:
+            if exit_ in update.layout_coords:
+                obj_pos = ObjectPos(EXIT, to_point(exit_))
+                objects.append(obj_pos)
+        update.actors = actors
+        update.objects = objects
+        player.recieve_update(update)
+
+def update_remote_players(players, gm):
+    for player in players:
+        update_remote_player(player, gm)
+
+
+def update_adversary_players(adversaries, player_coords):
     for adv in adversaries:
         adv.update_player_coords(player_coords)
 
-def update_adversary_levels(adversaries: Adversary, cur_level):
+def update_adversary_levels(adversaries, cur_level):
     for adv in adversaries:
         adv.update_current_level(cur_level)
     
@@ -195,15 +242,45 @@ def get_cardinal_coords(cur_pos):
     directions = [up, down, left, right]
     return directions
 
-def find_room_by_origin(origin: Coord, level: Level) -> Room:
+def find_room_by_origin(origin: Coord, level):
     for room in level.rooms:
         if room.origin == origin:
             return room
 
-def find_hallway_by_origin(origin: Coord, level: Level) -> Hallway:
+def find_hallway_by_origin(origin: Coord, level):
     for hall in level.hallways:
         if hall.origin == origin:
             return hall
+
+
+def to_layout(pos, level, dimensions):
+    '''Takes a level and returns a layout of tiles centered around the provided point'''
+    pos_info = check_position(pos, level)
+    origin = pos_info['origin']
+    is_room = pos_info[TYPE] == ROOM
+    layout = [[0 for ii in range(dimensions.row)] for jj in range(dimensions.col)]
+    coords = coord_radius(pos, dimensions)
+
+    if pos_info[TYPE] == ROOM:
+        room = next(room for room in level.rooms if room.origin == origin)
+        for tile in room.tiles:
+            if tile in coords:
+                #origin 5, 5 
+                layout[tile.row - origin.row][tile.col - origin.col] = 1
+        for door in room.doors:
+            if door in coords:
+                layout[door.row - origin.row][door.col - origin.col] = 2
+    elif pos_info[TYPE] == HALLWAY:
+        hall = next(hall for hall in level.hallways if hall.origin == origin)
+        for ii in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1):
+            for jj in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1):
+                hall_coord = Coord(ii, jj)
+                if hall_coord in coords:
+                    layout[hall_coord.row - origin.row][hall_coord.col - origin.col] = 1
+        for door in hall:
+            if door in coords:
+                layout[door.row - origin.row][door.col - origin.col] = 2
+    return {POS: pos, LAYOUT: layout}
 
 # CODE BLOCK FROM STACK OVERFLOW #
 

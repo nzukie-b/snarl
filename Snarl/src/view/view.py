@@ -142,35 +142,6 @@ def render_player_view(player: PlayerActor, state: GameState):
         else:
             pygame.draw.rect(SCREEN, BLACK, render_square(tile))
 
-def to_layout(pos, level, dimensions):
-    '''Takes a level and returns a layout of tiles centered around the provided point'''
-    pos_info = check_position(pos, level)
-    origin = pos_info['origin']
-    is_room = pos_info[TYPE] == ROOM
-    layout = [[0 for ii in range(dimensions.row)] for jj in range(dimensions.col)]
-    coords = coord_radius(pos, dimensions)
-
-    if pos_info[TYPE] == ROOM:
-        room = next(room for room in level.rooms if room.origin == origin)
-        for tile in room.tiles:
-            if tile in coords:
-                #origin 5, 5 
-                layout[tile.row - origin.row][tile.col - origin.col] = 1
-        for door in room.doors:
-            if door in coords:
-                layout[door.row - origin.row][door.col - origin.col] = 2
-    elif pos_info[TYPE] == HALLWAY:
-        hall = next(hall for hall in level.hallways if hall.origin == origin)
-        for ii in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1):
-            for jj in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1):
-                hall_coord = Coord(ii, jj)
-                if hall_coord in coords:
-                    layout[hall_coord.row - origin.row][hall_coord.col - origin.col] = 1
-        for door in hall:
-            if door in coords:
-                layout[door.row - origin.row][door.col - origin.col] = 2
-    return {POS: pos, LAYOUT: layout}
-
 def main(state: GameState):
     pygame.init()
     pygame.display.flip()

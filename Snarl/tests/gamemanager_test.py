@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 import sys, os
 import pytest
-
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
+from constants import KEY
+from model.item import Item
 from coord import Coord
 from utilities import to_coord, to_point
 from model.room import Room
@@ -26,7 +27,7 @@ def room2():
     start1 = Coord(5, 15)
     dimensions1 = Coord(5, 5)
     doors1 = [Coord(7, 15)]
-    items1 = [Coord(8, 17), Coord(7, 17)]
+    items1 = [Item(KEY, Coord(8, 17)), Item(KEY, Coord(7, 17))]
     room2 = Room(start1, dimensions1, tiles1, doors1, items1)
     return room2
 
@@ -38,7 +39,7 @@ def room3():
     start1 = Coord(5, 0)
     dimensions1 = Coord(5, 5)
     doors1 = [Coord(7, 5)]
-    items1 = [Coord(6, 1), Coord(7, 3)]
+    items1 = [Item(KEY, Coord(6, 1)), Item(KEY, Coord(7, 3))]
     room3 = Room(start1, dimensions1, tiles1, doors1, items1)
     return room3
 
@@ -93,13 +94,12 @@ def test_gamemanager(level2):
     assert gm.players[2].name == "bruh 2"
     new_player_locs = [gm.players[0].pos, gm.players[1].pos, gm.players[2].pos]
     new_player_locs[2] = Coord(7, 18)
-    gm.request_player_move(gm.players[2].name, Coord(7,18))
-    assert gm.gamestate.players[2].pos == Coord(7, 18)
-    gm.apply_player_item_interaction(gm.gamestate.players[2], Coord(8, 17))
+    gm.request_player_move(gm.players[2].name, Coord(7,3))
+    assert gm.players[2].pos == Coord(7, 3)
+    item = Item(KEY, Coord(8, 17))
+    gm.apply_player_item_interaction(gm.gamestate.players[2], Coord(8,17))
     print(str(gm.gamestate.players[2]))
-    assert Coord(8, 17) in gm.gamestate.players[2].inventory
-    for room in gm.gamestate.current_level.rooms:
-        assert Coord(8, 17) not in room.items
+    assert item in gm.gamestate.players[2].inventory
 
 
 

@@ -7,7 +7,6 @@ from coord import Coord
 from common.adversary import Adversary
 # from utilities import to_coord
 from constants import G_RNG, HALLWAY, ORIGIN, ROOM, TYPE, ZOMBIE, GHOST, Z_RNG
-from utilities import check_position, get_cardinal_coords, get_closest_coord
 
 class RemoteAdversary(Adversary):
     def __init__(self, name, type_, adversary_obj, current_level, player_coords, adversary_coords):

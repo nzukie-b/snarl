@@ -1,11 +1,10 @@
 import sys, os
-from typing import Type
-from adversary.remoteAdversary import RemoteAdversary
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
-from constants import EJECT, GAME_END, HALLWAY, INFO, LEVEL_END, MAX_PLAYERS, ORIGIN, P_WIN, ROOM, STATUS, TYPE, VALID_MOVE, ZOMBIE
+from constants import A_WIN, EJECT, GAME_END, HALLWAY, INFO, KEY, LEVEL_END, MAX_PLAYERS, ORIGIN, P_WIN, ROOM, STATUS, TYPE, VALID_MOVE, ZOMBIE
+from adversary.remoteAdversary import RemoteAdversary
 from coord import Coord
 from common.player import Player
 from player.localPlayer import LocalPlayer
@@ -15,7 +14,7 @@ from model.player import PlayerActor
 from model.adversary import AdversaryActor
 from model.gamestate import GameState, create_initial_game_state
 from game.ruleChecker import RuleChecker
-from utilities import update_adversary_players, update_players, check_position, find_room_by_origin, find_hallway_by_origin
+from utilities import update_adversary_players, check_position, find_room_by_origin, find_hallway_by_origin
 class GameManager:
     def __init__(self):
         #List of player clients
@@ -27,6 +26,9 @@ class GameManager:
         self.player_turns = []
         # Names of players that need to go during this turn
         self.adv_turns = []
+        self.start_level = 0
+        self.next_level_indx = 0
+        
 
     def __reset_player_turns(self):
         try:
@@ -112,17 +114,21 @@ class GameManager:
         if self.players:
             self.gamestate = self.__init_state(levels, start_level)
             self.reset_turns()
+            self.start_level = start_level
+            self.next_level_indx = (start_level + 1) % len(levels) if isinstance(levels, list) else start_level
         else:
             print("Please register at least one player and adversary to start the game.")
 
     def next_level(self):
-        if len(self.gamestate.levels) > 0:
+        if self.start_level != self.next_level_indx:
             old_state = self.gamestate
-            new_state = self.__init_state(old_state.levels)
+            new_state = self.__init_state(old_state.levels, self.next_level_indx)
             cur_level = new_state.current_level
             for adv in self.adversaries:
                 adv.update_current_level(cur_level)
+            level_indx = (self.next_level_indx + 1) % len(new_state.levels)
             self.gamestate = new_state
+            self.next_level_indx = level_indx
             return new_state.levels.index(cur_level)
     
     def request_player_moves(self, new_players_locs):
@@ -140,6 +146,7 @@ class GameManager:
             self.players = self.gamestate.players
 
     def request_player_move(self, name, new_pos):
+        '''Request a move from a player. If the move is invalid then returns false, otherwise it returns a dictionary with information of the move'''
         if len(self.player_turns) == len(self.adv_turns) == 0: self.reset_turns()
 
         player = next(player for player in self.players if player.name == name)
@@ -172,7 +179,7 @@ class GameManager:
                 self.players.append(player)
                 self.gamestate = GameState(self.gamestate.current_level, updated_players, adversaries, self.gamestate.exit_locked)
                 self.player_turns.remove(player.name)
-                update_players(player, self.players)
+                # update_players(player, self.players)
 
                 # If all players have gone update adversaries for their moves
                 if len(self.player_turns) == 0: update_adversary_players(self.adversaries, self.get_player_coords())
@@ -213,37 +220,57 @@ class GameManager:
          return False
 
 
-    def apply_player_item_interaction(self, player, item):
-        """
-        Updates player info based on player move.
-        :param new_players_locs: [Coord]
-        :param new_players_healths: [int]
-        :return:
-        """
+    def apply_player_item_interaction(self, player, item_pos):
         state = self.gamestate
+        exit_locked = state.exit_locked
         for room in state.current_level.rooms:
-            if item in room.items:
+            room_items = [item.pos for item in room.items]
+            if item_pos in room_items:
+                item = next(item for item in room.items if item.pos == item_pos)
+                if item.type == KEY:
+                    exit_locked = False
                 room.items.remove(item)
                 for p in self.players:
                     if p.name == player.name:
                         p.inventory.append(item)
+        res = self.rc.validate_item_interaction(player, item_pos, state)
+        if res:
+            players = self.get_player_actors()
+            adversaries = self.get_adversary_actors()
+            self.gamestate = GameState(levels=state.levels, players=players, adversaries=adversaries, exit_locked=exit_locked, current_level=state.current_level)
+        return res
 
-        if self.rc.validate_item_interaction(player, item, state):
-            level_over = self.rc.is_level_over(state)
-            game_over = self.rc.is_game_over(state)
+    def handle_level_over(self):
+        state = self.gamestate
+        level_over = self.rc.is_level_over(state)
+        if not level_over[STATUS] == P_WIN:
+            self.next_level()
+        elif level_over[STATUS] == A_WIN:
+            #TODO Properply handle adversary wins
+            pass
 
-            if not level_over[LEVEL_END]:
-                # if level is not over
-                self.gamestate = GameState(state.current_level, self.players,
-                                        self.adversaries, self.gamestate.exit_locked)
-            elif level_over[STATUS] == P_WIN:
-                # Player win level
-                self.next_level()
-            else:
-                # Not really sure what to return here 
-                print('GAME OVER: {} LEVEL STATUS: {}'.format(game_over[GAME_END], game_over[STATUS]))
-        else:
-            self.players = self.gamestate.players
+    def handle_game_over(self):
+        state = self.gamestate
+        game_over = self.rc.is_game_over(self.start_level, self.next_level_indx, state)
+        #TODO
+
+
+        # if res:
+        #     level_over = self.rc.is_level_over(state)
+        #     game_over = self.rc.is_game_over(state)
+
+        #     if not level_over[LEVEL_END]:
+        #         # if level is not over
+        #         self.gamestate = GameState(state.current_level, self.players, self.adversaries, self.gamestate.exit_locked)
+        #         return res
+        #     elif level_over[STATUS] == P_WIN:
+        #         # Player win level
+        #         self.next_level()
+        #     else:
+        #         # Not really sure what to return here 
+        #         print('GAME OVER: {} LEVEL STATUS: {}'.format(game_over[GAME_END], game_over[STATUS]))
+        # else:
+        #     self.players = self.gamestate.players
 
     def register_players(self, players):
         '''Create list of players from provided list of players'''
