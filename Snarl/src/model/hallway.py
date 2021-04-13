@@ -16,12 +16,13 @@ class Hallway:
         try:
             waypoint1 = waypoints[0]
             self.origin = waypoint1
-            try:
-                waypoint2 = waypoints[1]
-            except IndexError:
-                pass
         except IndexError:
             pass
+        try:
+            waypoint2 = waypoints[1]
+        except IndexError:
+            pass
+
         self.dimensions = Coord(abs(waypoint2.row - waypoint1.row), abs(waypoint2.col - waypoint1.col)) 
     
     def __str__(self):

@@ -4,7 +4,7 @@ from pathlib import Path
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
-from remote.messages import Welcome
+from remote.messages import StartLevel, Welcome
 from constants import CONN, MAX_PLAYERS, NAME, GHOST, ZOMBIE
 from controller.controller import parse_levels
 from game.gameManager import GameManager
@@ -62,6 +62,14 @@ def __register_adversaries(gm, no_levels):
     for ii in range(num_ghosts):
         gm.register_adversary('ghost: {}'.format(ii), GHOST, remote=True)
 
+def __send_level_start(no_level, clients):
+    names = [client[NAME] for client in clients]
+    start_lvl_msg = StartLevel(no_level, names)
+    msg = json.dumps(start_lvl_msg)
+    for client in clients:
+        client[CONN].sendall(msg.encode('utf-8'))
+    
+
 def main(args):
     if not __valid_clients_num(args.clients):
         print('Invalid number of clients. Please enter a number between 1 and {}'.format(MAX_PLAYERS))
@@ -101,7 +109,11 @@ def main(args):
     __register_players(gm, clients)
     __register_adversaries(gm, len(levels_list))
     gm.start_game(levels_list, start_level)
-    
+    __send_level_start(start_level, clients)
+
+    while True:
+        for ii in range(len(clients)):
+
 
 
 

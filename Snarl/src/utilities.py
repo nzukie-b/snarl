@@ -7,6 +7,10 @@ from common.player import Player
 from coord import Coord
 from constants import HALLWAY, ORIGIN, P_UPDATE, ROOM, TYPE
 import random
+from model.hallway import Hallway
+
+from model.level import Level
+from model.room import Room
 
 def check_hallway(hallway):
     '''Checks that a hallway is valid by checking that the hallway's orientation is either vertical or horizontal.'''
@@ -190,6 +194,16 @@ def get_cardinal_coords(cur_pos):
     right = Coord(cur_pos.row, cur_pos.col + 1)
     directions = [up, down, left, right]
     return directions
+
+def find_room_by_origin(origin: Coord, level: Level) -> Room:
+    for room in level.rooms:
+        if room.origin == origin:
+            return room
+
+def find_hallway_by_origin(origin: Coord, level: Level) -> Hallway:
+    for hall in level.hallways:
+        if hall.origin == origin:
+            return hall
 
 # CODE BLOCK FROM STACK OVERFLOW #
 

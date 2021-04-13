@@ -5,7 +5,7 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
-from constants import EJECT, GAME_END, INFO, LEVEL_END, MAX_PLAYERS, P_WIN, STATUS, VALID_MOVE, ZOMBIE
+from constants import EJECT, GAME_END, HALLWAY, INFO, LEVEL_END, MAX_PLAYERS, ORIGIN, P_WIN, ROOM, STATUS, TYPE, VALID_MOVE, ZOMBIE
 from coord import Coord
 from common.player import Player
 from player.localPlayer import LocalPlayer
@@ -15,7 +15,7 @@ from model.player import PlayerActor
 from model.adversary import AdversaryActor
 from model.gamestate import GameState, create_initial_game_state
 from game.ruleChecker import RuleChecker
-from utilities import update_adversary_players, update_players
+from utilities import update_adversary_players, update_players, check_position, find_room_by_origin, find_hallway_by_origin
 class GameManager:
     def __init__(self):
         #List of player clients
@@ -116,13 +116,14 @@ class GameManager:
             print("Please register at least one player and adversary to start the game.")
 
     def next_level(self):
-        if len(self.gamestate) > 0:
+        if len(self.gamestate.levels) > 0:
             old_state = self.gamestate
             new_state = self.__init_state(old_state.levels)
             cur_level = new_state.current_level
             for adv in self.adversaries:
                 adv.update_current_level(cur_level)
             self.gamestate = new_state
+            return new_state.levels.index(cur_level)
     
     def request_player_moves(self, new_players_locs):
         """
@@ -154,10 +155,12 @@ class GameManager:
                 if player_move[EJECT]:
                     # Skip this players turn until the list of ejected players is reset i.e. in a level change
                     self.gamestate.out_players.add(name)
-                
                 self.players.remove(player)
                 updated_players = self.get_player_actors()
                 adversaries = self.get_adversary_actors()
+                # If the new position is a door/waypoint, then move the player to the corresponding location.
+                door_pos = __handle_door_traversal(new_pos, self.gamestate.current_level)
+                if door_pos: new_pos = door_pos
 
                 if is_client:
                     player.player_obj.pos = new_pos
@@ -292,3 +295,29 @@ def __create_remote_player(name, conn) -> Player:
 def __create_remote_adversary(name, type_) -> Adversary:
     adv_obj = AdversaryActor(name, type_=type_)
     return RemoteAdversary(name, type_=type_, adversary_obj=adv_obj)
+
+def __handle_door_traversal(pos, level) -> Coord:
+    '''Handles changing position for when an actor is traversing through a door/waypoint. Returns the coordinate of the corresponding door/waypoint'''
+    new_pos = None
+    pos_info = check_position(pos, level)
+    if pos_info[TYPE] == ROOM:
+        room = find_room_by_origin(pos_info[ORIGIN], level)
+        for door in room.doors:
+            if door == pos:
+                for hall in level.hallways:
+                    for ii in range(2):
+                        if pos == hall.doors[ii]:
+                            # other_door_indx = (ii + 1) % 2
+                            new_pos = hall.waypoints[ii]
+
+    elif pos_info[TYPE] == HALLWAY:
+        hall = find_hallway_by_origin(pos_info[ORIGIN], level)
+        for ii in range(2):
+            if pos == hall.waypoints[ii]:
+                new_pos = hall.doors[ii]
+
+    return new_pos
+
+                                
+
+
