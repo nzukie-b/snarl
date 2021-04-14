@@ -1,6 +1,0 @@
-{
-    "traversable": true,
-    "object": "exit",
-    "type": "room",
-    "reachable": [[3, 1]]
-  }

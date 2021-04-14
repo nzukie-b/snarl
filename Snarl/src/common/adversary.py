@@ -6,6 +6,7 @@ sys.path.append(src_dir)
 from constants import G_RNG, HALLWAY, ORIGIN, ROOM, TYPE, ZOMBIE, GHOST, Z_RNG
 from coord import Coord
 from utilities import get_cardinal_coords, check_position, get_closest_coord
+from game.ruleChecker import RuleChecker
 
 class Adversary(ABC):
     def __init__(self, name, type_=ZOMBIE, adversary_obj=None, current_level=None, player_coords=None, adversary_coords=None):
@@ -48,7 +49,7 @@ class Adversary(ABC):
             return False
 
     def __player_noticed(self, cur_pos, coord, distance):
-        return self.rc.validate_movement_distance(cur_pos, coord, distance)
+        return RuleChecker.__validate_movement_distance(cur_pos, coord, distance)
 
     def __move_to_player(self, cur_pos) -> Coord:
         '''If a player is in notice range, returns a coord one tile closer to the player. Else None'''

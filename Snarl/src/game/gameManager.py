@@ -5,6 +5,7 @@ game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
 from constants import A_WIN, EJECT, GAME_END, HALLWAY, INFO, KEY, LEVEL_END, MAX_PLAYERS, ORIGIN, P_WIN, ROOM, STATUS, TYPE, VALID_MOVE, ZOMBIE
 from adversary.remoteAdversary import RemoteAdversary
+from player.remotePlayer import RemotePlayer
 from coord import Coord
 from common.player import Player
 from player.localPlayer import LocalPlayer
@@ -79,9 +80,9 @@ class GameManager:
                 if (isinstance(player_client, Player)):
                     self.players.append(player_client)
                 elif connection:
-                    self.players.append(__create_remote_player(player_client, connection))
+                    self.players.append(self.__create_remote_player(player_client, connection))
                 else:
-                    self.players.append(__create_local_player(player_client))
+                    self.players.append(self.__create_local_player(player_client))
 
 
     def register_adversary(self, adversary_client, actor_type=ZOMBIE, remote=False):
@@ -89,9 +90,28 @@ class GameManager:
             self.adversaries.append(adversary_client)
         elif remote:
             # There isn't really a difference between remote and local adversaries at this point
-             self.adversaries.append(__create_remote_adversary(adversary_client, actor_type))
+             self.adversaries.append(self.__create_remote_adversary(adversary_client, actor_type))
         else:
-             self.adversaries.append(__create_local_adversary(adversary_client, actor_type))
+             self.adversaries.append(self.__create_local_adversary(adversary_client, actor_type))
+
+    def __create_remote_player(self, name, conn) -> Player:
+        # TODO: Implement Remote Players
+        """"""
+        player_obj = PlayerActor(name)
+        return RemotePlayer(conn, name, player_obj=player_obj)
+
+    def __create_local_player(self, name) -> Player:
+        '''Helper for instantiating a localPlayer'''
+        player_obj = PlayerActor(name)
+        return LocalPlayer(name, player_obj=player_obj)
+
+    def __create_local_adversary(self, name, type_) -> Adversary:
+        adv_obj = AdversaryActor(name, type_=type_)
+        return LocalAdversary(name, type_=type_, adversary_obj=adv_obj)
+
+    def __create_remote_adversary(self, name, type_) -> Adversary:
+        adv_obj = AdversaryActor(name, type_=type_)
+        return RemoteAdversary(name, type_=type_, adversary_obj=adv_obj)
 
     def __init_state(self, levels, start_level=0) -> GameState:
         '''Create and return a GameState from list of levels.'''
@@ -103,10 +123,15 @@ class GameManager:
             print('Invalid Starting level')
             return self.gamestate
         except TypeError:
-            #Single level case
+            # Single level case
             level = levels
             player_objs = self.players
             adv_objs = self.adversaries
+        except AttributeError:
+            adv_objs = [a.adversary_obj for a in self.adversaries]
+            player_objs = [a.player_obj for a in self.players]
+
+
 
         gs_info = create_initial_game_state(level, player_objs, adv_objs)
         return GameState(levels, gs_info[0], gs_info[1], current_level=level)
@@ -167,7 +192,7 @@ class GameManager:
                 updated_players = self.get_player_actors()
                 adversaries = self.get_adversary_actors()
                 # If the new position is a door/waypoint, then move the player to the corresponding location.
-                door_pos = __handle_door_traversal(new_pos, self.gamestate.current_level)
+                door_pos = self.__handle_door_traversal(new_pos, self.gamestate.current_level)
                 if door_pos: new_pos = door_pos
 
                 if is_client:
@@ -206,7 +231,7 @@ class GameManager:
                     player = next(player for player in players if player.pos == new_pos)
                     self.gamestate.out_players.add(player.name)
                 
-                door_pos = __handle_door_traversal(new_pos, self.gamestate.current_level)
+                door_pos = self.__handle_door_traversal(new_pos, self.gamestate.current_level)
                 if door_pos: new_pos = door_pos
                 
                 if is_client:
@@ -310,45 +335,27 @@ class GameManager:
         else:
             print("Too few or too many players to register, please register between 1 and 4 players.")
 
+    def __handle_door_traversal(self, pos, level) -> Coord:
+        '''Handles changing position for when an actor is traversing through a door/waypoint. Returns the coordinate of the corresponding door/waypoint'''
+        new_pos = None
+        pos_info = check_position(pos, level)
+        if pos_info[TYPE] == ROOM:
+            room = find_room_by_origin(pos_info[ORIGIN], level)
+            for door in room.doors:
+                if door == pos:
+                    for hall in level.hallways:
+                        for ii in range(2):
+                            if pos == hall.doors[ii]:
+                                # other_door_indx = (ii + 1) % 2
+                                new_pos = hall.waypoints[ii]
 
-def __create_local_player(name) -> Player:
-    '''Helper for instantiating a localPlayer'''
-    player_obj = PlayerActor(name)
-    return LocalPlayer(name, player_obj=player_obj)
+        elif pos_info[TYPE] == HALLWAY:
+            hall = find_hallway_by_origin(pos_info[ORIGIN], level)
+            for ii in range(2):
+                if pos == hall.waypoints[ii]:
+                    new_pos = hall.doors[ii]
 
-def __create_local_adversary(name, type_) -> Adversary:
-    adv_obj = AdversaryActor(name, type_=type_)
-    return LocalAdversary(name, type_=type_, adversary_obj=adv_obj)
-
-def __create_remote_player(name, conn) -> Player:
-    #TODO: Implement Remote Players
-    NotImplemented
-
-def __create_remote_adversary(name, type_) -> Adversary:
-    adv_obj = AdversaryActor(name, type_=type_)
-    return RemoteAdversary(name, type_=type_, adversary_obj=adv_obj)
-
-def __handle_door_traversal(pos, level) -> Coord:
-    '''Handles changing position for when an actor is traversing through a door/waypoint. Returns the coordinate of the corresponding door/waypoint'''
-    new_pos = None
-    pos_info = check_position(pos, level)
-    if pos_info[TYPE] == ROOM:
-        room = find_room_by_origin(pos_info[ORIGIN], level)
-        for door in room.doors:
-            if door == pos:
-                for hall in level.hallways:
-                    for ii in range(2):
-                        if pos == hall.doors[ii]:
-                            # other_door_indx = (ii + 1) % 2
-                            new_pos = hall.waypoints[ii]
-
-    elif pos_info[TYPE] == HALLWAY:
-        hall = find_hallway_by_origin(pos_info[ORIGIN], level)
-        for ii in range(2):
-            if pos == hall.waypoints[ii]:
-                new_pos = hall.doors[ii]
-
-    return new_pos
+        return new_pos
 
                                 
 

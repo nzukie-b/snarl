@@ -188,7 +188,7 @@ def update_remote_player(player: Player, gm):
                 actor_pos = ActorPosition(actor_type, actor_name, pos)
                 actors.append(actor_pos)
         level = gm.gamestate.current_level
-        pos_info = check_position(player.pos, level)
+        pos_info = check_position(player_obj.pos, level)
 
         is_room = pos_info[TYPE] == ROOM
         objects = []
@@ -259,6 +259,8 @@ def to_layout(pos, level, dimensions):
     pos_info = check_position(pos, level)
     origin = pos_info['origin']
     is_room = pos_info[TYPE] == ROOM
+    #print("DIM: " + str(dimensions))
+    dimensions = to_coord(dimensions)
     layout = [[0 for ii in range(dimensions.row)] for jj in range(dimensions.col)]
     coords = coord_radius(pos, dimensions)
 
@@ -285,15 +287,22 @@ def to_layout(pos, level, dimensions):
 
 
 def send_msg(sock: socket.SocketType, msg: str, to: str):
-    print(to, '<<', msg)
     sock.sendall(msg.encode('utf-8'))
+    if isinstance(msg, dict):
+        print(to, '<<', msg.__dict__)
+    else:
+        print(to, '<<', msg)
+
 
 def receive_msg(sock: socket.SocketType, from_: str):
     data = sock.recv(4096)
     if not data:
         return data
     res = data.decode('utf-8')
-    print(from_, '>>', res)
+    if isinstance(res, dict):
+        print(from_, '>>', res.__dict__)
+    else:
+        print(from_, '>>', res)
     return res
 # CODE BLOCK FROM STACK OVERFLOW #
 

@@ -21,7 +21,8 @@ class RemotePlayer(Player):
         data = self.__receive()
         move = json.loads(data)
         assert type(move) == dict and move[TO]
-        super().move_to_tile(to_coord(move), gm)  
+        print(move)
+        super().move_to_tile(to_coord(move[TO]), gm)
         # return gm.request_player_move(self.name, move[TO])
  
 
@@ -39,7 +40,7 @@ class RemotePlayer(Player):
     def recieve_update(self, actor_update):
         """Takes in the position and visible tiles,
         then updates the current player with that info (Also visually updates)"""
-        msg = json.dumps(actor_update)
+        msg = json.dumps(str(actor_update))
         self.__send(msg)
 
 

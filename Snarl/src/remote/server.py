@@ -20,7 +20,7 @@ parser.add_argument('-w', '--wait', dest='wait', action='store', type=int, defau
 parser.add_argument('-s', '--start', dest='start', action='store', type=int, default=1, help='Start level. Not 0 indexed')
 parser.add_argument('-o', '--observe', dest='observe', action='store_true', default=False, help='Whether to return observer view of the ongoing game.')
 parser.add_argument('-a', '--address', dest='address', action='store', default='127.0.0.1', help='Address to start listing for connections')
-parser.add_argument('-p', '--port', dest='port', action='store', type=int, default=45678, help='Port to start listing for connections')
+parser.add_argument('-p', '--port', dest='port', action='store', type=int, default=45679, help='Port to start listing for connections')
 
 
 def __valid_clients_num(no_clients):
@@ -29,7 +29,7 @@ def __valid_clients_num(no_clients):
 def __send_server_welcome(connection: socket.SocketType, server_addr):
     info = '(Enesseand) server_address: {}'.format(server_addr)
     welcome_msg = Welcome(info)
-    formatted_msg = json.dumps(welcome_msg)
+    formatted_msg = json.dumps(welcome_msg.__dict__)
     connection.sendall(formatted_msg.encode('utf-8'))
 
 def __request_client_name(connection: socket.SocketType, clients):
@@ -93,7 +93,7 @@ def __register_adversaries(gm: GameManager, no_levels):
 def __send_level_start(no_level, clients):
     names = [client[NAME] for client in clients]
     start_lvl_msg = StartLevel(no_level, names)
-    msg = json.dumps(start_lvl_msg)
+    msg = json.dumps(start_lvl_msg.__dict__)
     for client in clients:
         client[CONN].sendall(msg.encode('utf-8'))
     
@@ -135,14 +135,14 @@ def __send_end_level(players: List[RemotePlayer], key, exits, ejects):
     '''Sends the level end message to the provided player and returns an '''
     key = 'null' if not key else key
     end_lvl = EndLevel(key, exits, ejects)
-    msg = json.dumps(end_lvl)
+    msg = json.dumps(end_lvl.__dict__)
     for player in players:
         send_msg(player.socket, msg, player.name)
 
 
 def __send_end_game(players: List[RemotePlayer], player_scores: List[PlayerScore]):
     end_game = EndGame(player_scores)
-    msg = json.dumps(end_game)
+    msg = json.dumps(end_game.__dict__)
     for player in players:
         send_msg(player.socket, msg, player.name)
 

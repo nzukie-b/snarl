@@ -96,8 +96,8 @@ class RuleChecker:
         
         return valid_move
 
-
-    def vaildate_movement_distance(self, current_pos, new_pos, move_distance) -> bool:
+    @staticmethod
+    def vaildate_movement_distance(current_pos, new_pos, move_distance) -> bool:
         """Helper for validating movements, takes new players position compared to old player/adversary position and
         checks that the movement is within the cardinal distance relative to the player/adversary movement speed."""
         return 0 <= abs(current_pos.row - new_pos.row) + \
