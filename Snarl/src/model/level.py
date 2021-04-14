@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import json
 from utilities import check_dimensions, check_position, get_reachable_halls, get_reachable_rooms, to_point
 from constants import EXIT, HALLWAY, KEY, ORIGIN, ROOM, TYPE
 
