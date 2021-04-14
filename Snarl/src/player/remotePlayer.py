@@ -1,4 +1,5 @@
 import json
+import socket
 import sys, os
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
@@ -9,7 +10,7 @@ from constants import TO
 
 
 class RemotePlayer(Player):
-    def __init__(self, socket, name=None, player_obj=None, layout=None, visible_tiles=None, actors=[], objects=[], inventory_contents=[]):
+    def __init__(self, socket: socket.SocketType, name=None, player_obj=None, layout=None, visible_tiles=None, actors=[], objects=[], inventory_contents=[]):
         super().__init__(name, player_obj=player_obj, layout=layout, visible_tiles=visible_tiles, actors=actors, objects=objects, inventory=inventory_contents)
         self.socket = socket
         
@@ -46,4 +47,4 @@ class RemotePlayer(Player):
         send_msg(self.socket, msg, self.name)
 
     def __receive(self):
-        receive_msg(self.socket, self.name)
+        return receive_msg(self.socket, self.name)

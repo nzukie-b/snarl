@@ -42,7 +42,8 @@ def __request_client_name(connection: socket.SocketType, clients):
         names.append(client)
     for i in range(4):
         connection.sendall(msg.encode('utf-8'))
-        client_name = connection.recv(4096).decode('utf-8')
+        client_name = receive_msg(connection, 'client')
+        # client_name = connection.recv(4096).decode('utf-8')
         if client_name not in names:
             client_info[NAME] = client_name
             break
@@ -144,8 +145,11 @@ def __send_end_game(players: List[RemotePlayer], player_scores: List[PlayerScore
     msg = json.dumps(end_game)
     for player in players:
         send_msg(player.socket, msg, player.name)
-    
 
+def __close_connections(players: List[RemotePlayer], server: socket.SocketType):
+    for player in players:
+        player.socket.close()
+    server.close()
 
 def main(args):
     if not __valid_clients_num(args.clients):
@@ -183,6 +187,7 @@ def main(args):
             __send_player_updates(gm)
         for adv in gm.adversaries:
             adv.move_to_tile(gm)
+            
         level_over = gm.handle_level_over()
         game_over = gm.handle_game_over()
         if level_over[LEVEL_END]:
@@ -197,10 +202,14 @@ def main(args):
             key = None
             exits = []
             ejects = []
+
             if game_over[GAME_END]:
                 __send_end_game(gm.players, player_scores)
+                __close_connections(gm.players, server_socket)
+                
             if level_over[STATUS] == A_WIN:
-                exit()
+                __send_end_game(gm.players, player_scores)
+                __close_connections(gm.players, server_socket)
 
 
 if __name__ == '__main__':
