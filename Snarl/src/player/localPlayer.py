@@ -1,11 +1,10 @@
 import sys, os
-
-from utilities import to_coord
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
 from common.player import Player
-
+from remote.messages import RemoteActorUpdate
+from utilities import to_coord
 
 class LocalPlayer(Player):
     def __init__(self, name, player_obj=None, layout=None, visible_tiles=None, actors=None, objects=None, inventory_contents=None):
@@ -38,3 +37,5 @@ class LocalPlayer(Player):
         layout_actors = self.actors
         layout_objects = self.objects
         print(str(self.layout).replace('],', ']\n').replace('[[', '\n [').replace(']]', ']') + '\nActors Visible: {}\nObjects Visible: {}'.format(layout_actors, layout_objects))
+        if isinstance(actor_update, RemoteActorUpdate):
+            print(actor_update.message)

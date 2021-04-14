@@ -5,7 +5,7 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
 from common.player import Player
-from utilities import receive_msg, send_msg
+from utilities import receive_msg, send_msg, to_coord
 from constants import TO
 
 
@@ -21,7 +21,7 @@ class RemotePlayer(Player):
         data = self.__receive()
         move = json.loads(data)
         assert type(move) == dict and move[TO]
-        super().move_to_tile(move, gm)  
+        super().move_to_tile(to_coord(move), gm)  
         # return gm.request_player_move(self.name, move[TO])
  
 

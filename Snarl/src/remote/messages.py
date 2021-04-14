@@ -60,6 +60,16 @@ class RemoteActorUpdate:
 
     def __repr__(self):
         return str(self)
+
+class ActorMove:
+    def __init__(self, to):
+        self.type = 'move'
+        self.to = to
+    def __str__(self) -> str:
+        return '{{"type": {}, "to": {}}}'.format(self.type, self.to)
+
+    def __repr(self):
+        return str(self)
         
 class EndLevel:
     def __init__(self, key, exits, ejects):

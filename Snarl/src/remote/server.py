@@ -59,7 +59,7 @@ def __wait_for_client_connections(server_socket: socket.SocketType, server_addr,
         try:
             conn, addr = server_socket.accept()
             __send_server_welcome(conn, server_addr[0])
-            client_info =__request_client_name(conn, clients)
+            client_info = __request_client_name(conn, clients)
             clients.append(client_info)
         except socket.timeout:
             end = time.perf_counter()
@@ -187,7 +187,7 @@ def main(args):
             __send_player_updates(gm)
         for adv in gm.adversaries:
             adv.move_to_tile(gm)
-            
+
         level_over = gm.handle_level_over()
         game_over = gm.handle_game_over()
         if level_over[LEVEL_END]:
