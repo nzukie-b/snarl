@@ -9,7 +9,7 @@ from player.remotePlayer import RemotePlayer
 from coord import Coord
 from utilities import to_point, update_remote_players, send_msg, receive_msg
 from remote.messages import EndGame, EndLevel, PlayerScore, RemoteActorUpdate, StartLevel, Welcome
-from constants import A_WIN, CONN, EJECT, EXIT, GAME_END, INVALID, KEY, LEVEL_END, MAX_PLAYERS, NAME, GHOST, OK, P_UPDATE, STATUS, VALID_MOVE, ZOMBIE
+from constants import A_WIN, CONN, EJECT, EXIT, GAME_END, INFO, INVALID, KEY, LEVEL_END, MAX_PLAYERS, NAME, GHOST, OK, P_UPDATE, STATUS, VALID_MOVE, ZOMBIE
 from controller.controller import parse_levels, parse_move
 from game.gameManager import GameManager
 
@@ -98,7 +98,6 @@ def __send_level_start(no_level, clients):
         client[CONN].sendall(msg.encode('utf-8'))
     
 def __send_player_updates(gm):
-    #TODO: make Remote player recieve update automatically send player_update
     update_remote_players(gm.players, gm)
 
 
@@ -111,7 +110,7 @@ def __request_client_move(player: RemotePlayer, gm: GameManager, key, exits, eje
         move_res = player.move_to_tile(gm)
         if move_res:
             player_obj = gm.get_player_actor(player.name)
-            if move_res[VALID_MOVE]:
+            if move_res[VALID_MOVE] and move_res[INFO].traversable:
                 res = gm.apply_player_item_interaction(player_obj, player_obj.pos)
                 if res:
                     if res == KEY:
@@ -127,9 +126,9 @@ def __request_client_move(player: RemotePlayer, gm: GameManager, key, exits, eje
                     move_msg = json.dumps(OK)
                 send_msg(conn, move_msg, player.name)
                 return move_msg
-        else: 
-            move_msg = json.dumps(INVALID)
-            send_msg(conn, move_msg, player.name)
+
+        move_msg = json.dumps(INVALID)
+        send_msg(conn, move_msg, player.name)
 
 def __send_end_level(players: List[RemotePlayer], key, exits, ejects):
     '''Sends the level end message to the provided player and returns an '''
@@ -174,6 +173,7 @@ def main(args):
     __register_adversaries(gm, len(levels_list))
    
     gm.start_game(levels_list, start_level)
+    
     __send_level_start(start_level, clients)
     __send_player_updates(gm)
 
@@ -182,12 +182,20 @@ def main(args):
     exits = []
     ejects = []
     while True:
-        for player in gm.players:
+        # Need to make copy of players and advs as gm modifies these during request_moves
+        advs = [adv for adv in gm.adversaries]
+        players = [p for p in gm.players]
+        
+        print('p Turns', gm.player_turns)
+        print('a turns ', gm.adv_turns)
+        for player in players:
             __request_client_move(player, gm, key, exits, ejects)
             __send_player_updates(gm)
-        for adv in gm.adversaries:
+        print('p Turns', gm.player_turns)
+        print('a turns ', gm.adv_turns)
+        for adv in advs:
             adv.move_to_tile(gm)
-
+        print('a turns ', gm.adv_turns)
         level_over = gm.handle_level_over()
         game_over = gm.handle_game_over()
         if level_over[LEVEL_END]:

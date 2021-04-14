@@ -18,8 +18,7 @@ class Room:
         tiles_str = [str(tile) for tile in self.tiles]
         doors_str = [str(door) for door in self.doors]
         items_str = [str(item) for item in self.items]
-        return '{{"origin": {}, "dimensions": {}, "tiles": {}, "doors": {}, "items": {}}}'.format(
-            origin_str, dimensions_str, tiles_str, doors_str, items_str)
+        return json.dumps({"origin": origin_str, "dimensions": dimensions_str, "tiles": tiles_str, "doors": doors_str, "items": items_str})
 
     def __repr__(self):
         return str(self)

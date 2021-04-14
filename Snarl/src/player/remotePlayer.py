@@ -1,12 +1,22 @@
 import json
+from json import JSONEncoder
 import socket
+import pickle
 import sys, os
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
 from common.player import Player
-from utilities import receive_msg, send_msg, to_coord
+from remote.messages import RemoteActorUpdate
+from utilities import receive_msg, send_msg, to_coord, to_point
 from constants import TO
+
+def _default(self, obj):
+    return getattr(obj.__class__, "to_json", _default.default)(obj)
+
+_default.default = JSONEncoder().default
+JSONEncoder.default = _default
+
 
 
 class RemotePlayer(Player):
@@ -21,8 +31,7 @@ class RemotePlayer(Player):
         data = self.__receive()
         move = json.loads(data)
         assert type(move) == dict and move[TO]
-        print(move)
-        super().move_to_tile(to_coord(move[TO]), gm)
+        return super().move_to_tile(to_coord(move[TO]), gm)
         # return gm.request_player_move(self.name, move[TO])
  
 
@@ -36,11 +45,18 @@ class RemotePlayer(Player):
     def update_info_from_game_manager(self, new_player):
         """Takes in an unpdated version of the player from the game-manager and sets the current player to these
         values"""
+    
 
-    def recieve_update(self, actor_update):
+
+    def recieve_update(self, actor_update: RemoteActorUpdate):
         """Takes in the position and visible tiles,
         then updates the current player with that info (Also visually updates)"""
-        msg = json.dumps(actor_update.__dict__)
+        # layout_points = [to_point(coord) for coord in actor_update.layout_coords]
+        # actor_update.layout_coords = 
+        # msg = pickle.dumps(actor_update)
+        # msg = json.dumps({"type": actor_update.type, "layout": actor_update.layout, 
+        # "position": actor_update.position, "objects": actor_update.objects, "message": actor_update.message})
+        msg = str(actor_update)
         self.__send(msg)
 
 

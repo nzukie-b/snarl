@@ -1,19 +1,16 @@
-import sys, os
+import sys, os, json
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
 from constants import END_GAME, END_LEVEL, P_SCORE, START_LVL, WELCOME
-from common.actorUpdate import ActorUpdate
-
 class Welcome:
     def __init__(self, server_info):
         self.type = WELCOME
         self.info = server_info
     
     def __str__(self):
-        return '{{"type": {}, "info": {}}}'.format(self.type, self.info)
-
+        return json.dumps({"type": self.type, "info": self.info})
 class StartLevel:
     def __init__(self, level, players):
         self.type = START_LVL
@@ -21,7 +18,7 @@ class StartLevel:
         self.players = players
 
     def __str__(self):
-        return '{{"type": {}, "level": {}, "players": {}'.format(self.type, self.level, self.players)
+        return json.dumps({"type": self.type, "level": self.level, "players": self.players})
 
 class ActorPosition:
     def __init__(self, type_, name, pos):
@@ -30,7 +27,7 @@ class ActorPosition:
         self.pos = pos
 
     def __str__(self):
-        return '{{"type" {}, "name": {}, "position": {}}}'.format(self.type, self.name, self.pos)
+        return json.dumps({"type": self.type, "name": self.name, "position": self.pos})
 
     def __repr__(self) -> str:
         return str(self)
@@ -40,33 +37,41 @@ class ObjectPos:
         self.pos = pos
     
     def __str__(self):
-        return '{{"type": {}, "position": {}}}'.format(self.type, self.pos)
+        return json.dumps({"type": self.type, "position": self.pos})
 
     def __repr__(self) -> str:
         return str(self)
         
 class RemoteActorUpdate:
-    def __init__(self, type_=None, layout=None, pos=None, objects=[], actors=[], message=None):
-        self.type = type_
+    def __init__(self, type=None, layout=None, position=None, objects=[], actors=[], message=None):
+        #  type instead of type_ to make it easier to serialize json into this obj
+        self.type = type
         self.layout = layout
-        self.pos = pos
+        self.position = position
         self.objects = objects
         self.actors = actors
         self.layout_coords = None
         self.message = message
     
     def __str__(self):
-        return '{{"type": {}, "layout": {}, "position": {}, "objects": {}, "actors": {}, "message": }}'.format(self.type, self.layout, self.pos, self.objects, self.actors, self.message)
+       return json.dumps({"type": self.type, "layout": self.layout, "position": [self.position.row, self.position.col], "objects": self.objects, "message": self.message})
 
     def __repr__(self):
         return str(self)
+
+    # def toJSON(self):
+    #     layout_coords = self.layout
+    #     delattr(self, 'layout_coords')
+    #     msg = json.dumps(self, default=lambda o:  o.__dict__)
+    #     setattr(self, 'layout_coords', layout_coords)
+    #     return msg
 
 class ActorMove:
     def __init__(self, to):
         self.type = 'move'
         self.to = to
     def __str__(self) -> str:
-        return '{{"type": {}, "to": {}}}'.format(self.type, self.to)
+        return json.dumps({"type": self.type, "to": self.to})
 
     def __repr(self):
         return str(self)
@@ -79,7 +84,7 @@ class EndLevel:
         self.ejects = ejects
 
     def __str__(self):
-        return '{{"type": {}, "key": {}, "exits": {}, "ejects": {}}}'.format(self.type, self.key, self.exits, self.ejects)
+        return json.dumps({"type": self.type, "key": self.key, "exits": self.exits, "ejects": self.ejects})
 
     def __repr__(self) -> str:
         return str(self)
@@ -94,7 +99,7 @@ class PlayerScore:
         self.ejects = ejects   
 
     def __str__(self) -> str:
-        return '{{"type": {}, "name": {}, "keys": {} "exits": {}, "ejects": {}}}'.format(self.type, self.name, self.keys, self.exits, self.ejects)
+        return json.dumps({"type": self.type, "name": self.name, "keys": self.keys, "exits": self.exits, "ejects": self.ejects})
 
     def __repr__(self) -> str:
         return str(self)
@@ -102,12 +107,12 @@ class PlayerScore:
 class EndGame:
     def __init__(self, scores):
         self.type = END_GAME
-        self.score = scores
+        self.scores = scores
 
     def __str__(self):
         # scores_str = [str(score) for score in self.scores]
         #TODO: Double check formatting on scores_str 
-        return '{{"type": {}, "scores": {}}}'.format(self.type, self.scores)
+        return json.dumps({"type": self.type, "scores": self.scores})
 
     def __repr__(self) -> str:
         return str(self)

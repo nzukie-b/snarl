@@ -9,8 +9,9 @@ class Coord:
         if isinstance(other, Coord):
             return self.row == other.row and self.col == other.col
         return False
+        
     def __str__(self):
-        return '{{"row": {}, "col":{}}}'.format(self.row, self.col)
+        return json.dumps({"row": self.row, "col": self.col})
 
     def __repr__(self):
         return str(self)

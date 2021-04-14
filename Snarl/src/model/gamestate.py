@@ -1,4 +1,5 @@
 import copy
+import json
 from constants import STATE
 from coord import Coord
 from model import level
@@ -16,8 +17,8 @@ class StateObj:
         self.exit_locked = exit_locked
 
     def __str__(self):
-        return '{{"type": {}, "level": {}, "players": {}, "adversaries": {}, "exit-locked": {}'.format(self.type, self.level, self.players, self.adversaries, self.exit_locked)
-    
+        return json.dumps({"type": self.type, "level": self.level, "players": self.players, "adversaries": self.adversaries, "exit-locked": self.exit_locked})
+        
     def __repr__(self):
         return str(self)
 

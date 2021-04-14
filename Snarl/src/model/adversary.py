@@ -1,3 +1,4 @@
+import json
 from constants import SIZE
 from coord import Coord
 from constants import ZOMBIE
@@ -13,7 +14,7 @@ class AdversaryActor:
         self.move_speed = move_speed
     
     def __str__(self):
-        return '{{"pos": {}, "name": {}, "health": {}, "walkable_tiles": {}, "move_speed": {}}}'.format(self.pos, self.name, self.health, self.non_walkable_tiles, self.move_speed)
+        return json.dumps({"pos": self.pos, "name": self.name, "health": self.health, "walkable_tiles": self.non_walkable_tiles, "move_speed": self.move_speed})
 
     def __repr__(self):
         return str(self)

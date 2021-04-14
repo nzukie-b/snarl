@@ -20,8 +20,6 @@ class Adversary(ABC):
     @abstractmethod
     def update_current_level(self, new_level):
         self.current_level = new_level
-        # TODO: Update adversary pos with new level here or in start game?
-        self.adversary_obj.pos = None
     
     @abstractmethod
     def update_player_coords(self, new_coords):
@@ -36,17 +34,16 @@ class Adversary(ABC):
         pos_info = check_position(cur_pos, self.current_level)
         if move is None:
             if self.type == ZOMBIE:
-                move = self.__move_ghost(cur_pos, pos_info, possible_moves)
+                move = self.__move_zombie(cur_pos, pos_info, possible_moves)
             elif self.type == GHOST:
                 move = self.__move_ghost(cur_pos, pos_info, possible_moves)
-
         if move == None or move == 'null': move = self.adversary_obj.pos
         move_info = gm.request_adversary_move(self.name, move)
-        if move_info is not None:
+        if move_info:
             self.adversary_obj = gm.get_adversary_actor(self.name)
         else:
             print('Invalid adversary move')
-            return False
+        return move_info
 
     def __player_noticed(self, cur_pos, coord, distance):
         return RuleChecker.validate_movement_distance(cur_pos, coord, distance)
@@ -96,6 +93,7 @@ class Adversary(ABC):
                 if room.origin == room_origin:
                     # Valid tiles in the room do not include doors
                     valid_moves = list(set(possible_moves) & set(room.tiles) - set(room.doors))
+                    # print(valid_moves)
                     if valid_moves:
                         move = random.choice(valid_moves)
         return move

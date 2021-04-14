@@ -146,7 +146,7 @@ def coord_radius(pos, dimensions) -> set:
             c7 = Coord(pos.row + ii, pos.col)
             c8 = Coord(pos.row - ii, pos.col)
             coords.update([c1, c2, c3, c4, c5, c6, c7, c8])
-    return coords
+    return list(coords)
 
 # def update_player(current_player: Player, other_player: Player):
 #     if isinstance(other_player, Player) and isinstance(current_player, Player):
@@ -166,7 +166,7 @@ def update_remote_player(player: Player, gm):
         update.type = P_UPDATE
         view_dimensions = [(player_obj.move_speed * 2) + 1, (player_obj.move_speed * 2) + 1]
         layout = to_layout(player_obj.pos, gm.gamestate.current_level, view_dimensions) 
-        update.layout = str(layout).replace('],', ']\n').replace('[[', '\n [').replace(']]', ']')
+        update.layout = layout[LAYOUT]
         update.layout_coords = coord_radius(player_obj.pos, to_coord(view_dimensions))
 
         actors = []
@@ -253,7 +253,6 @@ def find_hallway_by_origin(origin: Coord, level):
         if hall.origin == origin:
             return hall
 
-
 def to_layout(pos, level, dimensions):
     '''Takes a level and returns a layout of tiles centered around the provided point'''
     pos_info = check_position(pos, level)
@@ -269,7 +268,10 @@ def to_layout(pos, level, dimensions):
         for tile in room.tiles:
             if tile in coords:
                 #origin 5, 5 
-                layout[tile.row - origin.row][tile.col - origin.col] = 1
+                try:
+                    layout[tile.row - origin.row][tile.col - origin.col] = 1
+                except IndexError:
+                    pass
         for door in room.doors:
             if door in coords:
                 layout[door.row - origin.row][door.col - origin.col] = 2
@@ -279,8 +281,11 @@ def to_layout(pos, level, dimensions):
             for jj in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1):
                 hall_coord = Coord(ii, jj)
                 if hall_coord in coords:
-                    layout[hall_coord.row - origin.row][hall_coord.col - origin.col] = 1
-        for door in hall:
+                    try:
+                        layout[hall_coord.row - origin.row][hall_coord.col - origin.col] = 1
+                    except IndexError:
+                        pass
+        for door in hall.doors:
             if door in coords:
                 layout[door.row - origin.row][door.col - origin.col] = 2
     return {POS: pos, LAYOUT: layout}
@@ -291,7 +296,7 @@ def send_msg(sock: socket.SocketType, msg: str, to: str):
     if isinstance(msg, dict):
         print(to, '<<', msg.__dict__)
     else:
-        print(to, '<<', msg)
+        print(to, '<<', msg.replace('\\', ''))
 
 
 def receive_msg(sock: socket.SocketType, from_: str):
@@ -302,7 +307,7 @@ def receive_msg(sock: socket.SocketType, from_: str):
     if isinstance(res, dict):
         print(from_, '>>', res.__dict__)
     else:
-        print(from_, '>>', res)
+        print(from_, '>>', res.replace('\\', ''))
     return res
 # CODE BLOCK FROM STACK OVERFLOW #
 

@@ -3,6 +3,8 @@ import sys, os, argparse, json, socket
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
+from model.player import PlayerActor
+
 from constants import EJECT, END_GAME, END_LEVEL, EXIT, INVALID, KEY, OK, P_UPDATE, START_LVL, TYPE, WELCOME
 from remote.messages import ActorMove, RemoteActorUpdate
 from utilities import receive_msg, send_msg, streaming_iterload
@@ -81,7 +83,10 @@ class Client:
             #Receive name prompt
             if self.is_name_msg(req):
                 name = input('Please provide a name: ')
-                self.player = LocalPlayer(name)
+                player = LocalPlayer(name)
+                player.player_obj = PlayerActor(name)
+                self.player = player
+
                 msg = json.dumps(name)
                 self.__send(msg)
             #Receive start_level
@@ -91,6 +96,7 @@ class Client:
             if self.is_player_update(req):
                 # Should create an instance of RemoteActorUpdate using the json dict
                 actor_update = RemoteActorUpdate(**req)
+                # print(actor_update)
                 self.player.recieve_update(actor_update)
             #Receive "move" prompt player for move, and receive result
             #print(req)
@@ -102,11 +108,11 @@ class Client:
                 self.__send(move_msg)
             #Receive end_level
             if self.is_end_level(req):
-                # print(req)
+                print(req)
                 pass
             #Receive end_game
             if self.is_end_game(req):
-                # print(req)
+                print(req)
                 running = False
 
         self.__socket.close()

@@ -30,8 +30,8 @@ class Hallway:
         dimensions_str = str(self.dimensions)
         rooms_str = [str(room) for room in self.rooms]
         waypoints_str = [str(waypoint) for waypoint in self.waypoints]
-        return '{{"doors": {}, "dimensions": {}, "rooms": {}, "waypoints": {}}}'.format(doors_str, dimensions_str, rooms_str, waypoints_str)
-
+        return json.dumps({"doors": self.doors, "dimensions": self.dimensions, "rooms": self.rooms, "waypoints": self.waypoints})
+        
     def __repr__(self):
         return str(self)
 

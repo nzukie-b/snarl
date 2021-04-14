@@ -15,7 +15,7 @@ from model.player import PlayerActor
 from model.adversary import AdversaryActor
 from model.gamestate import GameState, create_initial_game_state
 from game.ruleChecker import RuleChecker
-from utilities import update_adversary_players, check_position, find_room_by_origin, find_hallway_by_origin
+from utilities import update_adversary_levels, update_adversary_players, check_position, find_room_by_origin, find_hallway_by_origin
 class GameManager:
     def __init__(self):
         #List of player clients
@@ -55,9 +55,9 @@ class GameManager:
         players = [self.get_player_actor(p.name) for p in self.players]
         return players
 
-    def get_player_coords(self):
+    def get_player_coords(self, name=None):
         players = self.get_player_actors()
-        player_coords = [player.pos for player in players]
+        player_coords = [player.pos for player in players if player.name != name]
         return player_coords
 
     def get_adversary_actor(self, name) -> Adversary:
@@ -68,9 +68,9 @@ class GameManager:
         advs = [self.get_adversary_actor(adv.name) for adv in self.adversaries]
         return advs
 
-    def get_adversary_coords(self):
+    def get_adversary_coords(self, name=None):
         advs = self.get_adversary_actors()
-        adv_coords = [adversary.pos for adversary in advs]
+        adv_coords = [adversary.pos for adversary in advs if adversary.name != name]
         return adv_coords
 
     def register_player(self, player_client, connection=None):
@@ -134,6 +134,8 @@ class GameManager:
 
 
         gs_info = create_initial_game_state(level, player_objs, adv_objs)
+        update_adversary_levels(self.adversaries, level)
+
         return GameState(levels, gs_info[0], gs_info[1], current_level=level)
 
     def start_game(self, levels, start_level=0):
@@ -181,7 +183,7 @@ class GameManager:
             player.pos = player.player_obj.pos
 
         if player.name in self.player_turns:
-            p_coords = self.get_player_coords()
+            p_coords = self.get_player_coords(player.name)
             a_coords = self.get_adversary_coords()
             player_move = self.rc.validate_player_movement(self.get_player_actor(player.name), new_pos, self.gamestate.current_level, p_coords, a_coords)
             if player_move[VALID_MOVE] and player_move[INFO].traversable:
@@ -203,12 +205,11 @@ class GameManager:
                     updated_players.append(player)
 
                 self.players.append(player)
-                self.gamestate = GameState(self.gamestate.current_level, updated_players, adversaries, self.gamestate.exit_locked)
+                self.gamestate = GameState(levels=self.gamestate.levels, current_level=self.gamestate.current_level, players=updated_players, adversaries=adversaries, exit_locked=self.gamestate.exit_locked)
                 self.player_turns.remove(player.name)
-                # update_players(player, self.players)
 
                 # If all players have gone update adversaries for their moves
-                if len(self.player_turns) == 0: update_adversary_players(self.adversaries, self.get_player_coords())
+            if len(self.player_turns) == 0: update_adversary_players(self.adversaries, self.get_player_coords())
             return player_move
             
         return False
@@ -216,37 +217,42 @@ class GameManager:
     def request_adversary_move(self, name, new_pos):
         if len(self.player_turns) == 0:
             if name in self.adv_turns:
-                adversary = next(adversary for adversary in self.adversaries if adversary.name == name)
-                is_client = isinstance(adversary, AdversaryActor)
+                adv = next(adv for adv in self.adversaries if adv.name == name)
+                is_client = isinstance(adv, Adversary)
                 p_coords = self.get_player_coords()
-                adv_coords = self.get_adversary_coords()
-                adv_move = self.rc.validate_adversary_movement(self.get_adversary_actor(adversary.name), new_pos, self.gamestate.current_level, p_coords, adv_coords)
+                a_coords = self.get_adversary_coords(name)
+                adv_move = self.rc.validate_adversary_movement(self.get_adversary_actor(name), new_pos, self.gamestate.current_level, p_coords, a_coords)
+                if adv_move[VALID_MOVE]:
+                    self.adversaries.remove(adv)
+                    updated_advs = self.get_adversary_actors()
+                    players = self.get_player_actors()
 
-            if adv_move[VALID_MOVE]:
-                self.adversaries.remove(adversary)
-                players = self.get_player_actors()
-                updated_advs = self.get_adversary_actors()
+                    if adv_move[EJECT]:
+                        player = next(p for p in players if p.pos == new_pos)
+                        self.gamestate.out_players.add(player.name)
+                    
+                    if is_client:
+                        adv.adversary_obj.pos = new_pos
+                        updated_advs.append(adv.adversary_obj)
+                    else:
+                        adv.pos = new_pos
+                        updated_advs.append(adv)
 
-                if adv_move[EJECT]:
-                    player = next(player for player in players if player.pos == new_pos)
-                    self.gamestate.out_players.add(player.name)
-                
-                door_pos = self.__handle_door_traversal(new_pos, self.gamestate.current_level)
-                if door_pos: new_pos = door_pos
-                
-                if is_client:
-                    adversary.adversary_obj.pos = new_pos
-                    updated_advs.append(adversary.adversary_obj)
-                else:
-                    adversary.pos = new_pos
-                    updated_advs.append(adversary)
+                    self.adversaries.append(adv)
+                    self.gamestate = GameState(levels=self.gamestate.levels, current_level=self.gamestate.current_level, players=players, adversaries=updated_advs, exit_locked=self.gamestate.exit_locked)
 
-                self.adversaries.append(adversary)
-                self.gamestate = GameState(self.gamestate.current_level, players, updated_advs, self.gamestate.exit_locked)
-                self.adv_turns.remove(adversary.name)
-            return adv_move
+                self.adv_turns.remove(name)
+                if len(self.adv_turns) == 0: self.reset_turns()
+                return adv_move
+            else:
+                print('name not in adv turns')
+                print(self.adv_turns)
+                print(name)
+                return False
         else:
-         return False
+            print('player turns not empty')
+            print(self.player_turns)
+            return False
 
 
     def apply_player_item_interaction(self, player, item_pos):
@@ -272,17 +278,14 @@ class GameManager:
     def handle_level_over(self):
         state = self.gamestate
         level_over = self.rc.is_level_over(state)
-        if not level_over[STATUS] == P_WIN:
+        if level_over[STATUS] == P_WIN:
             self.next_level()
-            return level_over
-        elif level_over[STATUS] == A_WIN:
-            #TODO Properply handle adversary wins
-            return level_over
+        return level_over
 
     def handle_game_over(self):
         state = self.gamestate
         game_over = self.rc.is_game_over(self.start_level, self.next_level_indx, state)
-        #TODO
+        return game_over
 
 
         # if res:

@@ -24,7 +24,7 @@ class Level:
     def __str__(self):
         rooms_str = [str(room) for room in self.rooms]
         halls_str = [str(hall) for hall in self.hallways]
-        return '{{"rooms": {}, "hallways": {}}}'.format(rooms_str, halls_str)
+        return json.dumps({"rooms": rooms_str, "hallways": halls_str})
 
     def __repr__(self):
         return str(self)

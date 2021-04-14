@@ -5,25 +5,28 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
-import random
 from coord import Coord
+from model.adversary import AdversaryActor
 from constants import A_WIN, EJECT, EXIT, GAME_END, GHOST, INFO, KEY, LEVEL_END, OK, ORIGIN, P_WIN, ROOM, STATUS, TYPE, VALID_MOVE, ZOMBIE
 from model.item import Item
-from utilities import check_position, get_random_room_coord
+from utilities import check_position, get_cardinal_coords, get_random_room_coord
 
 class RuleChecker:
+
+    @staticmethod
+    def validate_movement_distance(current_pos, new_pos, move_distance) -> bool:
+        """Helper for validating movements, takes new players position compared to old player/adversary position and
+        checks that the movement is within the cardinal distance relative to the player/adversary movement speed."""
+        return 0 <= abs(current_pos.row - new_pos.row) + \
+                   abs(current_pos.col - new_pos.col) <= move_distance
+
     def validate_player_movement(self, player, new_pos, level, players, adversaries):
         """Takes in old gamestate, level and new player state, then makes sure that new state is moving to a valid location
         location within the level and in relation to the other players/adversaries in the gamestate."""
         info = level.info_at_coord(new_pos)
         current_pos = player.pos
-        valid_move = self.vaildate_movement_distance(current_pos, new_pos, player.move_speed)
+        valid_move = self.validate_movement_distance(current_pos, new_pos, player.move_speed)
         # list of player coords with new pos filtered out
-        other_coords = [coord for coord in players if coord != current_pos]
-        # Invalid move if multiple coords are filtered out i.e. current_pos is shared by multiple adversaries
-        if len(other_coords) > len(players) - 1:
-            valid_move = False
-
         eject = False
         if valid_move:
             if new_pos in players:
@@ -34,7 +37,7 @@ class RuleChecker:
         return {VALID_MOVE: valid_move, INFO: info, EJECT: eject}
 
 
-    def validate_adversary_movement(self, adversary, new_adversary_pos, level, player_coords, adversary_coords):
+    def validate_adversary_movement(self, adversary: AdversaryActor, new_adversary_pos, level, player_coords, adversary_coords):
         """Takes in old gamestate, level and new player state, then makes sure that new state is moving to a valid location
         location within the level and in relation to the other players/adversaries in the gamestate."""
         valid_move = None
@@ -54,12 +57,12 @@ class RuleChecker:
         return coord in walkable_tiles and (coord not in adversary_coords and coord not in door_coords)
         
 
-    def __validate_zombie_movement(self, adversary, new_pos, level, adversary_coords):
+    def __validate_zombie_movement(self, adversary: AdversaryActor, new_pos, level, adversary_coords):
         '''Validates a moves according to the zombie movement rules. 
             * Only move 1 tile at a tile. Cannot skip moves, unless no other move is available. Cannot move onto a door. Cannot move onto adversaries'''
         cur_pos = adversary.pos
         rooms = [room for room in level.rooms]
-        door_coords = [room.door for room in rooms]
+        door_coords = [room.doors for room in rooms]
 
         dest = check_position(new_pos, level)
         if dest[TYPE] == ROOM:
@@ -67,17 +70,13 @@ class RuleChecker:
             room = next(room for room in level.rooms if room.origin == origin)
             tiles = room.tiles
             if cur_pos == new_pos:
-                up = Coord(cur_pos.row - 1, cur_pos.col)
-                down = Coord(cur_pos.row + 1, cur_pos.col)
-                left = Coord(cur_pos.row, cur_pos.col - 1)
-                right = Coord(cur_pos.row, cur_pos.col + 1)
-                directions = [up, down, left, right]
+                directions = get_cardinal_coords(cur_pos)
                 
                 for d in directions:
-                    if self.__valid_adversary_pos(d, tiles, adversary_coords, door_coords):
-                        return False
-
-            if self.validate_movement_distance(adversary.pos, new_pos, adversary.move_speed):
+                    if not self.__valid_adversary_pos(d, tiles, adversary_coords, door_coords):
+                        return True
+                        
+            if self.validate_movement_distance(cur_pos, new_pos, adversary.move_speed):
                 if self.__valid_adversary_pos(new_pos, tiles, adversary_coords, door_coords):
                     return True
         else:
@@ -95,14 +94,6 @@ class RuleChecker:
                 valid_move = False
         
         return valid_move
-
-    @staticmethod
-    def vaildate_movement_distance(current_pos, new_pos, move_distance) -> bool:
-        """Helper for validating movements, takes new players position compared to old player/adversary position and
-        checks that the movement is within the cardinal distance relative to the player/adversary movement speed."""
-        return 0 <= abs(current_pos.row - new_pos.row) + \
-                   abs(current_pos.col - new_pos.col) <= move_distance
-
 
     def validate_interaction(self, gamestate, player_or_adversary, player_or_adversary1):
         """Checks validity of interaction between two players/adversaries, interaction is automatically invalid if it
@@ -158,9 +149,14 @@ class RuleChecker:
                 if item_pos in room_items:
                     return False
             except StopIteration:
-                # No item found as it should have been removed from the room
+                pass
+                # No should be found as it should have been removed from the room
+            try:
                 item = next(item for item in player.inventory if item.pos == item_pos)
-                
+            except StopIteration:
+                # If there is no item with the current pos in the player's inventory, then this is an invalid interaction
+                return False
+
         res = OK
         inventory = [item.pos for item in player.inventory]
         if player.pos in level.exits and not state.exit_locked:

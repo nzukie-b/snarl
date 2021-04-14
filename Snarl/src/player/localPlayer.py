@@ -36,6 +36,8 @@ class LocalPlayer(Player):
         super().recieve_update(actor_update)
         layout_actors = self.actors
         layout_objects = self.objects
-        print(str(self.layout).replace('],', ']\n').replace('[[', '\n [').replace(']]', ']') + '\nActors Visible: {}\nObjects Visible: {}'.format(layout_actors, layout_objects))
+        self.layout = str(self.layout).replace('[[', '[').replace('], ', ']\n').replace(']]', ']\n')
+        # print(self.layout)
+        print(self.layout + 'Position: {}\nActors Visible: {}\nObjects Visible: {}'.format(actor_update.position, layout_actors, layout_objects))
         if isinstance(actor_update, RemoteActorUpdate):
             print(actor_update.message)

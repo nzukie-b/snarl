@@ -1,10 +1,13 @@
+import json
+
+
 class Item:
     def __init__(self, type_, pos):
         self.type = type_
         self.pos = pos
 
     def __str__(self):
-        return '{{"type": {}, "pos": {}}}'.format(self.type, self.pos)
+        return json.dumps({"type": self.type, "pos": self.pos})
 
     def __eq__(self, other):
         if isinstance(other, Item):
