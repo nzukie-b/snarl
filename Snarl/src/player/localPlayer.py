@@ -1,4 +1,6 @@
 import sys, os
+
+from utilities import to_coord
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
@@ -10,10 +12,12 @@ class LocalPlayer(Player):
         super().__init__(name=name, player_obj=player_obj, layout=layout, visible_tiles=visible_tiles, 
         actors=actors, objects=objects, inventory=inventory_contents)
 
-    def move_to_tile(self, move, gm):
+    def move_to_tile(self, gm):
         """Move to a location within the visible tiles, if the same tile the player is currently on is
         selected as the move location then stay put as the move for that turn. Sends this info to game-manager to be
         handled."""
+        move = input("Please provide a move of the format 'row, col': ")
+        move = to_coord(move)
         super().move_to_tile(move, gm)
 
     def interact_with_tile_contents(self, current_tile_info):

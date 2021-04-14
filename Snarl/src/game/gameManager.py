@@ -248,9 +248,10 @@ class GameManager:
         level_over = self.rc.is_level_over(state)
         if not level_over[STATUS] == P_WIN:
             self.next_level()
+            return level_over
         elif level_over[STATUS] == A_WIN:
             #TODO Properply handle adversary wins
-            pass
+            return level_over
 
     def handle_game_over(self):
         state = self.gamestate

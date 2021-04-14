@@ -19,8 +19,9 @@ class RemotePlayer(Player):
         handled."""
         data = self.__receive()
         move = json.loads(data)
-        assert type(move) == dict and move[TO]  
-        return gm.request_player_move(self.name, move[TO])
+        assert type(move) == dict and move[TO]
+        super().move_to_tile(move, gm)  
+        # return gm.request_player_move(self.name, move[TO])
  
 
     def interact_with_tile_contents(self, current_tile_info):

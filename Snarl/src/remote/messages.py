@@ -3,7 +3,7 @@ import sys, os
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
-from constants import START_LVL, WELCOME
+from constants import END_LEVEL, P_SCORE, START_LVL, WELCOME
 from common.actorUpdate import ActorUpdate
 
 class Welcome:
@@ -23,7 +23,7 @@ class StartLevel:
     def __str__(self):
         return '{{"type": {}, "level": {}, "players": {}'.format(self.type, self.level, self.players)
 
-class ActorPosition():
+class ActorPosition:
     def __init__(self, type_, name, pos):
         self.type = type_
         self.name = name
@@ -34,7 +34,7 @@ class ActorPosition():
 
     def __repr__(self) -> str:
         return str(self)
-class ObjectPos():
+class ObjectPos:
     def __init__(self, type_, pos):
         self.type = type_
         self.pos = pos
@@ -45,7 +45,7 @@ class ObjectPos():
     def __repr__(self) -> str:
         return str(self)
         
-class RemoteActorUpdate():
+class RemoteActorUpdate:
     def __init__(self, type_=None, layout=None, pos=None, objects=[], actors=[], message=None):
         self.type = type_
         self.layout = layout
@@ -61,3 +61,30 @@ class RemoteActorUpdate():
     def __repr__(self):
         return str(self)
         
+class EndLevel:
+    def __init__(self, key, exits, ejects):
+        self.type = END_LEVEL
+        self.key = key
+        self.exits = exits
+        self.ejects = ejects
+
+    def __str__(self):
+        return '{{"type": {}, "key": {}, "exits": {}, "ejects": {}}}'.format(self.type, self.key, self.exits, self.ejects)
+
+    def __repr__(self) -> str:
+        return str(self)
+
+
+class PlayerScore:
+    def __init__(self, name, keys, exits, ejects):
+        self.type = P_SCORE
+        self.name = name
+        self.keys = keys
+        self.exits = exits
+        self.ejects = ejects   
+
+    def __str__(self) -> str:
+        return '{{"type": {}, "name": {}, "keys": {} "exits": {}, "ejects": {}}}'.format(self.type, self.name, self.keys, self.exits, self.ejects)
+
+    def __repr__(self) -> str:
+        return str(self)

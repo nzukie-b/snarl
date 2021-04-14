@@ -26,7 +26,7 @@ class Player(ABC):
         else:
             #Player is trying to go twice or invalid player name
             print("Invalid Player")
-        return None
+        return move_info
 
 
 
