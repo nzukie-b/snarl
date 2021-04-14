@@ -2,11 +2,10 @@ import sys, os, argparse, time, json, math
 import socket
 from pathlib import Path
 from typing import List
-
-from player.remotePlayer import RemotePlayer
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
+from player.remotePlayer import RemotePlayer
 from coord import Coord
 from utilities import to_point, update_remote_players, send_msg, receive_msg
 from remote.messages import EndGame, EndLevel, PlayerScore, RemoteActorUpdate, StartLevel, Welcome
@@ -27,13 +26,13 @@ parser.add_argument('-p', '--port', dest='port', action='store', type=int, defau
 def __valid_clients_num(no_clients):
     return no_clients <= MAX_PLAYERS
 
-def __send_server_welcome(connection, server_addr):
+def __send_server_welcome(connection: socket.SocketType, server_addr):
     info = '(Enesseand) server_address: {}'.format(server_addr)
     welcome_msg = Welcome(info)
     formatted_msg = json.dumps(welcome_msg)
     connection.sendall(formatted_msg.encode('utf-8'))
 
-def __request_client_name(connection, clients):
+def __request_client_name(connection: socket.SocketType, clients):
     '''Send name prompt to client client connection. If the name is already taken it will attempt to reprompt 4 times before moving on.'''
     msg = 'name'
     msg = json.dumps(msg)
@@ -49,7 +48,7 @@ def __request_client_name(connection, clients):
             break
     return client_info
 
-def __wait_for_client_connections(server_socket, server_addr, no_clients):
+def __wait_for_client_connections(server_socket: socket.SocketType, server_addr, no_clients):
     '''Sets the timeout and waits for client connections. If the socket timesout the sever closes sockets and exits'''
     server_socket.settimeout(float(args.wait))
     clients = []
@@ -82,7 +81,7 @@ def __register_players(gm, clients):
     for client in clients:
         gm.register_player(client[NAME], client[CONN])
 
-def __register_adversaries(gm, no_levels):
+def __register_adversaries(gm: GameManager, no_levels):
     num_zombies = math.floor(no_levels / 2) + 1
     num_ghosts = math.floor((no_levels - 1) / 2)
     for ii in range(num_zombies):

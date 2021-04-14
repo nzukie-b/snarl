@@ -88,6 +88,7 @@ class GameManager:
         if isinstance(adversary_client, Adversary):
             self.adversaries.append(adversary_client)
         elif remote:
+            # There isn't really a difference between remote and local adversaries at this point
              self.adversaries.append(__create_remote_adversary(adversary_client, actor_type))
         else:
              self.adversaries.append(__create_local_adversary(adversary_client, actor_type))
