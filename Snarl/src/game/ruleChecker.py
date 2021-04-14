@@ -77,14 +77,14 @@ class RuleChecker:
                     if self.__valid_adversary_pos(d, tiles, adversary_coords, door_coords):
                         return False
 
-            if self.__validate_movement_distance(adversary.pos, new_pos, adversary.move_speed):
+            if self.validate_movement_distance(adversary.pos, new_pos, adversary.move_speed):
                 if self.__valid_adversary_pos(new_pos, tiles, adversary_coords, door_coords):
                     return True
         else:
             return False
         
     def __validate_ghost_movement(self, adversary, new_pos, level, adversary_coords) -> bool:
-        valid_move = self.__validate_movement_distance(adversary.pos, new_pos, adversary.move_speed)
+        valid_move = self.validate_movement_distance(adversary.pos, new_pos, adversary.move_speed)
         if valid_move:
             move_info = level.info_at_coord(new_pos)
             if not move_info.traversable:

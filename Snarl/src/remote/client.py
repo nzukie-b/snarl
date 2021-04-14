@@ -11,7 +11,7 @@ from player.localPlayer import LocalPlayer
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-a', '--address', dest='address', action='store', default='127.0.0.1', help='Address to start listing for connections')
-parser.add_argument('-p', '--port', dest='port', action='store', type=int, default=45679, help='Port to start listing for connections')
+parser.add_argument('-p', '--port', dest='port', action='store', type=int, default=45678, help='Port to start listing for connections')
 
 
 class Client:
@@ -69,40 +69,12 @@ class Client:
 
     def run(self):
         running = True
-        
         while running:
             data = self.__receive()
-
-            json_not_loaded = True
-            reqs = []
-
             if not data:
                 break
-
             req = json.loads(data)
 
-            # while json_not_loaded:
-            #     if not data:
-            #         break
-            #
-            #     try:
-            #         for o in streaming_iterload(data):
-            #             if o:
-            #                 print("O: " + str(o))
-            #                 parse_json = json.dumps(o)
-            #                 parse_json = parse_json.strip()
-            #                 reqs.append(json.loads(parse_json))
-            #                 json_not_loaded = False
-            #                 break
-            #     except (ValueError, TypeError) as err:
-            #         print("Invalid Message Received: " + str(err))
-            #         print("DATA: " + data)
-            #     if not json_not_loaded:
-            #         break
-
-            #print(reqs)
-
-            #req = json.dumps(req)
             #Receive server welcome
             if self.is_server_welcome(req):
                 pass
@@ -128,16 +100,15 @@ class Client:
                 move = [int(i) for i in move]
                 move_msg = json.dumps({ "type": "move", "to" : move})
                 self.__send(move_msg)
-
             #Receive end_level
             if self.is_end_level(req):
                 # print(req)
                 pass
-
             #Receive end_game
             if self.is_end_game(req):
                 # print(req)
                 running = False
+
         self.__socket.close()
 
 if __name__ == '__main__':

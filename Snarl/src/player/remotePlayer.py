@@ -40,7 +40,7 @@ class RemotePlayer(Player):
     def recieve_update(self, actor_update):
         """Takes in the position and visible tiles,
         then updates the current player with that info (Also visually updates)"""
-        msg = json.dumps(str(actor_update))
+        msg = json.dumps(actor_update.__dict__)
         self.__send(msg)
 
 

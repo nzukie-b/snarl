@@ -49,7 +49,7 @@ class Adversary(ABC):
             return False
 
     def __player_noticed(self, cur_pos, coord, distance):
-        return RuleChecker.__validate_movement_distance(cur_pos, coord, distance)
+        return RuleChecker.validate_movement_distance(cur_pos, coord, distance)
 
     def __move_to_player(self, cur_pos) -> Coord:
         '''If a player is in notice range, returns a coord one tile closer to the player. Else None'''

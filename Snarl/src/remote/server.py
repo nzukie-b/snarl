@@ -20,7 +20,7 @@ parser.add_argument('-w', '--wait', dest='wait', action='store', type=int, defau
 parser.add_argument('-s', '--start', dest='start', action='store', type=int, default=1, help='Start level. Not 0 indexed')
 parser.add_argument('-o', '--observe', dest='observe', action='store_true', default=False, help='Whether to return observer view of the ongoing game.')
 parser.add_argument('-a', '--address', dest='address', action='store', default='127.0.0.1', help='Address to start listing for connections')
-parser.add_argument('-p', '--port', dest='port', action='store', type=int, default=45679, help='Port to start listing for connections')
+parser.add_argument('-p', '--port', dest='port', action='store', type=int, default=45678, help='Port to start listing for connections')
 
 
 def __valid_clients_num(no_clients):
@@ -34,7 +34,7 @@ def __send_server_welcome(connection: socket.SocketType, server_addr):
 
 def __request_client_name(connection: socket.SocketType, clients):
     '''Send name prompt to client client connection. If the name is already taken it will attempt to reprompt 4 times before moving on.'''
-    msg = 'name'
+    msg = "name"
     msg = json.dumps(msg)
     names = []
     client_info = {NAME: None, CONN: connection}
@@ -103,7 +103,7 @@ def __send_player_updates(gm):
 
 
 def __request_client_move(player: RemotePlayer, gm: GameManager, key, exits, ejects):
-    msg = 'move'
+    msg = "move"
     msg = json.dumps(msg)
     conn = player.socket
     for i in range(4):
