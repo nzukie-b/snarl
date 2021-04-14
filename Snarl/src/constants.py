@@ -44,7 +44,7 @@ LEVEL_END = 'level-end'
 STATUS = 'game-status'
 INVALID = 'invalid'
 END_LEVEL = 'end-level'
-
+END_GAME = 'end-game'
 RES = 'result'
 EJECT = 'eject'
 

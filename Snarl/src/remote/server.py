@@ -9,7 +9,7 @@ src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
 from coord import Coord
 from utilities import to_point, update_remote_players, send_msg, receive_msg
-from remote.messages import EndLevel, RemoteActorUpdate, StartLevel, Welcome
+from remote.messages import EndGame, EndLevel, PlayerScore, RemoteActorUpdate, StartLevel, Welcome
 from constants import A_WIN, CONN, EJECT, EXIT, GAME_END, INVALID, KEY, LEVEL_END, MAX_PLAYERS, NAME, GHOST, OK, P_UPDATE, STATUS, VALID_MOVE, ZOMBIE
 from controller.controller import parse_levels, parse_move
 from game.gameManager import GameManager
@@ -132,12 +132,21 @@ def __request_client_move(player: RemotePlayer, gm: GameManager, key, exits, eje
             send_msg(conn, move_msg, player.name)
 
 def __send_end_level(players: List[RemotePlayer], key, exits, ejects):
+    '''Sends the level end message to the provided player and returns an '''
     key = 'null' if not key else key
     end_lvl = EndLevel(key, exits, ejects)
     msg = json.dumps(end_lvl)
     for player in players:
         send_msg(player.socket, msg, player.name)
+
+
+def __send_end_game(players: List[RemotePlayer], player_scores: List[PlayerScore]):
+    end_game = EndGame(player_scores)
+    msg = json.dumps(end_game)
+    for player in players:
+        send_msg(player.socket, msg, player.name)
     
+
 
 def main(args):
     if not __valid_clients_num(args.clients):
@@ -165,11 +174,11 @@ def main(args):
     __send_level_start(start_level, clients)
     __send_player_updates(gm)
 
-    player_scores = []
+    player_scores = [PlayerScore(player.name) for player in gm.players]
+    key = None
+    exits = []
+    ejects = []
     while True:
-        key = None
-        exits = []
-        ejects = []
         for player in gm.players:
             __request_client_move(player, gm, key, exits, ejects)
             __send_player_updates(gm)
@@ -179,10 +188,18 @@ def main(args):
         game_over = gm.handle_game_over()
         if level_over[LEVEL_END]:
             __send_end_level(gm.players, key, exits, ejects)
-            # TODO Separate send end level to be for individual players.  Take and return a PlayerScore obj
+            for p_score in player_scores:
+                if p_score.name == key:
+                    p_score.key += 1
+                if p_score.name in exits:
+                    p_score.exits += 1
+                if p_score.name in ejects:
+                    p_score.ejects += 1
+            key = None
+            exits = []
+            ejects = []
             if game_over[GAME_END]:
-                pass
-                # __send_end_game(gm.players, )
+                __send_end_game(gm.players, player_scores)
             if level_over[STATUS] == A_WIN:
                 exit()
 

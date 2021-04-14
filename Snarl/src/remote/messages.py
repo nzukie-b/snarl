@@ -3,7 +3,7 @@ import sys, os
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
-from constants import END_LEVEL, P_SCORE, START_LVL, WELCOME
+from constants import END_GAME, END_LEVEL, P_SCORE, START_LVL, WELCOME
 from common.actorUpdate import ActorUpdate
 
 class Welcome:
@@ -76,7 +76,7 @@ class EndLevel:
 
 
 class PlayerScore:
-    def __init__(self, name, keys, exits, ejects):
+    def __init__(self, name, keys=0, exits=0, ejects=0):
         self.type = P_SCORE
         self.name = name
         self.keys = keys
@@ -85,6 +85,19 @@ class PlayerScore:
 
     def __str__(self) -> str:
         return '{{"type": {}, "name": {}, "keys": {} "exits": {}, "ejects": {}}}'.format(self.type, self.name, self.keys, self.exits, self.ejects)
+
+    def __repr__(self) -> str:
+        return str(self)
+
+class EndGame:
+    def __init__(self, scores):
+        self.type = END_GAME
+        self.score = scores
+
+    def __str__(self):
+        # scores_str = [str(score) for score in self.scores]
+        #TODO: Double check formatting on scores_str 
+        return '{{"type": {}, "scores": {}}}'.format(self.type, self.scores)
 
     def __repr__(self) -> str:
         return str(self)
