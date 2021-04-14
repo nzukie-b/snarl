@@ -101,10 +101,12 @@ class Client:
                 self.__send(move_msg)
 
             #Receive end_level
+            if self.is_end_level(req):
+                # print(req)
+                pass
 
             #Receive end_game
-
-
-
-
+            if self.is_end_game(req):
+                # print(req)
+                break
         self.__socket.close()
