@@ -4,11 +4,11 @@ from utilities import check_dimensions, check_position, get_reachable_halls, get
 from constants import EXIT, HALLWAY, KEY, ORIGIN, ROOM, TYPE
 
 class CoordInfo:
-    def __init__(self, traversable=None, obj='null', type_='void', reachable=[]):
+    def __init__(self, traversable=None, obj='null', type_='void', reachable=None):
         self.traversable = traversable
         self.object = obj
         self.type = type_
-        self.reachable = reachable
+        self.reachable = reachable if reachable else []
 
     def __str__(self):
         return '{{"traversable": {}, "object": {}, "type": {}, "reachable": {}}}'.format(self.traversable, self.object, self.type, self.reachable)
@@ -16,11 +16,11 @@ class CoordInfo:
     def __repr__(self):
         return str(self)
 class Level:
-    def __init__(self, rooms, hallways, keys=[], exits=[]):
+    def __init__(self, rooms, hallways, keys=None, exits=None):
         self.rooms = rooms
         self.hallways = hallways
-        self.keys = keys
-        self.exits = exits
+        self.keys = keys if keys else []
+        self.exits = exits if exits else []
     
     def __str__(self):
         rooms_str = [str(room) for room in self.rooms]

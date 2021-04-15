@@ -1,11 +1,11 @@
 
 class ActorUpdate:
-    def __init__(self, type_=None, layout=None, pos=None, objects=[], actors=[]):
+    def __init__(self, type_=None, layout=None, pos=None, objects=None, actors=None):
         self.type = type_
         self.layout = layout
         self.pos = pos
-        self.objects = objects
-        self.actors = actors
+        self.objects = objects if objects else []
+        self.actors = actors if actors else []
         self.layout_coords = None
 
     def __str__(self):
