@@ -4,10 +4,10 @@ from coord import Coord
 
 
 class PlayerActor:
-    def __init__(self, name, pos=None, health=100, inventory=[], non_walkable_tiles=["Wall"], move_speed=2):
+    def __init__(self, name, pos=None, health=100, inventory=None, non_walkable_tiles=["Wall"], move_speed=2):
         self.name = name
         self.pos = Coord(pos.row, pos.col) if pos else None
-        self.inventory = inventory
+        self.inventory = inventory if inventory else []
         self.health = health
         self.non_walkable_tiles = non_walkable_tiles
         self.move_speed = move_speed

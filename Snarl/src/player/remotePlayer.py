@@ -10,8 +10,8 @@ from utilities import receive_msg, send_msg, to_coord, to_point
 from constants import TO
 
 class RemotePlayer(Player):
-    def __init__(self, socket: socket.SocketType, name=None, player_obj=None, layout=None, visible_tiles=None, actors=[], objects=[], inventory_contents=[]):
-        super().__init__(name, player_obj=player_obj, layout=layout, visible_tiles=visible_tiles, actors=actors, objects=objects, inventory=inventory_contents)
+    def __init__(self, socket: socket.SocketType, name=None, player_obj=None, layout=None, visible_tiles=None, actors=None, objects=None, inventory=None):
+        super().__init__(name, player_obj=player_obj, layout=layout, visible_tiles=visible_tiles, actors=actors, objects=objects, inventory=inventory)
         self.socket = socket
         
     def move_to_tile(self, gm):

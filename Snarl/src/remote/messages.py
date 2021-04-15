@@ -43,13 +43,13 @@ class ObjectPos:
         return str(self)
         
 class RemoteActorUpdate:
-    def __init__(self, type=None, layout=None, position=None, objects=[], actors=[], message=None):
+    def __init__(self, type=None, layout=None, position=None, objects=None, actors=None, message=None):
         #  type instead of type_ to make it easier to serialize json into this obj
         self.type = type
         self.layout = layout
         self.position = position
-        self.objects = objects
-        self.actors = actors
+        self.objects = objects if objects else []
+        self.actors = actors if actors else []
         self.layout_coords = None
         self.message = message
     
