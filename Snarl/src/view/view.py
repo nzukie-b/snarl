@@ -1,23 +1,20 @@
 import sys, os, json
+from typing import List
 import pygame
-
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
 from model.player import PlayerActor
-from utilities import check_position, coord_radius
+from model.adversary import AdversaryActor
 from coord import Coord
 from model.room import Room
 from model.hallway import Hallway
 from model.level import Level
-from model.gamestate import GameState, create_initial_game_state
-from controller.controller import parse_state
+from model.gamestate import GameState
 from constants import BLACK, EXIT, HALLWAY, KEY, LAYOUT, POS, ROOM, TYPE, WHITE, YELLOW, GREY, RED, BLUE, GREEN, PURPLE, HEIGTH, WIDTH, SIZE
 
 
-SCREEN = pygame.display.set_mode((WIDTH, HEIGTH), 0, 32)
-SCREEN.fill(GREY)
-pygame.display.set_caption('Snarl')
+
 
 class Tile:
     def __init__(self, row, col, wall=True, item=None):
@@ -30,7 +27,7 @@ class Tile:
         return json.dumps(self.__dict__)        
 
 
-def render_hallway(hallway, orientation):
+def render_hallway(hallway: Hallway, orientation, screen):
     '''Renders tiles for the provided hallway based on the hallway's orientaion, and returns the list of the created tiles.'''
     try :
         row_start = hallway.origin.row
@@ -42,7 +39,7 @@ def render_hallway(hallway, orientation):
             for jj in range(col_start, col_end + 1):
                 tile = Tile(ii, jj)
                 tiles.append(tile)
-                pygame.draw.rect(SCREEN, WHITE, render_square(tile))
+                pygame.draw.rect(screen, WHITE, render_square(tile))
                 # Walls aren't defined from the dimensions we assume the provided dimensions are all walkable
                 # TODO: Decide wether or not to include tile at end or walls
                 # if orientation == False:
@@ -51,10 +48,10 @@ def render_hallway(hallway, orientation):
                 right_wall = Tile(row_end + 1, jj)
                 top_wall = Tile(ii, col_start - 1)
                 bot_wall = Tile(ii, col_end + 1 )
-                pygame.draw.rect(SCREEN, BLACK, render_square(top_wall))
-                pygame.draw.rect(SCREEN, BLACK, render_square(bot_wall))
-                pygame.draw.rect(SCREEN, BLACK, render_square(left_wall))
-                pygame.draw.rect(SCREEN, BLACK, render_square(right_wall))
+                pygame.draw.rect(screen, BLACK, render_square(top_wall))
+                pygame.draw.rect(screen, BLACK, render_square(bot_wall))
+                pygame.draw.rect(screen, BLACK, render_square(left_wall))
+                pygame.draw.rect(screen, BLACK, render_square(right_wall))
                     # elif orientation == True:
                     #     # Horizontal path hallway
                     #     upper_wall = Tile(ii, col_start - 1)
@@ -63,24 +60,24 @@ def render_hallway(hallway, orientation):
                     #     pygame.draw.rect(SCREEN, BLACK, render_square(lower_wall))
         for waypoint in hallway.waypoints:
             tile = Tile(waypoint.row, waypoint.col)
-            pygame.draw.rect(SCREEN, PURPLE, render_square(tile))
+            pygame.draw.rect(screen, PURPLE, render_square(tile))
         for door in hallway.doors:
             tile = Tile(door.row, door.col)
-            pygame.draw.rect(SCREEN, GREY, render_square(tile))
+            pygame.draw.rect(screen, GREY, render_square(tile))
         return tiles
     except Exception as err :
         print('Error: Attempting to render invalid hallway. Object: ', err)
 
 
-def render_level(level):
+def render_level(level: Level, screen):
     for hall in level.hallways:
-        render_hallway(hall, hall.check_orientation())
+        render_hallway(hall, hall.check_orientation(), screen)
     for room in level.rooms:
-        render_room(room)
+        render_room(room, screen)
     for e in level.exits:
         pos = e.pos
         tile = Tile(pos.row, pos.col)
-        pygame.draw.rect(SCREEN, GREEN, render_square(tile) )
+        pygame.draw.rect(screen, GREEN, render_square(tile))
 
 def render_square(tile):
     '''Returns a rectangle for the provided Tile to be rendered on the view'''
@@ -89,7 +86,7 @@ def render_square(tile):
 def render_circle(tile):
     return (tile.x + SIZE / 2, tile.y + SIZE / 2)
 
-def render_room(room):
+def render_room(room: Room, screen):
     '''Renders tiles for the provided Room, and returns the list of the created tiles.'''
     tiles = []
     row_start = room.origin.row
@@ -103,26 +100,26 @@ def render_room(room):
             tile = Tile(ii, jj)
             tiles.append(tile)
             if coord in room.doors:
-                pygame.draw.rect(SCREEN, GREY, render_square(tile))
+                pygame.draw.rect(screen, GREY, render_square(tile))
             elif coord in room.tiles:
-                pygame.draw.rect(SCREEN, WHITE, render_square(tile))
+                pygame.draw.rect(screen, WHITE, render_square(tile))
             elif coord in item_coords:
-                pygame.draw.circle(SCREEN, YELLOW, render_circle(tile), SIZE / 2)
+                pygame.draw.circle(screen, YELLOW, render_circle(tile), SIZE / 2)
             else:
-                pygame.draw.rect(SCREEN, BLACK, render_square(tile))
+                pygame.draw.rect(screen, BLACK, render_square(tile))
     return tiles
 
-def render_players(players):
+def render_players(players: List[PlayerActor], screen):
     for player in players:
         tile = Tile(player.pos.row, player.pos.col)
-        pygame.draw.circle(SCREEN, BLUE, render_circle(tile), SIZE / 2)
+        pygame.draw.circle(screen, BLUE, render_circle(tile), SIZE / 2)
 
-def render_adversaries(adversaries):
+def render_adversaries(adversaries: List[AdversaryActor], screen):
     for adversary in adversaries:
         tile = Tile(adversary.pos.row, adversary.pos.col)
-        pygame.draw.circle(SCREEN, RED, render_circle(tile), SIZE / 2)
+        pygame.draw.circle(screen, RED, render_circle(tile), SIZE / 2)
 
-def render_player_view(player: PlayerActor, state: GameState):
+def render_player_view(player: PlayerActor, state: GameState, screen):
     level = state.current_level
     view_distance = (2 * player.move_speed) + 1
     coords = set()
@@ -134,35 +131,28 @@ def render_player_view(player: PlayerActor, state: GameState):
         tile = Tile(coord.row, coord.col)
         info = level.get_info_at_coord()
         if info.object == KEY:
-            pygame.draw.circle(SCREEN, YELLOW, render_circle(tile), SIZE / 2)
+            pygame.draw.circle(screen, YELLOW, render_circle(tile), SIZE / 2)
         elif info.object == EXIT:
-            pygame.draw.circle(SCREEN, GREEN, render_square(tile))
+            pygame.draw.circle(screen, GREEN, render_square(tile))
         elif info.traversable:
-            pygame.draw.rect(SCREEN, WHITE, render_square(tile))
+            pygame.draw.rect(screen, WHITE, render_square(tile))
         else:
-            pygame.draw.rect(SCREEN, BLACK, render_square(tile))
+            pygame.draw.rect(screen, BLACK, render_square(tile))
 
-def main(state: GameState):
+def render_state(state: GameState):
     pygame.init()
-    pygame.display.flip()
+    SCREEN = pygame.display.set_mode((WIDTH, HEIGTH), 0, 32)
+    SCREEN.fill(GREY)
+    pygame.display.set_caption('Snarl')
     while True:
-        render_level(state.current_level)
-        render_players(state.players)
-        render_adversaries(state.adversaries)
-        pygame.display.update()
+        render_level(state.current_level, screen=SCREEN)
+        render_players(state.players, screen=SCREEN)
+        render_adversaries(state.adversaries, screen=SCREEN)
         #gamestate = update_game_state([], [], [], [], False)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
+        pygame.display.flip()
+        break
 
-if __name__ == '__main__':
-    state_input = sys.stdin.read().strip()
-    parsed_input = parse_state(state_input)
-    state = parsed_input['state']
-    name = parsed_input['name']
-    coord = parsed_input['coord']
-    # gs_info =state.create_initial_game_state
-    main(state)
-
-    main()

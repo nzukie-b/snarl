@@ -5,13 +5,15 @@ from typing import List
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
+from model.gamestate import GameState
 from player.remotePlayer import RemotePlayer
 from coord import Coord
-from utilities import to_point, update_remote_players, send_msg, receive_msg
-from remote.messages import EndGame, EndLevel, PlayerScore, RemoteActorUpdate, StartLevel, Welcome
+from utilities import update_remote_players, send_msg, receive_msg
+from remote.messages import EndGame, EndLevel, PlayerScore, StartLevel, Welcome
 from constants import A_WIN, CONN, EJECT, EXIT, GAME_END, INFO, INVALID, KEY, LEVEL_END, MAX_PLAYERS, NAME, GHOST, OK, P_UPDATE, STATUS, VALID_MOVE, ZOMBIE
-from controller.controller import parse_levels, parse_move
+from controller.controller import parse_levels
 from game.gameManager import GameManager
+from view.view import render_state
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-l', '--levels', dest='levels', action='store', default='snarl.levels', help="Location of local levels file")
@@ -131,7 +133,7 @@ def __request_client_move(player: RemotePlayer, gm: GameManager, key, exits, eje
         send_msg(conn, move_msg, player.name)
 
 def __send_end_level(players: List[RemotePlayer], key, exits, ejects):
-    '''Sends the level end message to the provided player and returns an '''
+    '''Sends the level end message to all players '''
     key = 'null' if not key else key
     end_lvl = EndLevel(key, exits, ejects)
     msg = json.dumps(end_lvl.__dict__)
@@ -150,6 +152,10 @@ def __close_connections(players: List[RemotePlayer], server: socket.SocketType):
         player.socket.close()
     server.close()
 
+def __update_observer(observe: bool, state: GameState):
+    if observe:
+        render_state(state)
+
 def main(args):
     if not __valid_clients_num(args.clients):
         print('Invalid number of clients. Please enter a number between 1 and {}'.format(MAX_PLAYERS))
@@ -164,6 +170,7 @@ def main(args):
     levels_file = Path(args.levels).read_text()
     levels_list = parse_levels(levels_file)
     start_level = args.start
+    observe = args.observe
 
     clients = __wait_for_client_connections(server_socket, server_addr, no_clients)
     __close_invalid_clients(clients)
@@ -191,10 +198,12 @@ def main(args):
         for player in players:
             __request_client_move(player, gm, key, exits, ejects)
             __send_player_updates(gm)
+            __update_observer(observe, gm.gamestate)
         print('p Turns', gm.player_turns)
         print('a turns ', gm.adv_turns)
         for adv in advs:
             adv.move_to_tile(gm)
+            __update_observer(observe, gm.gamestate)
         print('a turns ', gm.adv_turns)
         level_over = gm.handle_level_over()
         game_over = gm.handle_game_over()

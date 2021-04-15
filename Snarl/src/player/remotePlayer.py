@@ -1,7 +1,5 @@
 import json
-from json import JSONEncoder
 import socket
-import pickle
 import sys, os
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
@@ -10,14 +8,6 @@ from common.player import Player
 from remote.messages import RemoteActorUpdate
 from utilities import receive_msg, send_msg, to_coord, to_point
 from constants import TO
-
-def _default(self, obj):
-    return getattr(obj.__class__, "to_json", _default.default)(obj)
-
-_default.default = JSONEncoder().default
-JSONEncoder.default = _default
-
-
 
 class RemotePlayer(Player):
     def __init__(self, socket: socket.SocketType, name=None, player_obj=None, layout=None, visible_tiles=None, actors=[], objects=[], inventory_contents=[]):
@@ -32,8 +22,6 @@ class RemotePlayer(Player):
         move = json.loads(data)
         assert type(move) == dict and move[TO]
         return super().move_to_tile(to_coord(move[TO]), gm)
-        # return gm.request_player_move(self.name, move[TO])
- 
 
     def interact_with_tile_contents(self, current_tile_info):
         """Interact with the contents on the current tile if it exists. The interaction will take place in the order
@@ -51,11 +39,6 @@ class RemotePlayer(Player):
     def recieve_update(self, actor_update: RemoteActorUpdate):
         """Takes in the position and visible tiles,
         then updates the current player with that info (Also visually updates)"""
-        # layout_points = [to_point(coord) for coord in actor_update.layout_coords]
-        # actor_update.layout_coords = 
-        # msg = pickle.dumps(actor_update)
-        # msg = json.dumps({"type": actor_update.type, "layout": actor_update.layout, 
-        # "position": actor_update.position, "objects": actor_update.objects, "message": actor_update.message})
         msg = str(actor_update)
         self.__send(msg)
 
