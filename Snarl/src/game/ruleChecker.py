@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import re
 import sys, os
+
+from model import level
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
@@ -127,8 +129,8 @@ class RuleChecker:
         '''Checks whether the current state is one of the game end states. That is
         * - At least 1 player has exited the level, and all other players have been removed
         * - All players have been removed from the level by adversaries'''
-        level_over = self.is_level_over(state)[LEVEL_END]
-        is_over = level_over and start_level == next_level
+        level_over = self.is_level_over(state)
+        is_over = (level_over[LEVEL_END] and start_level == next_level) or (level_over[LEVEL_END] and level_over[STATUS] == A_WIN)
         status = None
         if state.game_status == P_WIN:
              status = P_WIN
@@ -160,7 +162,7 @@ class RuleChecker:
         res = OK
         inventory = [item.pos for item in player.inventory]
         if player.pos in level.exits and not state.exit_locked:
-                state.out_players.add(player.name)
+                state.out_players.append(player.name)
                 state.game_status == P_WIN
                 res = EXIT
                 # game_info = self.is_game_over(state)

@@ -10,7 +10,7 @@ from player.remotePlayer import RemotePlayer
 from coord import Coord
 from utilities import update_remote_players, send_msg, receive_msg
 from remote.messages import EndGame, EndLevel, PlayerScore, StartLevel, Welcome
-from constants import A_WIN, CONN, EJECT, EXIT, GAME_END, INFO, INVALID, KEY, LEVEL_END, MAX_PLAYERS, NAME, GHOST, OK, P_UPDATE, STATUS, VALID_MOVE, ZOMBIE
+from constants import A_WIN, CONN, EJECT, END_LEVEL, EXIT, GAME_END, INFO, INVALID, KEY, LEVEL_END, MAX_PLAYERS, NAME, GHOST, OK, P_UPDATE, STATUS, VALID_MOVE, ZOMBIE
 from controller.controller import parse_levels
 from game.gameManager import GameManager
 from view.view import render_state
@@ -136,14 +136,14 @@ def __send_end_level(players: List[RemotePlayer], key, exits, ejects):
     '''Sends the level end message to all players '''
     key = 'null' if not key else key
     end_lvl = EndLevel(key, exits, ejects)
-    msg = json.dumps(end_lvl.__dict__)
+    msg = str(end_lvl)
     for player in players:
         send_msg(player.socket, msg, player.name)
 
 
 def __send_end_game(players: List[RemotePlayer], player_scores: List[PlayerScore]):
     end_game = EndGame(player_scores)
-    msg = json.dumps(end_game.__dict__)
+    msg = str(end_game)
     for player in players:
         send_msg(player.socket, msg, player.name)
 
@@ -195,18 +195,22 @@ def main(args):
         
         print('p Turns', gm.player_turns)
         print('a turns ', gm.adv_turns)
-        for player in players:
+        for p in gm.player_turns:
+            player = next(player for player in players if player.name == p)
             __request_client_move(player, gm, key, exits, ejects)
             __send_player_updates(gm)
             __update_observer(observe, gm.gamestate)
         print('p Turns', gm.player_turns)
         print('a turns ', gm.adv_turns)
-        for adv in advs:
+        for adversary in gm.adv_turns:
+            adv = next(adv for adv in advs if adv.name == adversary)
             adv.move_to_tile(gm)
             __update_observer(observe, gm.gamestate)
         print('a turns ', gm.adv_turns)
         level_over = gm.handle_level_over()
         game_over = gm.handle_game_over()
+        print(level_over)
+        print(game_over)
         if level_over[LEVEL_END]:
             __send_end_level(gm.players, key, exits, ejects)
             for p_score in player_scores:

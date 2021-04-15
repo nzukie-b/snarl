@@ -189,7 +189,7 @@ class GameManager:
             if player_move[VALID_MOVE] and player_move[INFO].traversable:
                 if player_move[EJECT]:
                     # Skip this players turn until the list of ejected players is reset i.e. in a level change
-                    self.gamestate.out_players.add(name)
+                    self.gamestate.out_players.append(name)
                 self.players.remove(player)
                 updated_players = self.get_player_actors()
                 adversaries = self.get_adversary_actors()
@@ -205,7 +205,8 @@ class GameManager:
                     updated_players.append(player)
 
                 self.players.append(player)
-                self.gamestate = GameState(levels=self.gamestate.levels, current_level=self.gamestate.current_level, players=updated_players, adversaries=adversaries, exit_locked=self.gamestate.exit_locked)
+                self.gamestate = GameState(levels=self.gamestate.levels, current_level=self.gamestate.current_level, players=updated_players, 
+                    adversaries=adversaries, exit_locked=self.gamestate.exit_locked, out_players=self.gamestate.out_players)
                 self.player_turns.remove(player.name)
 
                 # If all players have gone update adversaries for their moves
@@ -229,7 +230,7 @@ class GameManager:
 
                     if adv_move[EJECT]:
                         player = next(p for p in players if p.pos == new_pos)
-                        self.gamestate.out_players.add(player.name)
+                        self.gamestate.out_players.append(player.name)
                     
                     if is_client:
                         adv.adversary_obj.pos = new_pos
@@ -239,7 +240,8 @@ class GameManager:
                         updated_advs.append(adv)
 
                     self.adversaries.append(adv)
-                    self.gamestate = GameState(levels=self.gamestate.levels, current_level=self.gamestate.current_level, players=players, adversaries=updated_advs, exit_locked=self.gamestate.exit_locked)
+                    self.gamestate = GameState(levels=self.gamestate.levels, current_level=self.gamestate.current_level, players=players, 
+                        adversaries=updated_advs, exit_locked=self.gamestate.exit_locked, out_players=self.gamestate.out_players)
 
                 self.adv_turns.remove(name)
                 if len(self.adv_turns) == 0: self.reset_turns()
@@ -272,7 +274,7 @@ class GameManager:
         if res:
             players = self.get_player_actors()
             adversaries = self.get_adversary_actors()
-            self.gamestate = GameState(levels=state.levels, players=players, adversaries=adversaries, exit_locked=exit_locked, current_level=state.current_level)
+            self.gamestate = GameState(levels=state.levels, players=players, adversaries=adversaries, exit_locked=exit_locked, current_level=state.current_level, out_players=state.out_players)
         return res
 
     def handle_level_over(self):

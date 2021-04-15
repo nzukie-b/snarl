@@ -24,7 +24,7 @@ class StateObj:
 
 
 class GameState:
-    def __init__(self, levels, players, adversaries, exit_locked=True, current_level=None):
+    def __init__(self, levels, players, adversaries, exit_locked=True, current_level=None, out_players=[]):
         # print(current_level)
         multi_levels = isinstance(levels, list)
         if multi_levels:
@@ -38,7 +38,7 @@ class GameState:
         self.adversaries = adversaries
         self.exit_locked = exit_locked
         self.game_status = None
-        self.out_players = set()
+        self.out_players = out_players
     
     def __str__(self):
         level_str = str(self.current_level)

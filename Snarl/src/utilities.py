@@ -228,11 +228,14 @@ def get_random_room_coord(level) -> Coord:
 def get_closest_coord(cur_pos, target):
     temp_rows = [cur_pos.row + 1, cur_pos.row, cur_pos.row - 1]
     temp_cols = [cur_pos.col + 1, cur_pos.col, cur_pos.col - 1]
-    min_row = lambda row_val: abs(row_val - target.row)
-    min_col = lambda col_val: abs(col_val - target.col)
-    move_row = min(temp_rows, min_row)
-    move_col = min(temp_cols, min_col) if move_row == cur_pos.row else cur_pos.col 
+    print('TEMP COLS: ', temp_cols)
+    print("TEMP ROWS: ", temp_rows)
+    # min_row = 
+    # min_col = 
+    move_row = temp_rows[min(range(len(temp_rows)), key = lambda row_val: abs(temp_rows[row_val] - target.row))]
+    move_col = temp_cols[min(range(len(temp_cols)), key = lambda col_val: abs(temp_cols[col_val] - target.col))] if move_row == cur_pos.row else cur_pos.col 
     move = Coord(move_row, move_col)
+    print(move)
     return move
 
 def get_cardinal_coords(cur_pos):

@@ -112,7 +112,8 @@ class EndGame:
     def __str__(self):
         # scores_str = [str(score) for score in self.scores]
         #TODO: Double check formatting on scores_str 
-        return json.dumps({"type": self.type, "scores": self.scores})
+        scores_str = [str(score) for score in self.scores]
+        return json.dumps({"type": self.type, "scores": scores_str})
 
     def __repr__(self) -> str:
         return str(self)
