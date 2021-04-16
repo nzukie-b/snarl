@@ -25,16 +25,18 @@ parser.add_argument('-a', '--address', dest='address', action='store', default='
 parser.add_argument('-p', '--port', dest='port', action='store', type=int, default=45678, help='Port to start listing for connections')
 
 
+
+# Khoury machine doesnt accept Type hinting syntax ?
 def __valid_clients_num(no_clients):
     return no_clients <= MAX_PLAYERS
 
-def __send_server_welcome(connection: socket.SocketType, server_addr):
+def __send_server_welcome(connection, server_addr):
     info = '(Enesseand) server_address: {}'.format(server_addr)
     welcome_msg = Welcome(info)
     formatted_msg = json.dumps(welcome_msg.__dict__)
     connection.sendall(formatted_msg.encode('utf-8'))
 
-def __request_client_name(connection: socket.SocketType, clients):
+def __request_client_name(connection, clients):
     '''Send name prompt to client client connection. If the name is already taken it will attempt to reprompt 4 times before moving on.'''
     msg = "name"
     msg = json.dumps(msg)
@@ -51,7 +53,7 @@ def __request_client_name(connection: socket.SocketType, clients):
             break
     return client_info
 
-def __wait_for_client_connections(server_socket: socket.SocketType, server_addr, no_clients, timeout):
+def __wait_for_client_connections(server_socket, server_addr, no_clients, timeout):
     '''Sets the timeout and waits for client connections. If the socket timesout the sever closes sockets and exits'''
     server_socket.settimeout(float(timeout))
     clients = []
@@ -84,7 +86,7 @@ def __register_players(gm, clients):
     for client in clients:
         gm.register_player(client[NAME], client[CONN])
 
-def __register_adversaries(gm: GameManager, no_levels):
+def __register_adversaries(gm, no_levels):
     num_zombies = math.floor(no_levels / 2) + 1
     num_ghosts = math.floor((no_levels - 1) / 2)
     for ii in range(num_zombies):
@@ -102,8 +104,7 @@ def __send_level_start(no_level, clients):
 def __send_player_updates(gm):
     update_remote_players(gm.players, gm)
 
-
-def __request_client_move(player: RemotePlayer, gm: GameManager, key, exits, ejects):
+def __request_client_move(player, gm, key, exits, ejects):
     msg = "move"
     msg = json.dumps(msg)
     conn = player.socket
@@ -132,7 +133,7 @@ def __request_client_move(player: RemotePlayer, gm: GameManager, key, exits, eje
         move_msg = json.dumps(INVALID)
         send_msg(conn, move_msg, player.name)
 
-def __send_end_level(players: List[RemotePlayer], key, exits, ejects):
+def __send_end_level(players, key, exits, ejects):
     '''Sends the level end message to all players '''
     key = 'null' if not key else key
     end_lvl = EndLevel(key, exits, ejects)
@@ -141,18 +142,18 @@ def __send_end_level(players: List[RemotePlayer], key, exits, ejects):
         send_msg(player.socket, msg, player.name)
 
 
-def __send_end_game(players: List[RemotePlayer], player_scores: List[PlayerScore]):
+def __send_end_game(players, player_scores: List[PlayerScore]):
     end_game = EndGame(player_scores)
     msg = str(end_game)
     for player in players:
         send_msg(player.socket, msg, player.name)
 
-def __close_connections(players: List[RemotePlayer], server: socket.SocketType):
+def __close_connections(players, server):
     for player in players:
         player.socket.close()
     server.close()
 
-def __update_observer(observe: bool, state: GameState):
+def __update_observer(observe, state):
     if observe:
         render_state(state)
 
