@@ -1,9 +1,10 @@
 import sys, os
+from typing import List
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
-from constants import A_WIN, EJECT, GAME_END, HALLWAY, INFO, KEY, LEVEL_END, MAX_PLAYERS, ORIGIN, P_WIN, ROOM, STATUS, TYPE, VALID_MOVE, ZOMBIE
+from constants import EJECT, HALLWAY, INFO, KEY, MAX_PLAYERS, ORIGIN, P_WIN, ROOM, STATUS, TYPE, VALID_MOVE, ZOMBIE
 from adversary.remoteAdversary import RemoteAdversary
 from player.remotePlayer import RemotePlayer
 from coord import Coord
@@ -41,10 +42,9 @@ class GameManager:
     def __reset_adversary_turns(self):
         return [adversary.name for adversary in self.adversaries]
 
-    def reset_turns(self):
+    def __reset_turns(self):
         self.player_turns = self.__reset_player_turns()
         self.adv_turns = self.__reset_adversary_turns()
-
 
     def get_player_actor(self, name) -> PlayerActor:
         '''Returns the PlayerActor object associated with the provided name'''
@@ -55,12 +55,13 @@ class GameManager:
         players = [self.get_player_actor(p.name) for p in self.players]
         return players
 
-    def get_player_coords(self, name=None):
+    def get_player_coords(self, name=None) -> List[Coord]:
+        '''Returns a list of player coords excluding any player with the optionally provided name'''
         players = self.get_player_actors()
         player_coords = [player.pos for player in players if player.name != name]
         return player_coords
 
-    def get_adversary_actor(self, name) -> Adversary:
+    def get_adversary_actor(self, name) -> AdversaryActor:
         adversary = next(adv for adv in self.gamestate.adversaries if adv.name == name)
         return adversary
     
@@ -68,7 +69,7 @@ class GameManager:
         advs = [self.get_adversary_actor(adv.name) for adv in self.adversaries]
         return advs
 
-    def get_adversary_coords(self, name=None):
+    def get_adversary_coords(self, name=None) -> List[Coord]:
         advs = self.get_adversary_actors()
         adv_coords = [adversary.pos for adversary in advs if adversary.name != name]
         return adv_coords
@@ -129,8 +130,6 @@ class GameManager:
             adv_objs = [a.adversary_obj for a in self.adversaries]
             player_objs = [a.player_obj for a in self.players]
 
-
-
         gs_info = create_initial_game_state(level, player_objs, adv_objs)
         update_adversary_levels(self.adversaries, level)
 
@@ -139,13 +138,14 @@ class GameManager:
     def start_game(self, levels, start_level=0):
         if self.players:
             self.gamestate = self.__init_state(levels, start_level)
-            self.reset_turns()
+            self.__reset_turns()
             self.start_level = start_level
             self.next_level_indx = (start_level + 1) % len(levels) if isinstance(levels, list) else start_level
         else:
             print("Please register at least one player and adversary to start the game.")
 
-    def next_level(self):
+    def __next_level(self):
+        '''Initializes the gamestate with the next level, and updates adversaries current level'''
         if self.start_level != self.next_level_indx:
             old_state = self.gamestate
             new_state = self.__init_state(old_state.levels, self.next_level_indx)
@@ -173,7 +173,7 @@ class GameManager:
 
     def request_player_move(self, name, new_pos):
         '''Request a move from a player. If the move is invalid then returns false, otherwise it returns a dictionary with information of the move'''
-        if len(self.player_turns) == len(self.adv_turns) == 0: self.reset_turns()
+        if len(self.player_turns) == len(self.adv_turns) == 0: self.__reset_turns()
 
         player = next(player for player in self.players if player.name == name)
         is_client = isinstance(player, Player)
@@ -242,7 +242,7 @@ class GameManager:
                         adversaries=updated_advs, exit_locked=self.gamestate.exit_locked, out_players=self.gamestate.out_players)
 
                 self.adv_turns.remove(name)
-                if len(self.adv_turns) == 0: self.reset_turns()
+                if len(self.adv_turns) == 0: self.__reset_turns()
                 return adv_move
             else:
                 print('name not in adv turns')
@@ -279,31 +279,13 @@ class GameManager:
         state = self.gamestate
         level_over = self.rc.is_level_over(state)
         if level_over[STATUS] == P_WIN:
-            self.next_level()
+            self.__next_level()
         return level_over
 
     def handle_game_over(self):
         state = self.gamestate
         game_over = self.rc.is_game_over(self.start_level, self.next_level_indx, state)
         return game_over
-
-
-        # if res:
-        #     level_over = self.rc.is_level_over(state)
-        #     game_over = self.rc.is_game_over(state)
-
-        #     if not level_over[LEVEL_END]:
-        #         # if level is not over
-        #         self.gamestate = GameState(state.current_level, self.players, self.adversaries, self.gamestate.exit_locked)
-        #         return res
-        #     elif level_over[STATUS] == P_WIN:
-        #         # Player win level
-        #         self.next_level()
-        #     else:
-        #         # Not really sure what to return here 
-        #         print('GAME OVER: {} LEVEL STATUS: {}'.format(game_over[GAME_END], game_over[STATUS]))
-        # else:
-        #     self.players = self.gamestate.players
 
     def register_players(self, players):
         '''Create list of players from provided list of players'''

@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-import re
 import sys, os
-
-from model import level
+from typing import List
 currentdir = os.path.dirname(os.path.realpath(__file__))
 snarl_dir = os.path.dirname(currentdir)
 game_dir = snarl_dir + '/src'
 sys.path.append(game_dir)
 from coord import Coord
+from model.player import PlayerActor
 from model.adversary import AdversaryActor
 from constants import A_WIN, EJECT, EXIT, GAME_END, GHOST, INFO, KEY, LEVEL_END, OK, ORIGIN, P_WIN, ROOM, STATUS, TYPE, VALID_MOVE, ZOMBIE
 from model.item import Item
+from model.level import Level
 from utilities import check_position, get_cardinal_coords, get_random_room_coord
 
 class RuleChecker:
@@ -22,7 +22,7 @@ class RuleChecker:
         return 0 <= abs(current_pos.row - new_pos.row) + \
                    abs(current_pos.col - new_pos.col) <= move_distance
 
-    def validate_player_movement(self, player, new_pos, level, players, adversaries):
+    def validate_player_movement(self, player: PlayerActor, new_pos: Coord, level: Level, player_coords: List[Coord], adv_coords: List[Coord]):
         """Takes in old gamestate, level and new player state, then makes sure that new state is moving to a valid location
         location within the level and in relation to the other players/adversaries in the gamestate."""
         info = level.info_at_coord(new_pos)
@@ -31,15 +31,15 @@ class RuleChecker:
         # list of player coords with new pos filtered out
         eject = False
         if valid_move:
-            if new_pos in players:
+            if new_pos in player_coords:
                 valid_move = False
-            elif new_pos in adversaries:
+            elif new_pos in adv_coords:
                 eject = True
 
         return {VALID_MOVE: valid_move, INFO: info, EJECT: eject}
 
 
-    def validate_adversary_movement(self, adversary: AdversaryActor, new_adversary_pos, level, player_coords, adversary_coords):
+    def validate_adversary_movement(self, adversary: AdversaryActor, new_adversary_pos: Coord, level: Level, player_coords: List[Coord], adversary_coords: List[Coord]):
         """Takes in old gamestate, level and new player state, then makes sure that new state is moving to a valid location
         location within the level and in relation to the other players/adversaries in the gamestate."""
         valid_move = None

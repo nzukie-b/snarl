@@ -27,6 +27,7 @@ class Adversary(ABC):
 
     @abstractmethod
     def move_to_tile(self, gm):
+        '''Provide a move to and send it to the game manager based on the type of adversary'''
         cur_pos = self.adversary_obj.pos
         move = self.__move_to_player(cur_pos)
         # Player noticed in range. returned a coordinate

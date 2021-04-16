@@ -17,7 +17,7 @@ parser.add_argument('-p', '--port', dest='port', action='store', type=int, defau
 
 
 class Client:
-    __socket = None
+    __socket: socket.SocketType = None
 
     def __init__(self, host, port):
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -72,45 +72,43 @@ class Client:
     def run(self):
         running = True
         while running:
+            #Receive and and load json
             data = self.__receive()
             if not data:
                 break
             req = json.loads(data)
 
-            #Receive server welcome
+            #server welcome
             if self.is_server_welcome(req):
                 pass
-            #Receive name prompt
+            #name prompt
             if self.is_name_msg(req):
                 name = input('Please provide a name: ')
                 player = LocalPlayer(name)
                 player.player_obj = PlayerActor(name)
                 self.player = player
-
                 msg = json.dumps(name)
                 self.__send(msg)
-            #Receive start_level
+            #start_level
             if self.is_start_level(req):
                 pass
-            #Receive player_update msg
+            #player_update msg
             if self.is_player_update(req):
-                # Should create an instance of RemoteActorUpdate using the json dict
+                # Create an instance of RemoteActorUpdate using the json dict
                 actor_update = RemoteActorUpdate(**req)
-                # print(actor_update)
                 self.player.recieve_update(actor_update)
-            #Receive "move" prompt player for move, and receive result
-            #print(req)
+            #"move" prompt player for move, and receive result
             if self.is_player_move(req):
                 move_input = input("Please provide a move of the format \"row, col\": ")
                 move = move_input.split(', ')
                 move = [int(i) for i in move]
                 move_msg = json.dumps({ "type": "move", "to" : move})
                 self.__send(move_msg)
-            #Receive end_level
+            #end_level
             if self.is_end_level(req):
                 print(req)
                 pass
-            #Receive end_game
+            #end_game
             if self.is_end_game(req):
                 print(req)
                 running = False

@@ -145,11 +145,7 @@ def __send_end_game(players: List[RemotePlayer], player_scores: List[PlayerScore
     end_game = EndGame(player_scores)
     msg = str(end_game)
     for player in players:
-        try:
-            send_msg(player.socket, msg, player.name)
-        except OSError:
-            #player.socket is not a socket ?????
-            pass
+        send_msg(player.socket, msg, player.name)
 
 def __close_connections(players: List[RemotePlayer], server: socket.SocketType):
     for player in players:

@@ -1,12 +1,10 @@
-import sys, os, random
-
+import sys, os
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
 from coord import Coord
 from common.adversary import Adversary
-# from utilities import to_coord
-from constants import G_RNG, HALLWAY, ORIGIN, ROOM, TYPE, ZOMBIE, GHOST, Z_RNG
+from constants import ZOMBIE
 
 
 class RemoteAdversary(Adversary):

@@ -59,13 +59,6 @@ class RemoteActorUpdate:
     def __repr__(self):
         return str(self)
 
-    # def toJSON(self):
-    #     layout_coords = self.layout
-    #     delattr(self, 'layout_coords')
-    #     msg = json.dumps(self, default=lambda o:  o.__dict__)
-    #     setattr(self, 'layout_coords', layout_coords)
-    #     return msg
-
 class ActorMove:
     def __init__(self, to):
         self.type = 'move'

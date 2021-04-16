@@ -1,11 +1,9 @@
-import sys, os, random
-
+import sys, os
 current_dir = os.path.dirname(os.path.realpath(__file__))
 src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
-from coord import Coord
 from common.adversary import Adversary
-from constants import G_RNG, HALLWAY, ORIGIN, ROOM, TYPE,    ZOMBIE, GHOST, Z_RNG
+from constants import ZOMBIE
 
 class LocalAdversary(Adversary):
     def __init__(self, name, type_=ZOMBIE, adversary_obj=None, current_level=None, player_coords=None, adversary_coords=None):
