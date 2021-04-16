@@ -98,6 +98,7 @@ def main(args):
     levels_file = open(args.levels, 'r')
     levels_input = Path(args.levels).read_text()
     levels = parse_levels(levels_input)
+    print(args)
     
     gm = GameManager()
     start_level = args.start - 1

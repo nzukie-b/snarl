@@ -51,9 +51,9 @@ def __request_client_name(connection: socket.SocketType, clients):
             break
     return client_info
 
-def __wait_for_client_connections(server_socket: socket.SocketType, server_addr, no_clients):
+def __wait_for_client_connections(server_socket: socket.SocketType, server_addr, no_clients, timeout):
     '''Sets the timeout and waits for client connections. If the socket timesout the sever closes sockets and exits'''
-    server_socket.settimeout(float(args.wait))
+    server_socket.settimeout(float(timeout))
     clients = []
     start = time.perf_counter()
     while len(clients) < no_clients:
@@ -176,7 +176,7 @@ def main(args):
     start_level = args.start
     observe = args.observe
 
-    clients = __wait_for_client_connections(server_socket, server_addr, no_clients)
+    clients = __wait_for_client_connections(server_socket, server_addr, no_clients, args.wait)
     __close_invalid_clients(clients)
 
     gm = GameManager()
