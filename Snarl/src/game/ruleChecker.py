@@ -85,13 +85,12 @@ class RuleChecker:
             return False
         
     def __validate_ghost_movement(self, adversary, new_pos, level, adversary_coords) -> bool:
+        pos_info = level.info_at_coord(new_pos)
         valid_move = self.validate_movement_distance(adversary.pos, new_pos, adversary.move_speed)
+        if not pos_info.type == ROOM and not valid_move:
+            # ghost was teleported
+            valid_move = True
         if valid_move:
-            move_info = level.info_at_coord(new_pos)
-            if not move_info.traversable:
-                # if new pos is not traversable such as being a wall move to a random room
-                new_pos = get_random_room_coord(level)
-
             if new_pos in adversary_coords:
                 valid_move = False
         

@@ -145,7 +145,11 @@ def __send_end_game(players: List[RemotePlayer], player_scores: List[PlayerScore
     end_game = EndGame(player_scores)
     msg = str(end_game)
     for player in players:
-        send_msg(player.socket, msg, player.name)
+        try:
+            send_msg(player.socket, msg, player.name)
+        except OSError:
+            #player.socket is not a socket ?????
+            pass
 
 def __close_connections(players: List[RemotePlayer], server: socket.SocketType):
     for player in players:
@@ -193,24 +197,23 @@ def main(args):
         advs = [adv for adv in gm.adversaries]
         players = [p for p in gm.players]
         
-        print('p Turns', gm.player_turns)
-        print('a turns ', gm.adv_turns)
+        # print('p Turns', gm.player_turns)
+        # print('a turns ', gm.adv_turns)
         for p in gm.player_turns:
             player = next(player for player in players if player.name == p)
             __request_client_move(player, gm, key, exits, ejects)
             __send_player_updates(gm)
             __update_observer(observe, gm.gamestate)
-        print('p Turns', gm.player_turns)
-        print('a turns ', gm.adv_turns)
+        # print('p Turns', gm.player_turns)
+        # print('a turns ', gm.adv_turns)
         for adversary in gm.adv_turns:
             adv = next(adv for adv in advs if adv.name == adversary)
             adv.move_to_tile(gm)
             __update_observer(observe, gm.gamestate)
-        print('a turns ', gm.adv_turns)
         level_over = gm.handle_level_over()
         game_over = gm.handle_game_over()
-        print(level_over)
-        print(game_over)
+        # print(level_over)
+        # print(game_over)
         if level_over[LEVEL_END]:
             __send_end_level(gm.players, key, exits, ejects)
             for p_score in player_scores:
@@ -224,13 +227,13 @@ def main(args):
             exits = []
             ejects = []
 
-            if game_over[GAME_END]:
-                __send_end_game(gm.players, player_scores)
-                __close_connections(gm.players, server_socket)
+            if game_over[GAME_END] or level_over[STATUS] == A_WIN:
+                break
+
+    __send_end_game(gm.players, player_scores)
+    __close_connections(gm.players, server_socket)
+
                 
-            if level_over[STATUS] == A_WIN:
-                __send_end_game(gm.players, player_scores)
-                __close_connections(gm.players, server_socket)
 
 
 if __name__ == '__main__':

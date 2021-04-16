@@ -137,14 +137,14 @@ def coord_radius(pos, dimensions) -> set:
     coords = set()
     for ii in range(1, int(round(dimensions.row/2)) + 1):
         for jj in range(1, int(round(dimensions.col/2)) + 1):
-            c1 = Coord(pos.row + ii, pos.col + jj)
-            c2 = Coord(pos.row + ii, pos.col - jj)
-            c3 = Coord(pos.row - ii, pos.col + jj)
-            c4 = Coord(pos.row - ii, pos.col - jj)
-            c5 = Coord(pos.row, pos.col + jj)
-            c6 = Coord(pos.row, pos.col - jj)
-            c7 = Coord(pos.row + ii, pos.col)
-            c8 = Coord(pos.row - ii, pos.col)
+            c1 = Coord(abs(pos.row + ii), abs(pos.col + jj))
+            c2 = Coord(abs(pos.row + ii), abs(pos.col - jj))
+            c3 = Coord(abs(pos.row - ii), abs(pos.col + jj))
+            c4 = Coord(abs(pos.row - ii), abs(pos.col - jj))
+            c5 = Coord(pos.row, abs(pos.col + jj))
+            c6 = Coord(pos.row, abs(pos.col - jj))
+            c7 = Coord(abs(pos.row + ii), pos.col)
+            c8 = Coord(abs(pos.row - ii), pos.col)
             coords.update([c1, c2, c3, c4, c5, c6, c7, c8])
     return list(coords)
 
@@ -228,10 +228,6 @@ def get_random_room_coord(level) -> Coord:
 def get_closest_coord(cur_pos, target):
     temp_rows = [cur_pos.row + 1, cur_pos.row, cur_pos.row - 1]
     temp_cols = [cur_pos.col + 1, cur_pos.col, cur_pos.col - 1]
-    print('TEMP COLS: ', temp_cols)
-    print("TEMP ROWS: ", temp_rows)
-    # min_row = 
-    # min_col = 
     move_row = temp_rows[min(range(len(temp_rows)), key = lambda row_val: abs(temp_rows[row_val] - target.row))]
     move_col = temp_cols[min(range(len(temp_cols)), key = lambda col_val: abs(temp_cols[col_val] - target.col))] if move_row == cur_pos.row else cur_pos.col 
     move = Coord(move_row, move_col)
@@ -260,37 +256,39 @@ def to_layout(pos, level, dimensions):
     '''Takes a level and returns a layout of tiles centered around the provided point'''
     pos_info = check_position(pos, level)
     origin = pos_info['origin']
-    is_room = pos_info[TYPE] == ROOM
-    #print("DIM: " + str(dimensions))
     dimensions = to_coord(dimensions)
     layout = [[0 for ii in range(dimensions.row)] for jj in range(dimensions.col)]
     coords = coord_radius(pos, dimensions)
-
+    row_offset = int(round(dimensions.row / 2))
+    col_offset = int(round(dimensions.col / 2))
+    
     if pos_info[TYPE] == ROOM:
-        room = next(room for room in level.rooms if room.origin == origin)
+        room = find_room_by_origin(origin, level)
         for tile in room.tiles:
             if tile in coords:
                 #origin 5, 5 
                 try:
-                    layout[tile.row - origin.row][tile.col - origin.col] = 1
+                    layout[(tile.row - pos.row - 1) + row_offset][(tile.col - pos.col - 1) + col_offset] = 1
                 except IndexError:
                     pass
         for door in room.doors:
             if door in coords:
-                layout[door.row - origin.row][door.col - origin.col] = 2
+                layout[(door.row - pos.row) + row_offset][(door.col - pos.col) + col_offset] = 2
+
     elif pos_info[TYPE] == HALLWAY:
-        hall = next(hall for hall in level.hallways if hall.origin == origin)
+        hall = find_hallway_by_origin(origin, level)
         for ii in range(hall.origin.row, hall.origin.row + hall.dimensions.row + 1):
             for jj in range(hall.origin.col, hall.origin.col + hall.dimensions.col + 1):
                 hall_coord = Coord(ii, jj)
                 if hall_coord in coords:
                     try:
-                        layout[hall_coord.row - origin.row][hall_coord.col - origin.col] = 1
+                        layout[(hall_coord.row - pos.row) + row_offset][(hall_coord.col - pos.col) + col_offset] = 1
                     except IndexError:
                         pass
-        for door in hall.doors:
-            if door in coords:
-                layout[door.row - origin.row][door.col - origin.col] = 2
+        for waypoint in hall.waypoints:
+            if waypoint in coords:
+                layout[(waypoint.row - pos.row) + row_offset][(waypoint.col - pos.col) + col_offset] = 2
+
     return {POS: pos, LAYOUT: layout}
 
 

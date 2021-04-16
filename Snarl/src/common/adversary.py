@@ -5,7 +5,7 @@ src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
 from constants import G_RNG, HALLWAY, ORIGIN, ROOM, TYPE, ZOMBIE, GHOST, Z_RNG
 from coord import Coord
-from utilities import get_cardinal_coords, check_position, get_closest_coord
+from utilities import get_cardinal_coords, check_position, get_closest_coord, get_random_room_coord
 from game.ruleChecker import RuleChecker
 
 class Adversary(ABC):
@@ -37,6 +37,10 @@ class Adversary(ABC):
                 move = self.__move_zombie(cur_pos, pos_info, possible_moves)
             elif self.type == GHOST:
                 move = self.__move_ghost(cur_pos, pos_info, possible_moves)
+                move_info = self.current_level.info_at_coord(move)
+                if not move_info.traversable:
+                    # if new pos is not traversable such as being a wall move to a random room
+                    move = get_random_room_coord(self.current_level)
         if move == None or move == 'null': move = self.adversary_obj.pos
         move_info = gm.request_adversary_move(self.name, move)
         if move_info:

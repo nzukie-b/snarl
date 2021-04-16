@@ -95,10 +95,8 @@ class GameManager:
              self.adversaries.append(self.__create_local_adversary(adversary_client, actor_type))
 
     def __create_remote_player(self, name, conn) -> Player:
-        # TODO: Implement Remote Players
-        """"""
         player_obj = PlayerActor(name)
-        return RemotePlayer(conn, name, player_obj=player_obj)
+        return RemotePlayer(socket=conn, name=name, player_obj=player_obj)
 
     def __create_local_player(self, name) -> Player:
         '''Helper for instantiating a localPlayer'''
