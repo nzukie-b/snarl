@@ -15,10 +15,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-a', '--address', dest='address', action='store', default='127.0.0.1', help='Address to start listing for connections')
 parser.add_argument('-p', '--port', dest='port', action='store', type=int, default=45678, help='Port to start listing for connections')
 
-# Khoury machine doesnt accept Type hinting syntax ?
 
 class Client:
-    __socket = None
+    __socket: socket.SocketType = None
 
     def __init__(self, host, port):
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
