@@ -226,6 +226,7 @@ def get_random_room_coord(level) -> Coord:
     return tile
 
 def get_closest_coord(cur_pos, target):
+    '''Returns a Coord 1 tile closer to the provided targer'''
     temp_rows = [cur_pos.row + 1, cur_pos.row, cur_pos.row - 1]
     temp_cols = [cur_pos.col + 1, cur_pos.col, cur_pos.col - 1]
     move_row = temp_rows[min(range(len(temp_rows)), key = lambda row_val: abs(temp_rows[row_val] - target.row))]
