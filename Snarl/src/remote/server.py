@@ -142,7 +142,7 @@ def __send_end_level(players, key, exits, ejects):
         send_msg(player.socket, msg, player.name)
 
 
-def __send_end_game(players, player_scores: List[PlayerScore]):
+def __send_end_game(players, player_scores):
     end_game = EndGame(player_scores)
     msg = str(end_game)
     for player in players:
