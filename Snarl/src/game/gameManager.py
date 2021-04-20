@@ -232,6 +232,8 @@ class GameManager:
                 if adv_move[VALID_MOVE]:
                     self.adversaries.remove(adv)
                     updated_advs = self.get_adversary_actors()
+                    door_pos = self.__handle_door_traversal(new_pos, self.gamestate.current_level)
+                    if door_pos: new_pos = door_pos
 
                     if adv_move[EJECT]:
                         # Remove eliminated player
@@ -239,6 +241,7 @@ class GameManager:
                     
                     if is_client:
                         adv.adversary_obj.pos = new_pos
+                        # print('NEW POS:', new_pos)
                         updated_advs.append(adv.adversary_obj)
                     else:
                         adv.pos = new_pos

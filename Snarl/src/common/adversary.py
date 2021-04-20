@@ -38,12 +38,19 @@ class Adversary(ABC):
                 move = self.__move_zombie(cur_pos, pos_info, possible_moves)
             elif self.type == GHOST:
                 move = self.__move_ghost(cur_pos, pos_info, possible_moves)
-                move_info = self.current_level.info_at_coord(move)
-                if not move_info.traversable:
-                    # if new pos is not traversable such as being a wall move to a random room
-                    move = get_random_room_coord(self.current_level)
+                # print('MOVE:1 ', move)
+                try:
+                    pos_info = self.current_level.info_at_coord(move)
+                    if not pos_info.traversable:
+                        # if new pos is not traversable such as being a wall move to a random room
+                        move = get_random_room_coord(self.current_level)
+                    # print('MOVE:2 ', move)
+                except AttributeError:
+                    #Invalid Move
+                    pass
         if move == None or move == 'null': move = self.adversary_obj.pos
         move_info = gm.request_adversary_move(self.name, move)
+        # print('MOVE INFO:', move_info)
         if move_info:
             self.adversary_obj = gm.get_adversary_actor(self.name)
         else:
@@ -82,7 +89,7 @@ class Adversary(ABC):
                     row_end = hall.origin.row + hall.dimensions.row
                     col_start = hall.origin.col
                     col_end = hall.origin.col + hall.dimensions.col
-                    valid_moves = [m for m in possible_moves if m.row not in range(row_start, row_end + 1) or m.col not in range(col_start, col_end)]
+                    valid_moves = [m for m in possible_moves if m.row not in range(row_start, row_end + 1) or m.col not in range(col_start, col_end + 1)]
                     if not valid_moves:
                         door1 = get_closest_coord(cur_pos, hall.doors[0])
                         door2 = get_closest_coord(cur_pos, hall.doors[1])
