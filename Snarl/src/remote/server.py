@@ -1,6 +1,6 @@
 import sys, os, argparse, time, json, math
 import socket
-import threading
+from threading import Thread
 from pathlib import Path
 from typing import List
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -57,7 +57,7 @@ def __wait_for_client_connections(server_socket: socket.SocketType, server_addr,
     server_socket.settimeout(float(timeout))
     clients = []
     start = time.perf_counter()
-    while len(clients) < no_clients:
+    while len(clients) < no_clients * 2:
         start = time.perf_counter()
         try:
             conn, addr = server_socket.accept()
@@ -67,7 +67,6 @@ def __wait_for_client_connections(server_socket: socket.SocketType, server_addr,
         except socket.timeout:
             end = time.perf_counter()
             dur = int(end - start)
-            # Should we close client connections here?
             for client in clients:
                 client[CONN].close()
             print('Timeout: {} seconds have passed since last player connected'.format(dur))
@@ -157,7 +156,8 @@ def __update_observer(observe: bool, state: GameState):
     if observe:
         render_state(state)
 
-def thread(gm: GameManager, clients, levels_list, start_level, observe):
+def run_game(clients, levels_list, start_level, observe=False):
+    gm = GameManager()
     __register_players(gm, clients)
     __register_adversaries(gm, len(levels_list))
    
@@ -229,18 +229,17 @@ def main(args):
 
     clients = __wait_for_client_connections(server_socket, server_addr, no_clients, args.wait)
     __close_invalid_clients(clients)
-    #clients[start:stop] range(0, len() step) = [0, n + step...]
+    # clients[start:stop] for in range(0, len() step) = [0, n + step...]
     client_threads = [clients[i: i + no_clients] for i in range(0, len(clients), no_clients)]
+    print(client_threads)
     for ct in client_threads:
-        gm = GameManager()
-        __register_players(gm, ct)
-        __register_adversaries(gm, len(levels_list))
-        thread(gm, ct, levels_list, start_level)
-    __close_connections(gm.players, server_socket)
+        thread =Thread(target=run_game, args=(ct, levels_list, start_level))
+        thread.start()
+    # __close_connections(gm.players, server_socket)
 
                 
 
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    thread(args)
+    main(args)
