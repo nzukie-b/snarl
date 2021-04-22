@@ -1,19 +1,15 @@
-import json
-from constants import SIZE
-from coord import Coord
+from constants import P_ATK
+from model.actor import Actor
 
 
-class PlayerActor:
+class PlayerActor(Actor):
     def __init__(self, name, pos=None, health=100, inventory=None, non_walkable_tiles=["Wall"], move_speed=2):
-        self.name = name
-        self.pos = Coord(pos.row, pos.col) if pos else None
+        super().__init__(name=name, pos=pos, health=health, non_walkable_tiles=non_walkable_tiles, move_speed=move_speed, atk_power=P_ATK)
         self.inventory = inventory if inventory else []
-        self.health = health
-        self.non_walkable_tiles = non_walkable_tiles
-        self.move_speed = move_speed
+
 
     def __str__(self):
-        return json.dumps({"pos": str(self.pos), "name": self.name, "health": self.health, "walkable_tiles": self.non_walkable_tiles, "move_speed": self.move_speed, "inventory": self.inventory})
+        return super().__str__()
 
     def __repr__(self):
-        return str(self)
+        return super().__repr__()

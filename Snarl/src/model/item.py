@@ -7,7 +7,8 @@ class Item:
         self.pos = pos
 
     def __str__(self):
-        return json.dumps({"type": self.type, "pos": self.pos})
+        pos_str = str(self.pos)
+        return json.dumps({"type": self.type, "pos": pos_str})
 
     def __eq__(self, other):
         if isinstance(other, Item):

@@ -34,13 +34,17 @@ class GameManager:
 
     def __reset_player_turns(self):
         try:
-            out_players = self.gamestate.out_players
+            out_actors = self.gamestate.out_actors
         except AttributeError:
-            out_players = []
-        return [player.name for player in self.players if player.name not in out_players]
+            out_actors = []
+        return [player.name for player in self.players if player.name not in out_actors]
 
     def __reset_adversary_turns(self):
-        return [adversary.name for adversary in self.adversaries]
+        try:
+            out_actors = self.gamestate.out_actors
+        except AttributeError:
+            out_actors = []
+        return [adversary.name for adversary in self.adversaries if adversary.name not in out_actors]
 
     def __reset_turns(self):
         self.player_turns = self.__reset_player_turns()
@@ -96,6 +100,7 @@ class GameManager:
              self.adversaries.append(self.__create_local_adversary(adversary_client, actor_type))
 
     def __create_remote_player(self, name, conn) -> Player:
+        '''Helper for instantiating a remotePlayer'''
         player_obj = PlayerActor(name)
         return RemotePlayer(socket=conn, name=name, player_obj=player_obj)
 
@@ -105,10 +110,12 @@ class GameManager:
         return LocalPlayer(name, player_obj=player_obj)
 
     def __create_local_adversary(self, name, type_) -> Adversary:
+        '''Helper for instantiating a localAdversary'''
         adv_obj = AdversaryActor(name, type_=type_)
         return LocalAdversary(name, type_=type_, adversary_obj=adv_obj)
 
     def __create_remote_adversary(self, name, type_) -> Adversary:
+        '''Helper for instantiating a remoteAdversary'''
         adv_obj = AdversaryActor(name, type_=type_)
         return RemoteAdversary(name, type_=type_, adversary_obj=adv_obj)
 
@@ -136,6 +143,7 @@ class GameManager:
         return GameState(levels, gs_info[0], gs_info[1], current_level=level)
 
     def start_game(self, levels, start_level=0):
+        '''Begin the game with the registered players and adversaries. The starting level is the level at the provided index'''
         if self.players:
             self.gamestate = self.__init_state(levels, start_level)
             self.__reset_turns()
@@ -182,15 +190,14 @@ class GameManager:
 
         if player.name in self.player_turns:
             p_coords = self.get_player_coords(player.name)
-            a_coords = self.get_adversary_coords()
-            player_move = self.rc.validate_player_movement(self.get_player_actor(player.name), new_pos, self.gamestate.current_level, p_coords, a_coords)
+            adversaries = self.get_adversary_actors()
+            player_move = self.rc.validate_player_movement(self.get_player_actor(player.name), new_pos, self.gamestate.current_level, p_coords, adversaries)
             if player_move[VALID_MOVE] and player_move[INFO].traversable:
                 if player_move[EJECT]:
-                    # Skip this players turn until the list of ejected players is reset i.e. in a level change
-                    self.gamestate.out_players.append(name)
+                    # Remove eliminated adversary
+                    self.gamestate.out_actors.append(player_move[EJECT])
                 self.players.remove(player)
                 updated_players = self.get_player_actors()
-                adversaries = self.get_adversary_actors()
                 # If the new position is a door/waypoint, then move the player to the corresponding location.
                 door_pos = self.__handle_door_traversal(new_pos, self.gamestate.current_level)
                 if door_pos: new_pos = door_pos
@@ -204,7 +211,7 @@ class GameManager:
 
                 self.players.append(player)
                 self.gamestate = GameState(levels=self.gamestate.levels, current_level=self.gamestate.current_level, players=updated_players, 
-                    adversaries=adversaries, exit_locked=self.gamestate.exit_locked, out_players=self.gamestate.out_players)
+                    adversaries=adversaries, exit_locked=self.gamestate.exit_locked, out_actors=self.gamestate.out_actors)
                 self.player_turns.remove(player.name)
 
                 # If all players have gone update adversaries for their moves
@@ -214,24 +221,27 @@ class GameManager:
         return False
 
     def request_adversary_move(self, name, new_pos):
+        '''Requests a move from an adversary. If the move is invalid returns False, otherwise it returns a dictionary with information on the move'''
         if len(self.player_turns) == 0:
             if name in self.adv_turns:
                 adv = next(adv for adv in self.adversaries if adv.name == name)
                 is_client = isinstance(adv, Adversary)
-                p_coords = self.get_player_coords()
+                players = self.get_player_actors()
                 a_coords = self.get_adversary_coords(name)
-                adv_move = self.rc.validate_adversary_movement(self.get_adversary_actor(name), new_pos, self.gamestate.current_level, p_coords, a_coords)
+                adv_move = self.rc.validate_adversary_movement(self.get_adversary_actor(name), new_pos, self.gamestate.current_level, players, a_coords)
                 if adv_move[VALID_MOVE]:
                     self.adversaries.remove(adv)
                     updated_advs = self.get_adversary_actors()
-                    players = self.get_player_actors()
+                    door_pos = self.__handle_door_traversal(new_pos, self.gamestate.current_level)
+                    if door_pos: new_pos = door_pos
 
                     if adv_move[EJECT]:
-                        player = next(p for p in players if p.pos == new_pos)
-                        self.gamestate.out_players.append(player.name)
+                        # Remove eliminated player
+                        self.gamestate.out_actors.append(adv_move[EJECT])
                     
                     if is_client:
                         adv.adversary_obj.pos = new_pos
+                        # print('NEW POS:', new_pos)
                         updated_advs.append(adv.adversary_obj)
                     else:
                         adv.pos = new_pos
@@ -239,7 +249,7 @@ class GameManager:
 
                     self.adversaries.append(adv)
                     self.gamestate = GameState(levels=self.gamestate.levels, current_level=self.gamestate.current_level, players=players, 
-                        adversaries=updated_advs, exit_locked=self.gamestate.exit_locked, out_players=self.gamestate.out_players)
+                        adversaries=updated_advs, exit_locked=self.gamestate.exit_locked, out_actors=self.gamestate.out_actors)
 
                 self.adv_turns.remove(name)
                 if len(self.adv_turns) == 0: self.__reset_turns()
@@ -272,10 +282,11 @@ class GameManager:
         if res:
             players = self.get_player_actors()
             adversaries = self.get_adversary_actors()
-            self.gamestate = GameState(levels=state.levels, players=players, adversaries=adversaries, exit_locked=exit_locked, current_level=state.current_level, out_players=state.out_players)
+            self.gamestate = GameState(levels=state.levels, players=players, adversaries=adversaries, exit_locked=exit_locked, current_level=state.current_level, out_actors=state.out_actors)
         return res
 
     def handle_level_over(self):
+        '''If the current level is over, and the players have won, initializes the state to the next level. Returns a dictionary representing the status and winners of level'''
         state = self.gamestate
         level_over = self.rc.is_level_over(state)
         if level_over[STATUS] == P_WIN:
