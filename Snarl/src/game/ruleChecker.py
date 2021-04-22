@@ -30,8 +30,11 @@ class RuleChecker:
         """Validates attack interaction between the two types of Actors"""
         for target in targets:
             if new_pos == target.pos:
+                print('ATTACKER: ', attacker.name, 'HEALTH: ', attacker.health)
+                print('TARGET ', target.name, 'HEALTH: ',target.health)
                 target.health = target.health - attacker.atk_power
-                if target.health < 0:
+                if target.health <= 0:
+                    print('KILLED: ', target.name, 'HEALTH: ', target.health)
                     return target.name
 
 
@@ -42,7 +45,7 @@ class RuleChecker:
         current_pos = player.pos
         valid_move = self.validate_movement_distance(current_pos, new_pos, player.move_speed)
         # list of player coords with new pos filtered out
-        eject = False
+        eject = None
         if valid_move:
             if new_pos in player_coords:
                 valid_move = False
