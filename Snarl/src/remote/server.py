@@ -66,7 +66,6 @@ def __wait_for_client_connections(server_socket: socket.SocketType, server_addr,
         except socket.timeout:
             end = time.perf_counter()
             dur = int(end - start)
-            # Should we close client connections here?
             for client in clients:
                 client[CONN].close()
             print('Timeout: {} seconds have passed since last player connected'.format(dur))
