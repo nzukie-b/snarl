@@ -148,16 +148,6 @@ def coord_radius(pos, dimensions) -> set:
             coords.update([c1, c2, c3, c4, c5, c6, c7, c8])
     return list(coords)
 
-# def update_player(current_player: Player, other_player: Player):
-#     if isinstance(other_player, Player) and isinstance(current_player, Player):
-#         if current_player.player_obj.pos in other_player.visible_tiles:
-#             other_player.actors.append(MoveUpdate(P_UPDATE, current_player.name, to_coord(current_player.player_obj.pos)))
-
-# def update_players(current_player: Player, other_players: Player):
-#     other_players = [player for player in other_players if player.name != current_player.name]
-#     for other in other_players:
-#         update_player(current_player, other)
-
 
 def update_remote_player(player: Player, gm):
         player_obj = gm.get_player_actor(player.name)
@@ -232,7 +222,6 @@ def get_closest_coord(cur_pos, target):
     move_row = temp_rows[min(range(len(temp_rows)), key = lambda row_val: abs(temp_rows[row_val] - target.row))]
     move_col = temp_cols[min(range(len(temp_cols)), key = lambda col_val: abs(temp_cols[col_val] - target.col))] if move_row == cur_pos.row else cur_pos.col 
     move = Coord(move_row, move_col)
-    print(move)
     return move
 
 def get_cardinal_coords(cur_pos):
