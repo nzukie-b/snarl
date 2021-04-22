@@ -1,6 +1,6 @@
 import sys, os, argparse, time, json, math
 import socket
-from threading import Thread
+from multiprocessing import Process
 from pathlib import Path
 from typing import List
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -8,7 +8,6 @@ src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
 from model.gamestate import GameState
 from player.remotePlayer import RemotePlayer
-from coord import Coord
 from utilities import update_remote_players, send_msg, receive_msg
 from remote.messages import EndGame, EndLevel, PlayerScore, StartLevel, Welcome
 from constants import A_WIN, CONN, EJECT, END_LEVEL, EXIT, GAME_END, INFO, INVALID, KEY, LEVEL_END, MAX_PLAYERS, NAME, GHOST, OK, P_UPDATE, STATUS, VALID_MOVE, ZOMBIE
@@ -52,12 +51,12 @@ def __request_client_name(connection: socket.SocketType, clients):
             break
     return client_info
 
-def __wait_for_client_connections(server_socket: socket.SocketType, server_addr, no_clients, timeout):
+def __wait_for_client_connections(server_socket: socket.SocketType, server_addr, no_clients, timeout, max_games):
     '''Sets the timeout and waits for client connections. If the socket timesout the sever closes sockets and exits'''
     server_socket.settimeout(float(timeout))
     clients = []
     start = time.perf_counter()
-    while len(clients) < no_clients * 2:
+    while len(clients) < no_clients * max_games :
         start = time.perf_counter()
         try:
             conn, addr = server_socket.accept()
@@ -192,8 +191,6 @@ def run_game(clients, levels_list, start_level, observe=False):
 
         level_over = gm.handle_level_over()
         game_over = gm.handle_game_over()
-        # print(level_over)
-        # print(game_over)
         if level_over[LEVEL_END]:
             __send_end_level(gm.players, key, exits, ejects)
             for p_score in player_scores:
@@ -213,7 +210,6 @@ def run_game(clients, levels_list, start_level, observe=False):
     __send_end_game(gm.players, player_scores)
     __close_client_connections(gm.players)
 
-
 def main(args):
     if not __valid_clients_num(args.clients):
         print('Invalid number of clients. Please enter a number between 1 and {}'.format(MAX_PLAYERS))
@@ -230,18 +226,17 @@ def main(args):
     start_level = args.start
     observe = args.observe
 
-    clients = __wait_for_client_connections(server_socket, server_addr, no_clients, args.wait)
+    clients = __wait_for_client_connections(server_socket, server_addr, no_clients, args.wait, args.threads)
     __close_invalid_clients(clients)
 
     # clients[start:stop] for in range(0, len() step) = [0, n + step...]
     client_threads = [clients[i: i + no_clients] for i in range(0, len(clients), no_clients)]
-    print(client_threads)
     for ct in client_threads:
-        thread =Thread(target=run_game, args=(ct, levels_list, start_level, observe))
-        thread.start()
-    
-    server_socket.close()
-    # __close_connections(gm.players, server_socket)
+        process = Process(target=run_game, args=(ct, levels_list, start_level, observe))
+        process.start()
+    kill = input('Type "exit" to stop server and terminate in progress games\n')
+    if kill == 'exit':
+        server_socket.close()
 
                 
 
