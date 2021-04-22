@@ -146,6 +146,7 @@ class GameManager:
         '''Begin the game with the registered players and adversaries. The starting level is the level at the provided index'''
         if self.players:
             self.gamestate = self.__init_state(levels, start_level)
+            update_adversary_players(self.adversaries, self.get_player_coords())
             self.__reset_turns()
             self.start_level = start_level
             self.next_level_indx = (start_level + 1) % len(levels) if isinstance(levels, list) else start_level

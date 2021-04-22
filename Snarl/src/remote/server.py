@@ -1,5 +1,6 @@
 import sys, os, argparse, time, json, math
 import socket
+from multiprocessing import Process
 from pathlib import Path
 from typing import List
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -7,7 +8,6 @@ src_dir = os.path.dirname(current_dir)
 sys.path.append(src_dir)
 from model.gamestate import GameState
 from player.remotePlayer import RemotePlayer
-from coord import Coord
 from utilities import update_remote_players, send_msg, receive_msg
 from remote.messages import EndGame, EndLevel, PlayerScore, StartLevel, Welcome
 from constants import A_WIN, CONN, EJECT, END_LEVEL, EXIT, GAME_END, INFO, INVALID, KEY, LEVEL_END, MAX_PLAYERS, NAME, GHOST, OK, P_UPDATE, STATUS, VALID_MOVE, ZOMBIE
@@ -17,13 +17,13 @@ from view.view import render_state
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-l', '--levels', dest='levels', action='store', default='snarl.levels', help="Location of local levels file")
-parser.add_argument('-c', '--clients', dest='clients', action='store', type=int, default=1, help='Number of players')
+parser.add_argument('-c', '--clients', dest='clients', action='store', type=int, default=1, help='Number of players allowed per game')
 parser.add_argument('-w', '--wait', dest='wait', action='store', type=int, default=20, help='Number of seconds to wait for next player to connect before connection timeout')
 parser.add_argument('-s', '--start', dest='start', action='store', type=int, default=1, help='Start level. Not 0 indexed')
 parser.add_argument('-o', '--observe', dest='observe', action='store_true', default=False, help='Whether to return observer view of the ongoing game.')
 parser.add_argument('-a', '--address', dest='address', action='store', default='127.0.0.1', help='Address to start listing for connections')
 parser.add_argument('-p', '--port', dest='port', action='store', type=int, default=45678, help='Port to start listing for connections')
-
+parser.add_argument('-t', '--threads', dest='threads', action='store', type=int, default=2, help='Max number of concurrent games')
 
 def __valid_clients_num(no_clients):
     return no_clients <= MAX_PLAYERS
@@ -51,12 +51,12 @@ def __request_client_name(connection: socket.SocketType, clients):
             break
     return client_info
 
-def __wait_for_client_connections(server_socket: socket.SocketType, server_addr, no_clients, timeout):
+def __wait_for_client_connections(server_socket: socket.SocketType, server_addr, no_clients, timeout, max_games):
     '''Sets the timeout and waits for client connections. If the socket timesout the sever closes sockets and exits'''
     server_socket.settimeout(float(timeout))
     clients = []
     start = time.perf_counter()
-    while len(clients) < no_clients:
+    while len(clients) < no_clients * max_games :
         start = time.perf_counter()
         try:
             conn, addr = server_socket.accept()
@@ -100,7 +100,6 @@ def __send_level_start(no_level, clients):
     
 def __send_player_updates(gm):
     update_remote_players(gm.players, gm)
-
 
 def __request_client_move(player: RemotePlayer, gm: GameManager, key, exits, ejects):
     msg = "move"
@@ -146,34 +145,15 @@ def __send_end_game(players: List[RemotePlayer], player_scores: List[PlayerScore
     for player in players:
         send_msg(player.socket, msg, player.name)
 
-def __close_connections(players: List[RemotePlayer], server: socket.SocketType):
+def __close_client_connections(players: List[RemotePlayer]):
     for player in players:
         player.socket.close()
-    server.close()
 
 def __update_observer(observe: bool, state: GameState):
     if observe:
         render_state(state)
 
-def main(args):
-    if not __valid_clients_num(args.clients):
-        print('Invalid number of clients. Please enter a number between 1 and {}'.format(MAX_PLAYERS))
-        exit()
-
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_addr = (args.address, args.port)
-    server_socket.bind(server_addr)
-    server_socket.listen(MAX_PLAYERS)
-    
-    no_clients = args.clients
-    levels_file = Path(args.levels).read_text()
-    levels_list = parse_levels(levels_file)
-    start_level = args.start
-    observe = args.observe
-
-    clients = __wait_for_client_connections(server_socket, server_addr, no_clients, args.wait)
-    __close_invalid_clients(clients)
-
+def __init_game_start(clients, levels_list, start_level) -> GameManager: 
     gm = GameManager()
     __register_players(gm, clients)
     __register_adversaries(gm, len(levels_list))
@@ -182,6 +162,11 @@ def main(args):
     
     __send_level_start(start_level, clients)
     __send_player_updates(gm)
+    return gm
+
+
+def run_game(clients, levels_list, start_level, observe=False):
+    gm = __init_game_start(clients, levels_list, start_level)
 
     player_scores = [PlayerScore(player.name) for player in gm.players]
     key = None
@@ -192,8 +177,6 @@ def main(args):
         advs = [adv for adv in gm.adversaries]
         players = [p for p in gm.players]
         
-        # print('p Turns', gm.player_turns)
-        # print('a turns ', gm.adv_turns)
         for p in gm.player_turns:
             player = next(player for player in players if player.name == p)
             __request_client_move(player, gm, key, exits, ejects)
@@ -205,10 +188,9 @@ def main(args):
             adv = next(adv for adv in advs if adv.name == adversary)
             adv.move_to_tile(gm)
             __update_observer(observe, gm.gamestate)
+
         level_over = gm.handle_level_over()
         game_over = gm.handle_game_over()
-        # print(level_over)
-        # print(game_over)
         if level_over[LEVEL_END]:
             __send_end_level(gm.players, key, exits, ejects)
             for p_score in player_scores:
@@ -226,7 +208,35 @@ def main(args):
                 break
 
     __send_end_game(gm.players, player_scores)
-    __close_connections(gm.players, server_socket)
+    __close_client_connections(gm.players)
+
+def main(args):
+    if not __valid_clients_num(args.clients):
+        print('Invalid number of clients. Please enter a number between 1 and {}'.format(MAX_PLAYERS))
+        exit()
+
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_addr = (args.address, args.port)
+    server_socket.bind(server_addr)
+    server_socket.listen(MAX_PLAYERS)
+    
+    no_clients = args.clients
+    levels_file = Path(args.levels).read_text()
+    levels_list = parse_levels(levels_file)
+    start_level = args.start
+    observe = args.observe
+
+    clients = __wait_for_client_connections(server_socket, server_addr, no_clients, args.wait, args.threads)
+    __close_invalid_clients(clients)
+
+    # clients[start:stop] for in range(0, len() step) = [0, n + step...]
+    client_threads = [clients[i: i + no_clients] for i in range(0, len(clients), no_clients)]
+    for ct in client_threads:
+        process = Process(target=run_game, args=(ct, levels_list, start_level, observe))
+        process.start()
+    kill = input('Type "exit" to stop server and terminate in progress games\n')
+    if kill == 'exit':
+        server_socket.close()
 
                 
 
