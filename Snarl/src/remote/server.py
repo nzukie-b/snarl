@@ -102,7 +102,6 @@ def __send_level_start(no_level, clients):
 def __send_player_updates(gm):
     update_remote_players(gm.players, gm)
 
-
 def __request_client_move(player: RemotePlayer, gm: GameManager, key, exits, ejects):
     msg = "move"
     msg = json.dumps(msg)
@@ -147,16 +146,15 @@ def __send_end_game(players: List[RemotePlayer], player_scores: List[PlayerScore
     for player in players:
         send_msg(player.socket, msg, player.name)
 
-def __close_connections(players: List[RemotePlayer], server: socket.SocketType):
+def __close_client_connections(players: List[RemotePlayer]):
     for player in players:
         player.socket.close()
-    server.close()
 
 def __update_observer(observe: bool, state: GameState):
     if observe:
         render_state(state)
 
-def run_game(clients, levels_list, start_level, observe=False):
+def __init_game_start(clients, levels_list, start_level) -> GameManager: 
     gm = GameManager()
     __register_players(gm, clients)
     __register_adversaries(gm, len(levels_list))
@@ -165,6 +163,11 @@ def run_game(clients, levels_list, start_level, observe=False):
     
     __send_level_start(start_level, clients)
     __send_player_updates(gm)
+    return gm
+
+
+def run_game(clients, levels_list, start_level, observe=False):
+    gm = __init_game_start(clients, levels_list, start_level)
 
     player_scores = [PlayerScore(player.name) for player in gm.players]
     key = None
@@ -175,8 +178,6 @@ def run_game(clients, levels_list, start_level, observe=False):
         advs = [adv for adv in gm.adversaries]
         players = [p for p in gm.players]
         
-        # print('p Turns', gm.player_turns)
-        # print('a turns ', gm.adv_turns)
         for p in gm.player_turns:
             player = next(player for player in players if player.name == p)
             __request_client_move(player, gm, key, exits, ejects)
@@ -188,6 +189,7 @@ def run_game(clients, levels_list, start_level, observe=False):
             adv = next(adv for adv in advs if adv.name == adversary)
             adv.move_to_tile(gm)
             __update_observer(observe, gm.gamestate)
+
         level_over = gm.handle_level_over()
         game_over = gm.handle_game_over()
         # print(level_over)
@@ -209,6 +211,7 @@ def run_game(clients, levels_list, start_level, observe=False):
                 break
 
     __send_end_game(gm.players, player_scores)
+    __close_client_connections(gm.players)
 
 
 def main(args):
@@ -229,12 +232,15 @@ def main(args):
 
     clients = __wait_for_client_connections(server_socket, server_addr, no_clients, args.wait)
     __close_invalid_clients(clients)
+
     # clients[start:stop] for in range(0, len() step) = [0, n + step...]
     client_threads = [clients[i: i + no_clients] for i in range(0, len(clients), no_clients)]
     print(client_threads)
     for ct in client_threads:
-        thread =Thread(target=run_game, args=(ct, levels_list, start_level))
+        thread =Thread(target=run_game, args=(ct, levels_list, start_level, observe))
         thread.start()
+    
+    server_socket.close()
     # __close_connections(gm.players, server_socket)
 
                 
