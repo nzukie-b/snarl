@@ -73,10 +73,7 @@ class Client:
         running = True
         while running:
             #Receive and and load json
-            data = self.__receive()
-            if not data:
-                break
-            req = json.loads(data)
+            req = self.__receive_and_load()
 
             #server welcome
             if self.is_server_welcome(req):

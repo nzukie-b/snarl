@@ -3,6 +3,10 @@ import json
 from constants import ORIGIN
 from coord import Coord
 
+class HallwayError(Exception):
+    pass
+
+
 class Hallway:
     def __init__(self, doors, rooms, waypoints=None):
         # Doors are coordinates of door in connected room
@@ -54,7 +58,7 @@ class Hallway:
                 return is_horizontal
             else:
             #Not straight and no waypoint
-                raise Exception(self)
+                raise HallwayError(self)
         else:
             for ii in range(len(self.waypoints)):
                 waypoint = self.waypoints[ii]
@@ -67,7 +71,7 @@ class Hallway:
                 elif self.doors[ii].col == waypoint.col:
                     #Vertical Hallway
                     if is_horizontal == True:
-                        raise Exception(self)
+                        raise HallwayError(self)
                 is_horizontal = False
         return is_horizontal
 

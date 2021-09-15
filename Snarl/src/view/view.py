@@ -8,7 +8,7 @@ from model.player import PlayerActor
 from model.adversary import AdversaryActor
 from coord import Coord
 from model.room import Room
-from model.hallway import Hallway
+from model.hallway import Hallway, HallwayError
 from model.level import Level
 from model.gamestate import GameState
 from constants import BLACK, EXIT, HALLWAY, KEY, LAYOUT, POS, ROOM, TYPE, WHITE, YELLOW, GREY, RED, BLUE, GREEN, PURPLE, HEIGTH, WIDTH, SIZE
@@ -29,49 +29,42 @@ class Tile:
 
 def render_hallway(hallway: Hallway, orientation, screen):
     '''Renders tiles for the provided hallway based on the hallway's orientaion, and returns the list of the created tiles.'''
-    try :
-        row_start = hallway.origin.row
-        col_start = hallway.origin.col
-        row_end = hallway.origin.row + hallway.dimensions.row
-        col_end = hallway.origin.col + hallway.dimensions.col
-        tiles = []
-        for ii in range(row_start, row_end + 1):
-            for jj in range(col_start, col_end + 1):
-                tile = Tile(ii, jj)
-                tiles.append(tile)
-                pygame.draw.rect(screen, WHITE, render_square(tile))
-                # Walls aren't defined from the dimensions we assume the provided dimensions are all walkable
-                # TODO: Decide wether or not to include tile at end or walls
-                # if orientation == False:
-                    # Vertical path hallway case
-                left_wall = Tile(row_start - 1, jj)
-                right_wall = Tile(row_end + 1, jj)
-                top_wall = Tile(ii, col_start - 1)
-                bot_wall = Tile(ii, col_end + 1 )
-                pygame.draw.rect(screen, BLACK, render_square(top_wall))
-                pygame.draw.rect(screen, BLACK, render_square(bot_wall))
-                pygame.draw.rect(screen, BLACK, render_square(left_wall))
-                pygame.draw.rect(screen, BLACK, render_square(right_wall))
-                    # elif orientation == True:
-                    #     # Horizontal path hallway
-                    #     upper_wall = Tile(ii, col_start - 1)
-                    #     lower_wall = Tile(ii, col_end + 1)
-                    #     pygame.draw.rect(SCREEN, BLACK, render_square(upper_wall))
-                    #     pygame.draw.rect(SCREEN, BLACK, render_square(lower_wall))
-        for waypoint in hallway.waypoints:
-            tile = Tile(waypoint.row, waypoint.col)
-            pygame.draw.rect(screen, PURPLE, render_square(tile))
-        for door in hallway.doors:
-            tile = Tile(door.row, door.col)
-            pygame.draw.rect(screen, GREY, render_square(tile))
-        return tiles
-    except Exception as err :
-        print('Error: Attempting to render invalid hallway. Object: ', err)
+    row_start = hallway.origin.row
+    col_start = hallway.origin.col
+    row_end = hallway.origin.row + hallway.dimensions.row
+    col_end = hallway.origin.col + hallway.dimensions.col
+    tiles = []
+    for ii in range(row_start, row_end + 1):
+        for jj in range(col_start, col_end + 1):
+            tile = Tile(ii, jj)
+            tiles.append(tile)
+            pygame.draw.rect(screen, WHITE, render_square(tile))
+            # NOTE: Walls aren't defined from the dimensions so we assume the provided dimensions are all walkable
+            # TODO: Decide wether or not to include tile at end or walls
+            left_wall = Tile(row_start - 1, jj)
+            right_wall = Tile(row_end + 1, jj)
+            top_wall = Tile(ii, col_start - 1)
+            bot_wall = Tile(ii, col_end + 1 )
+            pygame.draw.rect(screen, BLACK, render_square(top_wall))
+            pygame.draw.rect(screen, BLACK, render_square(bot_wall))
+            pygame.draw.rect(screen, BLACK, render_square(left_wall))
+            pygame.draw.rect(screen, BLACK, render_square(right_wall))
 
+    for waypoint in hallway.waypoints:
+        tile = Tile(waypoint.row, waypoint.col)
+        pygame.draw.rect(screen, PURPLE, render_square(tile))
+    for door in hallway.doors:
+        tile = Tile(door.row, door.col)
+        pygame.draw.rect(screen, GREY, render_square(tile))
+    return tiles
 
 def render_level(level: Level, screen):
     for hall in level.hallways:
-        render_hallway(hall, hall.check_orientation(), screen)
+        try:
+            hall_orientation = hall.check_orientation()
+            render_hallway(hall, hall_orientation, screen)
+        except HallwayError as err:
+            print('Error: Attempting to render invalid hallway. Object: ', err)
     for room in level.rooms:
         render_room(room, screen)
     for e in level.exits:
